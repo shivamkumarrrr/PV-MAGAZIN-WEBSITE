@@ -1,0 +1,111 @@
+---
+// Inline-CTA für Artikeltext — bewusst NICHT als Sidebar (Großteil des
+// Traffics mobil, Sidebar kollabiert dort ohnehin; eine CTA an der
+// inhaltlich passenden Stelle ist kontextuell relevanter als ein
+// durchgehendes Widget). Zwei Varianten: "inline" (schmal, im Fließtext)
+// und "final" (größere Abschluss-Box am Artikelende).
+interface Props {
+  variant?: "inline" | "final";
+  text?: string;
+  href?: string;
+}
+
+const {
+  variant = "inline",
+  text = "Berechnen Sie Ertrag, Ersparnis und Amortisation für Ihr eigenes Dach.",
+  href = "/rechner/photovoltaik/",
+} = Astro.props;
+---
+
+{variant === "inline" ? (
+  <a href={href} class="cta-inline">
+    <span class="cta-inline-label">Jetzt selbst rechnen</span>
+    <span class="cta-inline-text">{text}</span>
+  </a>
+) : (
+  <div class="cta-final">
+    <div class="cta-final-eyebrow">Passend dazu</div>
+    <h3 class="cta-final-title">Photovoltaik-Rechner</h3>
+    <p class="cta-final-text">{text}</p>
+    <a href={href} class="cta-final-button">Zum Rechner →</a>
+  </div>
+)}
+
+<style>
+  .cta-inline {
+    display: block;
+    margin: 28px 0;
+    padding: 16px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    text-decoration: none;
+    background: var(--color-surface);
+    transition: background-color 0.15s, border-color 0.15s;
+  }
+
+  .cta-inline:hover {
+    border-color: var(--color-accent);
+    background: var(--color-accent-subtle);
+  }
+
+  .cta-inline-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-accent);
+    margin-bottom: 4px;
+  }
+
+  .cta-inline-text {
+    display: block;
+    font-size: 15px;
+    color: var(--color-text-primary);
+  }
+
+  .cta-final {
+    margin: 40px 0 16px;
+    padding: 28px 24px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .cta-final-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-accent);
+    margin-bottom: 6px;
+  }
+
+  .cta-final-title {
+    margin: 0 0 8px;
+    font-size: 20px;
+  }
+
+  .cta-final-text {
+    margin: 0 0 16px;
+    color: var(--color-text-secondary);
+    font-size: 15px;
+  }
+
+  .cta-final-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 12px 22px;
+    border-radius: var(--radius-pill);
+    background: var(--color-accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: background-color 0.15s;
+  }
+
+  .cta-final-button:hover {
+    background: var(--color-accent-hover);
+  }
+</style>

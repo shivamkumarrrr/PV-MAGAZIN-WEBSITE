@@ -1,0 +1,32 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Datenschutz | PPC GmbH" description="Datenschutzerklärung von PPC GmbH.">
+  <section class="prose legal">
+    <h1>Datenschutzerklärung</h1>
+    <p class="todo-note">
+      TODO vor Livegang: vollständige Datenschutzerklärung nach Art. 13/14
+      DSGVO ergänzen — insbesondere zur Verarbeitung von Formular-Leads
+      (Rechner-Ergebnis-Screen), zum eingebundenen PVGIS-Standort-Abruf
+      (EU Joint Research Centre) und zu Calendly (Drittanbieter-Einbindung
+      für Beratungstermine). Verantwortliche Stelle, Rechtsgrundlagen,
+      Speicherdauer und Betroffenenrechte fehlen noch.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal {
+    padding: 40px 20px 56px;
+  }
+
+  .todo-note {
+    padding: 14px 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-subtle);
+    color: var(--color-text-primary);
+    font-size: 14px;
+  }
+</style>

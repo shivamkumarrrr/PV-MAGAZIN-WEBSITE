@@ -1,0 +1,179 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { categoryLabel } from "../lib/categories.js";
+
+const articles = (await getCollection("articles")).sort(
+  (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
+);
+const latest = articles.slice(0, 4);
+---
+
+<BaseLayout
+  title="Photovoltaik-Ratgeber & PV-Rechner | PPC GmbH"
+  description="Unabhängiger Ratgeber zu Photovoltaik-Kosten, Förderung, Speicher und Einspeisevergütung — plus PV-Rechner mit echten PVGIS-Satellitendaten für Ihren Standort."
+>
+  <section class="hub-intro">
+    <div class="prose">
+      <h1>Photovoltaik verstehen — und für Ihr Dach durchrechnen</h1>
+      <p class="intro-text">
+        Zwei Wege zum gleichen Ziel: im <strong>Ratgeber</strong> lesen Sie sich
+        in Kosten, Förderung, Technik und Speicher ein — im <strong>Rechner</strong>
+        bekommen Sie sofort eine konkrete Zahl für Ihr eigenes Dach, auf Basis
+        echter PVGIS-Satellitendaten.
+      </p>
+    </div>
+  </section>
+
+  <section class="entry-points container">
+    <a href="/ratgeber/" class="entry-card">
+      <span class="entry-eyebrow">Lesen</span>
+      <h2>Ratgeber</h2>
+      <p>Grundlagen, Kosten & Förderung, Speicher, Einspeisevergütung, Balkonkraftwerk, Ökobilanz und Checklisten.</p>
+      <span class="entry-link">Zum Ratgeber →</span>
+    </a>
+    <a href="/rechner/" class="entry-card">
+      <span class="entry-eyebrow">Rechnen</span>
+      <h2>Rechner</h2>
+      <p>PV-Rechner mit echten PVGIS-Satellitendaten: Anlagengröße, Ertrag, Ersparnis, Autarkiegrad, Amortisation.</p>
+      <span class="entry-link">Zum Rechner →</span>
+    </a>
+  </section>
+
+  {latest.length > 0 && (
+    <section class="latest container">
+      <h2>Neu im Ratgeber</h2>
+      <ul class="latest-list">
+        {latest.map((a) => (
+          <li>
+            <a href={`/ratgeber/${a.id}/`}>
+              <span class="latest-cat">{categoryLabel(a.data.category)}</span>
+              <span class="latest-title">{a.data.title}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</BaseLayout>
+
+<style>
+  .hub-intro {
+    padding: 48px 0 32px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .hub-intro h1 {
+    font-size: 32px;
+    max-width: 620px;
+  }
+
+  .intro-text {
+    font-size: 17px;
+    color: var(--color-text-secondary);
+    max-width: 620px;
+  }
+
+  .entry-points {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    padding: 40px 20px;
+  }
+
+  @media (max-width: 720px) {
+    .entry-points {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .entry-card {
+    display: flex;
+    flex-direction: column;
+    padding: 28px 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s;
+  }
+
+  .entry-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .entry-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--color-accent);
+    margin-bottom: 6px;
+  }
+
+  .entry-card h2 {
+    margin: 0 0 10px;
+    font-size: 22px;
+  }
+
+  .entry-card p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    margin: 0 0 16px;
+    flex-grow: 1;
+  }
+
+  .entry-link {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--color-text-primary);
+  }
+
+  .latest {
+    padding: 8px 20px 56px;
+  }
+
+  .latest h2 {
+    font-size: 22px;
+    margin-bottom: 16px;
+  }
+
+  .latest-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .latest-list a {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 18px;
+    background: var(--color-surface);
+    text-decoration: none;
+    color: var(--color-text-primary);
+  }
+
+  .latest-list a:hover {
+    background: var(--color-accent-subtle);
+  }
+
+  .latest-cat {
+    flex-shrink: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+  }
+
+  .latest-title {
+    font-weight: 500;
+  }
+</style>

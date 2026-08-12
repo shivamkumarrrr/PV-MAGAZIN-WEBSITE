@@ -1,0 +1,88 @@
+---
+title: "Wie funktioniert eine Photovoltaikanlage? Der Weg vom Sonnenlicht zur Steckdose"
+description: "Module, Wechselrichter, Zähler und Speicher im Zusammenspiel — verständlich erklärt anhand des tatsächlichen Stromwegs durchs Haus."
+category: "grundlagen"
+datePublished: 2026-08-12
+dateModified: 2026-08-12
+relatedRechner: "photovoltaik"
+---
+
+import RechnerCta from "../../components/RechnerCta.astro";
+
+Die meisten Erklärungen zur Funktionsweise von Photovoltaik beginnen bei
+der Physik des photoelektrischen Effekts. Nachvollziehbarer ist es oft,
+den umgekehrten Weg zu gehen: dem Strom vom Dach bis zur Steckdose zu
+folgen und an jeder Station zu klären, was dort passiert und warum.
+
+## Station 1: das Modul — Gleichstrom aus Licht
+
+Ein Solarmodul besteht aus in Reihe geschalteten Silizium-Zellen. Trifft
+Licht auf die Zelle, lösen sich Elektronen, und es entsteht eine
+Spannungsdifferenz — Gleichstrom (DC). Wie viel davon am Ende ankommt,
+hängt von drei Faktoren ab, die auf den ersten Blick unabhängig wirken,
+sich aber gegenseitig verstärken oder abschwächen:
+
+- **Ausrichtung** (Himmelsrichtung, in der die Module zeigen)
+- **Neigungswinkel** (wie steil die Module zur Sonne stehen)
+- **Verschattung** (Bäume, Nachbargebäude, Schornsteine)
+
+Ein separater Artikel geht genauer darauf ein, wie stark Ausrichtung und
+Neigung den Ertrag konkret verändern.
+
+## Station 2: der Wechselrichter — aus Gleichstrom wird Haushaltsstrom
+
+Das Hausnetz und alle Geräte darin laufen mit Wechselstrom (AC), Module
+liefern aber Gleichstrom. Der Wechselrichter übernimmt diese Umwandlung —
+und ist damit technisch das komplexeste und verschleißanfälligste Bauteil
+der gesamten Anlage. Während Module realistisch 25–30 Jahre mit nur
+langsamer Leistungsabnahme laufen, hat ein Wechselrichter typischerweise
+eine Lebensdauer von 10 bis 15 Jahren und muss innerhalb der
+Anlagenlaufzeit einmal getauscht werden.
+
+## Station 3: der Zähler — wer verbraucht was, wann
+
+An dieser Stelle entscheidet sich, wie viel vom erzeugten Strom direkt im
+Haus verbraucht wird (Eigenverbrauch) und wie viel ins öffentliche Netz
+geht (Einspeisung). Ein Zweirichtungszähler misst beide Flüsse getrennt —
+Voraussetzung für die korrekte Abrechnung der Einspeisevergütung.
+
+Der Eigenverbrauchsanteil hängt maßgeblich vom zeitlichen Zusammenspiel
+zwischen Erzeugung und Verbrauch ab: PV-Anlagen produzieren am meisten
+zwischen etwa 11 und 15 Uhr. Haushalte, die genau in diesem Fenster viel
+Strom verbrauchen (z. B. durch Homeoffice, Wärmepumpen-Betrieb tagsüber
+oder ein zeitgesteuertes E-Auto-Laden), nutzen einen größeren Anteil des
+erzeugten Stroms direkt selbst, statt ihn günstiger einzuspeisen als
+zuzukaufen.
+
+## Station 4 (optional): der Speicher — Verschiebung in die Abendstunden
+
+Ohne Speicher geht jede Kilowattstunde, die nicht sofort verbraucht wird,
+ins Netz. Ein Batteriespeicher puffert den Überschuss und gibt ihn frei,
+sobald abends oder nachts wieder Strom gebraucht wird — er verschiebt
+Eigenverbrauch zeitlich, statt ihn zu erhöhen. Ob sich das wirtschaftlich
+lohnt, hängt stark vom Verbrauchsprofil ab; das behandelt ein eigener
+Artikel im Detail.
+
+<RechnerCta text="Alle vier Stationen zusammen ergeben die Zahl, die am Ende zählt: die Ersparnis. Der Rechner bildet das komplette Zusammenspiel für Ihre Situation ab." />
+
+## Warum "Autarkiegrad" und "Eigenverbrauchsquote" nicht dasselbe sind
+
+Zwei Kennzahlen werden in Beratungsgesprächen häufig verwechselt, obwohl
+sie sich in entgegengesetzte Richtungen bewegen:
+
+- **Autarkiegrad** = Eigenverbrauch geteilt durch Gesamtverbrauch. Steigt,
+  je größer die Anlage im Verhältnis zum Verbrauch dimensioniert ist.
+- **Eigenverbrauchsquote** = Eigenverbrauch geteilt durch Jahresertrag.
+  Sinkt tendenziell, je größer die Anlage im Verhältnis zum Verbrauch
+  dimensioniert ist — eine große Anlage erzeugt schlicht mehr, als ein
+  Haushalt zeitgleich verbrauchen kann.
+
+Der ADAC kommuniziert für deutsche Haushalte offiziell einen Autarkiegrad
+von 30 bis 55 % ohne Speicher und bis zu 85 % mit sinnvoll dimensioniertem
+Speicher — Werte über 85 % gelten laut HTW Berlin auch mit Speicher als
+praktisch nicht realistisch erreichbar.
+
+<RechnerCta
+  variant="final"
+  text="Wie hoch Autarkiegrad und Ersparnis für Ihr eigenes Haus tatsächlich ausfallen, zeigt der PV-Rechner in vier kurzen Schritten."
+/>

@@ -1,0 +1,83 @@
+---
+title: "Ausrichtung & Neigung: Welcher PV-Ertrag ist auf Ihrem Dach realistisch?"
+description: "Wie stark Südabweichung und Dachneigung den Ertrag wirklich verändern — inklusive der Ertragsfaktor-Tabelle, mit der unser eigener Rechner arbeitet."
+category: "technik"
+datePublished: 2026-08-12
+dateModified: 2026-08-12
+relatedRechner: "photovoltaik"
+---
+
+import RechnerCta from "../../components/RechnerCta.astro";
+
+"Nur Südausrichtung lohnt sich" ist einer der hartnäckigsten Halbwahrheiten
+rund um Photovoltaik. Sie stimmt in der Tendenz, aber die tatsächlichen
+Ertragsverluste bei Abweichung sind kleiner, als die meisten annehmen —
+und bei einem realen Dach ist "Süd oder nichts" ohnehin selten die echte
+Wahl.
+
+## Wie stark Ausrichtung den Ertrag verändert
+
+Bezogen auf eine optimale Südausrichtung (= 100 % Referenzertrag) gelten
+folgende Ertragsfaktoren, wie sie auch in unserem eigenen PV-Rechner als
+Grundlage dienen:
+
+| Ausrichtung | Ertragsfaktor | Verlust ggü. Süd |
+|---|---|---|
+| Süd | 1,00 | — |
+| Südwest / Südost | 0,95 | ca. 5 % |
+| Ost / West | 0,85 | ca. 15 % |
+| Nord | 0,29 | ca. 71 % |
+
+Die Zahlen für Südwest/Südost und Ost/West decken sich mit mehreren
+unabhängigen deutschen PV-Ratgebern (u. a. mit Bezug auf PVGIS- und
+HTW-Berlin-Daten): eine 45°-Abweichung von Süd kostet demnach nur rund 5
+bis 10 % Ertrag, eine reine Ost- oder Westausrichtung 15 bis 20 %. Erst bei
+echter Nordausrichtung wird der Verlust drastisch — hier arbeiten wir
+bewusst mit dem von photovoltaik.org kommunizierten niedrigsten Faktor
+(0,29), statt eine Nordfläche stillschweigend aus der Kalkulation
+herauszunehmen: Auch ein schlechter Ertrag ist ein Ertrag, den ein
+Interessent kennen sollte, bevor er investiert.
+
+## Wie stark Neigung den Ertrag verändert
+
+Der wirtschaftlich optimale Neigungswinkel in Deutschland liegt bei etwa
+30 bis 35° (Süd). Abweichungen davon sind toleranter als viele erwarten:
+
+| Neigung | Ertragsfaktor |
+|---|---|
+| Flach (0–15°) | 0,88 |
+| Mittel (25–35°) | 1,00 |
+| Steil (40–60°) | 0,90 |
+
+Sowohl sehr flache als auch sehr steile Neigungen bleiben laut mehreren
+PV-Ratgeber-Quellen im oberen 80–90-%-Bereich des theoretischen Optimums —
+ein Grund, warum sich Photovoltaik auch auf Flachdächern (mit
+aufgeständerten Modulen im optimalen Winkel) und auf steilen
+Satteldächern gleichermaßen lohnen kann.
+
+<RechnerCta text="Diese beiden Faktoren wirken multiplikativ zusammen — wie genau, zeigt der Rechner direkt für Ihre eigene Dachkonstellation." />
+
+## Warum unser Rechner zusätzlich echte Satellitendaten nutzt
+
+Ertragsfaktor-Tabellen wie oben sind bundesweite Durchschnittswerte — sie
+berücksichtigen nicht, dass Freiburg im Schnitt spürbar mehr
+Sonnenstunden hat als die Nordseeküste. Für eine konkrete Adresse ist das
+ein relevanter Unterschied. Deshalb ruft unser Rechner, sobald eine
+Postleitzahl oder Adresse eingegeben wird, zusätzlich Ertragsdaten direkt
+von PVGIS ab — dem PV-Ertragsrechner des Joint Research Centre der
+Europäischen Kommission, der auf jahrzehntelangen Satelliten- und
+Wetterdaten für die exakten Koordinaten des eingegebenen Standorts
+basiert. Nur wenn keine Standortdaten verfügbar sind, greift die
+Tabellen-Schätzung oben als Fallback (mit einem bundesweiten
+Durchschnittsertrag von rund 950 kWh pro kWp und Jahr, abgeleitet aus
+Fraunhofer-ISE-Zahlen).
+
+Der praktische Unterschied: Zwei identisch ausgerichtete und geneigte
+Dächer in unterschiedlichen Regionen Deutschlands können real 10 bis 15 %
+im Jahresertrag auseinanderliegen — ein Unterschied, den eine reine
+Faktor-Tabelle ohne Standortbezug nicht abbilden kann.
+
+<RechnerCta
+  variant="final"
+  text="Geben Sie Ihre PLZ ein und sehen Sie den Unterschied zwischen Tabellen-Schätzung und echten Satellitendaten für Ihren Standort."
+/>

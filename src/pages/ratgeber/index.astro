@@ -1,0 +1,143 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { CATEGORIES, categoryLabel } from "../../lib/categories.js";
+
+const articles = (await getCollection("articles")).sort(
+  (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
+);
+
+const breadcrumbLd = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: "Ratgeber", item: new URL("/ratgeber/", Astro.site).toString() },
+  ],
+};
+---
+
+<BaseLayout
+  title="Photovoltaik-Ratgeber | PPC GmbH"
+  description="Alle Artikel zu Photovoltaik: Kosten & Förderung, Technik, Speicher, Einspeisevergütung, Balkonkraftwerk, Ökobilanz und Checklisten — nach Kategorie filterbar."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
+
+  <section class="prose ratgeber-header">
+    <h1>Ratgeber</h1>
+    <p>Alle Artikel rund um Photovoltaik — von den Grundlagen bis zur Checkliste vor dem Kauf.</p>
+  </section>
+
+  <section class="container">
+    <div class="filter-bar" role="tablist" aria-label="Nach Kategorie filtern">
+      <a href="/ratgeber/" class="filter-chip active">Alle</a>
+      {CATEGORIES.map((c) => (
+        <a href={`/ratgeber/${c.slug}/`} class="filter-chip">{c.label}</a>
+      ))}
+    </div>
+
+    <ul class="article-grid">
+      {articles.map((a) => (
+        <li class="article-card">
+          <a href={`/ratgeber/${a.id}/`}>
+            <span class="card-cat">{categoryLabel(a.data.category)}</span>
+            <h2>{a.data.title}</h2>
+            <p>{a.data.description}</p>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .ratgeber-header {
+    padding: 40px 20px 24px;
+  }
+
+  .ratgeber-header h1 {
+    font-size: 30px;
+  }
+
+  .ratgeber-header p {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0 28px;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .filter-chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent-hover);
+  }
+
+  .filter-chip.active {
+    background: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    color: #fff;
+  }
+
+  .article-grid {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 56px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+
+  .article-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    transition: border-color 0.15s;
+  }
+
+  .article-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .article-card a {
+    display: block;
+    padding: 22px 20px;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card-cat {
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-accent);
+    margin-bottom: 8px;
+  }
+
+  .article-card h2 {
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+
+  .article-card p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+</style>

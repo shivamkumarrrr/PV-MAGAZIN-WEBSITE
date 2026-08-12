@@ -1,0 +1,140 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const tools = [
+  {
+    slug: "photovoltaik",
+    title: "Photovoltaik-Rechner",
+    description: "Anlagengröße, Jahresertrag, Ersparnis, Autarkiegrad und Amortisation — auf Basis echter PVGIS-Satellitendaten für Ihren Standort.",
+    status: "live",
+  },
+  {
+    slug: null,
+    title: "Speicherrechner",
+    description: "Empfohlene Batteriegröße für Ihren Verbrauch und Ihre PV-Anlage.",
+    status: "bald",
+  },
+  {
+    slug: null,
+    title: "Balkonkraftwerk-Rechner",
+    description: "Ertrag und Amortisation für Stecker-Solargeräte, speziell für Mieter und kleine Budgets.",
+    status: "bald",
+  },
+  {
+    slug: null,
+    title: "CO2-Einsparungsrechner",
+    description: "Wie viel CO2 spart Ihre Anlage gegenüber dem deutschen Strommix ein?",
+    status: "bald",
+  },
+  {
+    slug: null,
+    title: "PV-Gestehungskostenrechner",
+    description: "Ihre eigenen Stromkosten pro kWh im Vergleich zum Netzstrompreis.",
+    status: "bald",
+  },
+];
+---
+
+<BaseLayout
+  title="PV-Rechner — Photovoltaik-Tools | PPC GmbH"
+  description="Alle Photovoltaik-Rechner von PPC GmbH an einem Ort: PV-Rechner mit echten PVGIS-Daten, bald ergänzt um Speicher-, Balkonkraftwerk-, CO2- und Gestehungskostenrechner."
+>
+  <section class="prose rechner-header">
+    <h1>Rechner</h1>
+    <p>Konkrete Zahlen statt Schätzungen — für Ihr Dach, Ihren Verbrauch, Ihren Standort.</p>
+  </section>
+
+  <section class="container tool-grid">
+    {tools.map((t) => (
+      t.status === "live" ? (
+        <a href={`/rechner/${t.slug}/`} class="tool-card live">
+          <span class="tool-status">Verfügbar</span>
+          <h2>{t.title}</h2>
+          <p>{t.description}</p>
+          <span class="tool-link">Jetzt rechnen →</span>
+        </a>
+      ) : (
+        <div class="tool-card upcoming">
+          <span class="tool-status muted">Bald verfügbar</span>
+          <h2>{t.title}</h2>
+          <p>{t.description}</p>
+        </div>
+      )
+    ))}
+  </section>
+</BaseLayout>
+
+<style>
+  .rechner-header {
+    padding: 40px 20px 24px;
+  }
+
+  .rechner-header h1 {
+    font-size: 30px;
+  }
+
+  .rechner-header p {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+
+  .tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+    padding-bottom: 56px;
+  }
+
+  .tool-card {
+    display: flex;
+    flex-direction: column;
+    padding: 24px 22px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  a.tool-card {
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.15s;
+  }
+
+  a.tool-card:hover {
+    border-color: var(--color-accent);
+  }
+
+  .tool-card.upcoming {
+    opacity: 0.7;
+  }
+
+  .tool-status {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-accent);
+    margin-bottom: 8px;
+  }
+
+  .tool-status.muted {
+    color: var(--color-text-muted);
+  }
+
+  .tool-card h2 {
+    font-size: 18px;
+    margin: 0 0 8px;
+  }
+
+  .tool-card p {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin: 0 0 14px;
+    flex-grow: 1;
+  }
+
+  .tool-link {
+    font-weight: 600;
+    font-size: 14px;
+  }
+</style>
