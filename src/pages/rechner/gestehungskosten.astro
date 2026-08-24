@@ -1,0 +1,63 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Wizard from "../../components/gestehung/Wizard.jsx";
+---
+
+<BaseLayout
+  title="Gestehungskostenrechner — Was kostet Ihre Solar-kWh? | PPC GmbH"
+  description="Berechnen Sie Ihre eigenen Stromgestehungskosten in ct/kWh und vergleichen Sie mit dem aktuellen Netzstrompreis — basierend auf der Fraunhofer-ISE-Methodik."
+>
+  <section class="prose rechner-intro">
+    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / Gestehungskosten</nav>
+    <h1>Gestehungskostenrechner</h1>
+    <p>
+      Was kostet eine selbst erzeugte Kilowattstunde Solarstrom wirklich —
+      über die gesamte Lebensdauer der Anlage gerechnet? Drei kurze
+      Schritte, dann sehen Sie Ihre Stromgestehungskosten in ct/kWh im
+      direkten Vergleich zum aktuellen Netzstrompreis. Hintergrund und
+      Methodik erklärt der Artikel{" "}
+      <a href="/ratgeber/stromgestehungskosten-photovoltaik-erklaert/">
+        Was kostet eine Kilowattstunde Solarstrom wirklich?
+      </a>
+    </p>
+  </section>
+
+  <section class="container wizard-wrap">
+    <Wizard client:load />
+  </section>
+</BaseLayout>
+
+<style>
+  .rechner-intro {
+    padding: 32px 20px 20px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .rechner-intro h1 {
+    font-size: 28px;
+  }
+
+  .rechner-intro p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  .rechner-intro a {
+    color: var(--color-accent);
+  }
+
+  .wizard-wrap {
+    padding-bottom: 56px;
+  }
+</style>

@@ -158,9 +158,19 @@ nachfragen oder eindeutigen Platzhalter (`[FIRMENNAME]`) verwenden.
 - `src/pages/impressum/` und `src/pages/datenschutz/`: nur Platzhalter mit
   TODO-Hinweis, keine rechtsgültigen Angaben — vor Livegang ausfüllen
   (Pflichtangaben § 5 TMG bzw. Art. 13/14 DSGVO).
-- Phase 2 (nicht implementiert, nur als "bald verfügbar"-Karten auf
-  `/rechner/` gelistet): Speicherrechner, Balkonkraftwerk-Rechner,
-  CO2-Einsparungsrechner, PV-Gestehungskostenrechner.
+- Phase 2 — offen (nur als "bald verfügbar"-Karten auf `/rechner/`
+  gelistet): Speicherrechner, Balkonkraftwerk-Rechner,
+  CO2-Einsparungsrechner. **Gestehungskostenrechner ist bereits live**
+  (`/rechner/gestehungskosten/`, `src/lib/calculateGestehung.js`,
+  `src/components/gestehung/**`) — vereinfachte, undiskontierte LCOE-
+  Rechnung, Methodik-Hinweis im Begleitartikel
+  `stromgestehungskosten-photovoltaik-erklaert.mdx`.
+- Recherche-Ergebnisse (Web-Recherche gegen Primärquellen, August 2026):
+  Speicherkosten-Band in `calculate.js` (300–470 €/kWh, Marktpreisquelle)
+  weicht vom Fraunhofer-ISE-LCOE-Modellinput (400–1.000 €/kWh) ab —
+  bewusste Nutzerentscheidung, NICHT geändert (siehe Diskussion in
+  Session-Historie). Bei künftiger Änderung: Amortisation-mit-Speicher-
+  Regel oben gegenprüfen.
 
 ## Session Checklist
 
