@@ -4,6 +4,7 @@ import theme from "../../../theme.js";
 export default function Slider({ value, onChange, min, max, step, unit, label }) {
   const [editing, setEditing] = useState(false);
   const [temp, setTemp] = useState(String(value));
+  const slug = label ? label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "slider";
 
   const commit = () => {
     let n = parseFloat(temp.replace(/\./g, "").replace(",", "."));
@@ -22,6 +23,8 @@ export default function Slider({ value, onChange, min, max, step, unit, label })
         {editing ? (
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <input
+              id={`${slug}-value`}
+              name={`${slug}-value`}
               autoFocus
               value={temp}
               onChange={(e) => setTemp(e.target.value)}
@@ -65,6 +68,8 @@ export default function Slider({ value, onChange, min, max, step, unit, label })
         )}
       </div>
       <input
+        id={`${slug}-range`}
+        name={`${slug}-range`}
         type="range"
         min={min}
         max={max}

@@ -10,7 +10,7 @@ const isRechner = pathname.startsWith("/rechner");
 <header class="site-header">
   <div class="container header-inner">
     <a href="/" class="brand" aria-label="Startseite">
-      <Image src={logo} alt="PPC GmbH" height={36} width={110} style="height:36px;width:auto;" />
+      <Image src={logo} alt="PPC GmbH" height={36} loading="eager" />
     </a>
     <nav class="main-nav" aria-label="Hauptnavigation">
       <a href="/ratgeber/" class:list={["nav-link", { active: isRatgeber }]}>Ratgeber</a>
