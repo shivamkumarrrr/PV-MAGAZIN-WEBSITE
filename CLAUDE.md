@@ -158,13 +158,20 @@ nachfragen oder eindeutigen Platzhalter (`[FIRMENNAME]`) verwenden.
 - `src/pages/impressum/` und `src/pages/datenschutz/`: nur Platzhalter mit
   TODO-Hinweis, keine rechtsgültigen Angaben — vor Livegang ausfüllen
   (Pflichtangaben § 5 TMG bzw. Art. 13/14 DSGVO).
-- Phase 2 — offen (nur als "bald verfügbar"-Karten auf `/rechner/`
-  gelistet): Speicherrechner, Balkonkraftwerk-Rechner,
-  CO2-Einsparungsrechner. **Gestehungskostenrechner ist bereits live**
-  (`/rechner/gestehungskosten/`, `src/lib/calculateGestehung.js`,
-  `src/components/gestehung/**`) — vereinfachte, undiskontierte LCOE-
-  Rechnung, Methodik-Hinweis im Begleitartikel
-  `stromgestehungskosten-photovoltaik-erklaert.mdx`.
+- Phase 2 — offen (nur als "bald verfügbar"-Karte auf `/rechner/`
+  gelistet): Speicherrechner, CO2-Einsparungsrechner (niedrigere
+  Priorität — Zahlen stecken teilweise schon im Haupt-Rechner-Ergebnis).
+  **Gestehungskostenrechner und Balkonkraftwerk-Rechner sind bereits
+  live:**
+  - `/rechner/gestehungskosten/` (`src/lib/calculateGestehung.js`,
+    `src/components/gestehung/**`) — vereinfachte, undiskontierte LCOE-
+    Rechnung, Methodik-Hinweis im Begleitartikel
+    `stromgestehungskosten-photovoltaik-erklaert.mdx`.
+  - `/rechner/balkonkraftwerk/` (`src/lib/calculateBalkonkraftwerk.js`,
+    `src/components/balkonkraftwerk/**`) — 800-W-Deckelung nach
+    Solarpaket I, nutzt AUSRICHTUNG/NEIGUNG aus `calculate.js` für
+    gleiche Methodik wie der Haupt-Rechner. Eigenverbrauchsanteil (85 %)
+    ist eine dokumentierte eigene Annahme, keine externe Quelle.
 - Recherche-Ergebnisse (Web-Recherche gegen Primärquellen, August 2026):
   Speicherkosten-Band in `calculate.js` (300–470 €/kWh, Marktpreisquelle)
   weicht vom Fraunhofer-ISE-LCOE-Modellinput (400–1.000 €/kWh) ab —
