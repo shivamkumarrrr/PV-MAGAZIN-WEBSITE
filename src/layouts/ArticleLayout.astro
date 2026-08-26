@@ -23,7 +23,7 @@ const articleLd = {
   description,
   datePublished: datePublished.toISOString(),
   dateModified: dateModified.toISOString(),
-  publisher: { "@type": "Organization", name: "PPC GmbH" },
+  publisher: { "@type": "Organization", name: "Photovoltaik Aktuell" },
   mainEntityOfPage: canonicalURL.toString(),
 };
 
@@ -38,7 +38,7 @@ const breadcrumbLd = {
 };
 ---
 
-<BaseLayout title={`${title} | PPC GmbH`} description={description}>
+<BaseLayout title={`${title} | Photovoltaik Aktuell`} description={description}>
   <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 

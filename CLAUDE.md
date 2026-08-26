@@ -12,9 +12,14 @@ Teil von `pvrechner`). Vorbild Struktur: solaranlage-ratgeber.de,
 co2online.de/modernisieren-und-bauen/photovoltaik. Ziel: SEO-Traffic auf
 Artikel-Content, mit durchgehender Verlinkung zum Rechner als
 Conversion-Punkt — **die Seite dient Sales/Leadgen**, nicht nur Info.
-Marke/Betreiber: PPC GmbH direkt, kein Fantasiename. Sprache: Deutsch
-durchgehend. Stack: Astro (statisches HTML für Content-Seiten, React-Insel
-für den interaktiven Rechner), Deployment-Ziel Vercel.
+Sichtbare Marke: **Photovoltaik Aktuell** (Logo `src/assets/pv-aktuell-logo-*.png`,
+seit 26.8.2026 aus Claude Design übernommen — vorher trat die Seite direkt
+als "PPC GmbH" auf). **PPC GmbH bleibt der rechtliche Betreiber** und steht
+weiterhin im Impressum sowie als Kleingedrucktes im Footer ("Ein Produkt
+der PPC GmbH") — kein Fantasiename ohne echten Rechtsträger dahinter, nur
+ein zusätzlicher Produktname obendrauf. Sprache: Deutsch durchgehend.
+Stack: Astro (statisches HTML für Content-Seiten, React-Insel für den
+interaktiven Rechner), Deployment-Ziel Vercel.
 
 ### Warum Astro statt reinem React-SPA
 
@@ -67,9 +72,12 @@ Display-Font:  'Space Grotesk' (Headlines/Zahlen)
 Body-Font:     system-ui-Stack
 ```
 
-PPC-Logo: `src/assets/ppc-logo.png`, transparentes PNG, liest direkt auf
-heller Fläche — kein dunkler Chip, kein Verlauf. In Navbar (`Header.astro`)
-und Footer.
+Logo: `src/assets/pv-aktuell-logo-light.png` (transparent, dunkle Wortmarke
+— für die Navbar auf hellem Grund) und `pv-aktuell-logo-dark.png`
+(opakes dunkles Card-Badge, für dunkle Flächen reserviert, aktuell nicht
+im Einsatz). In Navbar (`Header.astro`) läuft die transparente Version;
+der Footer zeigt nur Text ("Photovoltaik Aktuell" + "Ein Produkt der PPC
+GmbH" als Kleingedrucktes), kein Logo-Bild.
 
 ### Absolute Design-Regeln (nicht verhandelbar, bei jedem UI-Task prüfen)
 
@@ -132,8 +140,12 @@ verwenden, niemals erfundene.
 
 ## Verbot: erfundene Firmen-/Markenidentität
 
-Marke ist entschieden: PPC GmbH direkt, kein Zwischenname. Bei Unklarheit
-nachfragen oder eindeutigen Platzhalter (`[FIRMENNAME]`) verwenden.
+Marke ist entschieden: **Photovoltaik Aktuell** als sichtbarer Produktname,
+**PPC GmbH** als real dahinterstehender, im Impressum genannter
+Rechtsträger (Stand 26.8.2026, siehe Project Overview oben) — kein
+Zwischenname ohne echten Betreiber dahinter, das ist der Unterschied zu
+einer erfundenen Identität. Bei Unklarheit nachfragen oder eindeutigen
+Platzhalter (`[FIRMENNAME]`) verwenden.
 
 ## Content-Regeln für Artikel
 

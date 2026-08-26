@@ -1,7 +1,7 @@
 // Schlanke Konfiguration nur für das, was ResultScreen.jsx tatsächlich liest
 // (Lead-Ziel + Calendly). Kein volles Mandanten-System wie im pvrechner-
 // Quellprojekt (config.js dort) — dieses Repo hat genau einen Mandanten
-// (PPC GmbH), kein White-Label.
+// (Photovoltaik Aktuell, ein Produkt der PPC GmbH), kein White-Label.
 export const siteConfig = {
   lead: {
     // "demo" = kein Backend, simuliert Erfolg. Auf "web3forms" | "formspree" |
