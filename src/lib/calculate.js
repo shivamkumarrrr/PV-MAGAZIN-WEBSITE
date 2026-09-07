@@ -96,7 +96,10 @@ const MONATS_VERBRAUCH_ANTEILE = [0.094, 0.086, 0.086, 0.08, 0.08, 0.075, 0.075,
 // Jahresgänge des EU-PVGIS-Ertragsrechners für Deutschland; Formvergleich mit öffentlichen deutschen
 // Ertragsverteilungen (z.B. photovoltaikanbieter.com, PV-Ertrag-Tabelle 2026). Stand Aug 2026,
 // bei Bedarf neu prüfen.
-const MONATS_ERTRAG_ANTEILE_FALLBACK = [0.035, 0.055, 0.09, 0.11, 0.125, 0.125, 0.125, 0.115, 0.09, 0.065, 0.04, 0.025];
+// Exportiert, weil die Startseite denselben Jahresgang als Ertragskurve zeigt.
+// Eine Quelle der Wahrheit: die Kurve auf der Startseite und die Rechnung im
+// Rechner dürfen nie unterschiedliche Verläufe zeigen.
+export const MONATS_ERTRAG_ANTEILE_FALLBACK = [0.035, 0.055, 0.09, 0.11, 0.125, 0.125, 0.125, 0.115, 0.09, 0.065, 0.04, 0.025];
 
 // ─── Konstanten: Quelle, Stand, Prüf-Rhythmus ───
 

@@ -5,6 +5,25 @@ fortsetzen können ohne das Projekt erneut zu erklären. Für generische
 Astro-Workflow-Hinweise (Dev-Server im Hintergrund starten, Doku-Links)
 siehe `AGENTS.md` im selben Verzeichnis.
 
+## Befehle
+
+```bash
+npm run dev          # Dev-Server, http://localhost:4321
+npm run build        # Pflicht vor jedem Abschluss (siehe Session Checklist)
+npm run preview      # Produktions-Build lokal ansehen
+npx astro dev stop   # Dev-Server beenden (läuft im Hintergrund weiter)
+```
+
+**Falle: Der Dev-Server cached Content-Collection-Frontmatter.** Nach einer
+Änderung an `.mdx`-Frontmatter (`relatedRechner`, `faq`, `ogImage`) liefert
+`npm run dev` weiter die alten Werte, während `npm run build` korrekt ist.
+Hat schon zweimal zu Fehlersuche an der falschen Stelle geführt. Bei
+verdächtigen Abweichungen gegen den Build gegenprüfen, dann:
+
+```bash
+npx astro dev stop && rm -f .astro/data-store.json && npm run dev
+```
+
 ## Project Overview
 
 PV-Content-Hub: Ratgeber-Artikel + PV-Rechner, eigenständiges Repo (nicht
@@ -41,19 +60,34 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   (`src/content.config.ts`, Astro Content Layer API mit `glob`-Loader).
   Schema: `title`, `description`, `category` (Enum, siehe
   `src/lib/categories.js`), `datePublished`, `dateModified`,
-  `relatedRechner`.
-- `src/components/calculator/**` — **1:1 aus dem `pvrechner`-Quellprojekt
-  portiert** (Wizard, Steps, ResultScreen, UI-Komponenten). Rechner-Logik
-  (`src/lib/calculate.js`) unverändert übernommen, inkl. aller
-  Quellenangaben — **nicht ohne neue Recherche ändern**, siehe
-  Daten-Regeln unten.
+  `relatedRechner` sowie optional `ogImage` und `faq`.
+- `src/components/calculator/**` — ursprünglich aus dem
+  `pvrechner`-Quellprojekt portiert (Wizard, Steps, ResultScreen,
+  UI-Komponenten), inzwischen aber eigenständig weiterentwickelt.
+  `pvrechner` (github.com/shivamkumarrrr/pvrechner) bleibt die
+  **Genauigkeits-Referenz für den Photovoltaik-Rechner** — vom Nutzer
+  gemeinsam mit Patrick bestätigt. Bei Zweifeln an einer Formel dort
+  vergleichen. Nicht übernehmen: `theme.js`, das trägt die Markenfarben
+  eines anderen Mandanten.
 - `src/theme.js` (für die React-Insel) und `src/styles/global.css`
   (CSS-Custom-Properties für Astro-Seiten) müssen dieselben Token-Werte
   tragen — bei Änderung an einem Ort den anderen mitpflegen.
 - `src/config.js` — schlanke Konfiguration nur für das, was
-  `ResultScreen.jsx` tatsächlich liest (`lead.mode`/-keys,
+  `LeadForm.jsx` tatsächlich liest (`lead.mode`/-keys,
   `contact.calendlyUrl`). Kein volles Mandanten-System wie im
   Quellprojekt — dieser Hub hat genau einen Mandanten (PPC GmbH).
+- `src/lib/rechner.js` — **einzige Quelle der Rechner-Liste.** Sowohl die
+  Übersichtsseite `/rechner/` als auch der Titel der "Passend dazu"-Box
+  (`RechnerCta.astro`) lesen von hier. Neuen Rechner nur hier eintragen,
+  nicht in der Seite duplizieren.
+- `src/components/lead/LeadForm.jsx` — **gemeinsames Lead-Formular für alle
+  11 Rechner** (Einwilligung, Calendly-Zwei-Klick, Versand). Jeder Rechner
+  reicht `rechner`, `zusammenfassung` und ein flaches `daten`-Objekt herein;
+  die erlaubten Feldnamen stehen in `src/pages/api/lead.ts`
+  (`ERLAUBTE_FELDER`). `src/components/calculator/LeadForm.jsx` ist nur noch
+  ein dünner Adapter für die PV-Rechner-Felder.
+- `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
+  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden.
 
 ## Design System
 
@@ -119,33 +153,41 @@ kollabiert.
 - Alle Konstanten mit Geldbezug oder Prozentwert (in `calculate.js` und in
   Artikeltexten) brauchen Quelle + Stand. Nie einen Wert ohne Quelle
   ändern oder neu erfinden.
-- `calculate.js` ist 1:1 aus dem `pvrechner`-Quellprojekt portiert —
-  Stand der Konstanten dort siehe Kommentare in der Datei selbst
-  (Strompreis, Einspeisevergütung, Systemkosten, CO2-Faktor etc., jeweils
-  mit Quelle+Stand+Prüf-Rhythmus). Bei Bedarf dort neu recherchieren,
-  nicht aus dem Kontext übernehmen.
+- Jede Konstante in `calculate.js` trägt Quelle, Stand und Prüf-Rhythmus
+  als Kommentar direkt darüber (Strompreis, Einspeisevergütung,
+  Systemkosten, CO2-Faktor). Diese Kommentare sind die Dokumentation —
+  beim Ändern eines Werts den Kommentar mitziehen, sonst ist die Quelle
+  verloren.
 - Autarkiegrad vs. Eigenverbrauchsquote nicht verwechseln (siehe Kommentar
   in `calculate.js` und Artikel "Wie funktioniert eine Photovoltaikanlage").
-- Speicher darf niemals die Amortisation gegenüber derselben Anlage ohne
-  Speicher verkürzen — wirtschaftlich unplausibel, bei jeder Änderung an
-  den Speicher-Konstanten gegenprüfen.
+- Alle abgeleiteten Rechner importieren aus `calculate.js`, statt Werte zu
+  duplizieren. Duplikate sind schon zweimal auseinandergelaufen
+  (`M2_PRO_KWP_REINIGUNG`, die Verbrauchs-Anzeigewerte im Kombi-Rechner).
+- Randfälle abfangen: Verbrauch 0, Ersparnis 0, Speicher 0. Diese Pfade
+  lieferten `NaN`, `Infinity` und `null` bis in die Anzeige.
+- Die vier harten Invarianten stehen weiter unten in einem eigenen
+  Abschnitt.
 
-## Verbot: erfundene Testimonials/Bewertungen/Kundennamen/Autoren
+## Verbot: erfundene Aussagen über das Unternehmen
 
-Gleiche Regel wie im `pvrechner`-Quellprojekt (§ 5 UWG-Risiko bei
-fabrizierten Kundenstimmen). Gilt zusätzlich für Artikel-Autoren: Diese
-Artikel-Batch läuft bewusst OHNE Autoren-Byline (Nutzerentscheidung) —
-falls später Autoren ergänzt werden sollen, nur echte Namen/Rollen
-verwenden, niemals erfundene.
+Kein erfundener Beleg, keine erfundene Identität — § 5 UWG bzw. § 5 TMG.
+Betrifft in diesem Projekt konkret:
 
-## Verbot: erfundene Firmen-/Markenidentität
-
-Marke ist entschieden: **Photovoltaik Aktuell** als sichtbarer Produktname,
-**PPC GmbH** als real dahinterstehender, im Impressum genannter
-Rechtsträger (Stand 26.8.2026, siehe Project Overview oben) — kein
-Zwischenname ohne echten Betreiber dahinter, das ist der Unterschied zu
-einer erfundenen Identität. Bei Unklarheit nachfragen oder eindeutigen
-Platzhalter (`[FIRMENNAME]`) verwenden.
+- **Testimonials, Bewertungen, Kundennamen.** Gleiche Regel wie im
+  `pvrechner`-Quellprojekt.
+- **Leistungsversprechen.** Auf der Seite standen "Fachbetrieb aus unserem
+  bundesweiten Partnernetzwerk", "in {Stadt} und Umgebung" und "Antwort
+  innerhalb von 24 Stunden". Ein solches Netzwerk existiert laut PPC nicht;
+  die Aussagen sind entfernt. Nichts zusagen, was nicht bestätigt ist.
+- **Firmendaten.** Im Impressum standen `Musterstraße 1`, `HRB 12345`,
+  `DE123456789`, `Max Mustermann`. Statt Beispieldaten immer
+  `[BITTE EINTRAGEN]` mit sichtbarem Warnbanner.
+- **Artikel-Autoren.** Läuft bewusst ohne Byline (Nutzerentscheidung); im
+  Article-Schema steht die Organisation als `author`. Falls später Autoren
+  ergänzt werden: nur echte Namen und Rollen.
+- **Marke.** **Photovoltaik Aktuell** ist der sichtbare Produktname,
+  **PPC GmbH** der im Impressum genannte Rechtsträger. Kein Zwischenname
+  ohne echten Betreiber dahinter.
 
 ## Content-Regeln für Artikel
 
@@ -156,40 +198,94 @@ Platzhalter (`[FIRMENNAME]`) verwenden.
 - PPCs eigene Rechner-Methodik als Content-Differenzierung nutzen, wo es
   passt (siehe `ausrichtung-und-neigung-realistischer-ertrag.mdx` als
   Beispiel: erklärt explizit, wie der eigene Rechner PVGIS nutzt).
-- Jeder Artikel endet mit der automatischen "Passend dazu"-CTA-Box
-  (`ArticleLayout.astro`) — nicht selbst duplizieren.
+- Jeder Artikel endet mit der automatischen "Passend dazu"-CTA-Box und dem
+  "Weiterlesen"-Block (beide aus `ArticleLayout.astro`) — nicht im MDX
+  duplizieren. Der CTA-Titel wird aus `relatedRechner` abgeleitet, also
+  `relatedRechner` immer auf den thematisch passenden Rechner setzen.
+- **FAQ: höchstens 8–9 Fragen je Artikel** (Nutzervorgabe). Darüber wirkt
+  der Block wie Füllmaterial und verwässert die FAQPage-Strukturdaten. Was
+  mehr wert ist, gehört als `##`-Abschnitt in den Fließtext.
+- FAQ-Antworten müssen inhaltlich im Artikeltext gedeckt sein — der
+  sichtbare Block und das JSON-LD kommen aus derselben `faq:`-Quelle im
+  Frontmatter, weil Google Übereinstimmung verlangt.
+- Kontextuelle Links auf andere Artikel im Fließtext setzen. Vor September
+  2026 enthielt kein einziger Artikel einen Link auf einen anderen — jede
+  Seite war eine Sackgasse.
 
-## Was noch offen ist (TODOs vor Livegang)
+## Stand der Rechner
 
-- `astro.config.mjs`: `site:` ist noch Platzhalter
-  (`https://pv-content-hub.example`) — echte Domain eintragen, danach auch
-  `public/robots.txt` (Sitemap-URL) prüfen.
-- `src/config.js`: `lead.mode` ist `"demo"` (kein echtes Backend). Auf
-  `"web3forms"` | `"formspree"` | `"webhook"` umstellen, sobald ein
-  Endpunkt feststeht.
-- `src/pages/impressum/` und `src/pages/datenschutz/`: nur Platzhalter mit
-  TODO-Hinweis, keine rechtsgültigen Angaben — vor Livegang ausfüllen
-  (Pflichtangaben § 5 TMG bzw. Art. 13/14 DSGVO).
-- Phase 2 — offen (nur als "bald verfügbar"-Karte auf `/rechner/`
-  gelistet): Speicherrechner, CO2-Einsparungsrechner (niedrigere
-  Priorität — Zahlen stecken teilweise schon im Haupt-Rechner-Ergebnis).
-  **Gestehungskostenrechner und Balkonkraftwerk-Rechner sind bereits
-  live:**
-  - `/rechner/gestehungskosten/` (`src/lib/calculateGestehung.js`,
-    `src/components/gestehung/**`) — vereinfachte, undiskontierte LCOE-
-    Rechnung, Methodik-Hinweis im Begleitartikel
-    `stromgestehungskosten-photovoltaik-erklaert.mdx`.
-  - `/rechner/balkonkraftwerk/` (`src/lib/calculateBalkonkraftwerk.js`,
-    `src/components/balkonkraftwerk/**`) — 800-W-Deckelung nach
-    Solarpaket I, nutzt AUSRICHTUNG/NEIGUNG aus `calculate.js` für
-    gleiche Methodik wie der Haupt-Rechner. Eigenverbrauchsanteil (85 %)
-    ist eine dokumentierte eigene Annahme, keine externe Quelle.
-- Recherche-Ergebnisse (Web-Recherche gegen Primärquellen, August 2026):
-  Speicherkosten-Band in `calculate.js` (300–470 €/kWh, Marktpreisquelle)
-  weicht vom Fraunhofer-ISE-LCOE-Modellinput (400–1.000 €/kWh) ab —
-  bewusste Nutzerentscheidung, NICHT geändert (siehe Diskussion in
-  Session-Historie). Bei künftiger Änderung: Amortisation-mit-Speicher-
-  Regel oben gegenprüfen.
+Alle **11 Rechner sind live** — es gibt keine "Phase 2" und keine
+"bald verfügbar"-Karten mehr (der Status-Schalter auf `/rechner/` wurde
+entfernt, weil ihn kein Eintrag mehr nutzte). Liste und Reihenfolge stehen
+in `src/lib/rechner.js`.
+
+Eigene Modelle mit eigener Methodik, jeweils in `src/lib/calculate<Name>.js`
+plus `src/components/<name>/**`:
+
+- **photovoltaik** — Hauptrechner, einziger mit PVGIS-Standortdaten und
+  Karte. Alle anderen leiten ihre Konstanten aus `calculate.js` ab.
+- **gestehungskosten** — vereinfachte, undiskontierte LCOE-Rechnung.
+  Methodik-Hinweis im Begleitartikel.
+- **balkonkraftwerk** — 800-W-Deckelung nach Solarpaket I. Eigenverbrauchs-
+  anteil (85 %) ist eine dokumentierte eigene Annahme, keine externe Quelle.
+- **speicher** — Mehr-Eigenverbrauch kommt aus `autarkieSchaetzung()`, nicht
+  aus einer eigenen Faustregel (siehe Invarianten unten).
+- **mieterstrom** — Amortisation auf Deckungsbeitrag. `betriebskostenProWeJahr`
+  ist bewusst mit 0 vorbelegt: Für die laufenden Kosten (Messwesen,
+  Abrechnung) liegt keine belastbare Quelle vor, und ein geschätzter Betrag
+  würde die zentrale Kennzahl unbelegt verschieben.
+- **rendite, kombi, co2, reinigung, eauto, steuer** — jeweils eigene
+  Fragestellung, gemeinsame Konstanten.
+
+## Invarianten (bei jeder Änderung gegenprüfen)
+
+Diese vier sind schon einmal gebrochen worden und haben je einen echten
+Fehler erzeugt:
+
+1. **Kein Drittanbieter-Request beim Seitenaufruf.** Schriften (`public/fonts/`)
+   und Leaflet (`node_modules`, dynamischer Import) werden selbst
+   ausgeliefert. Nominatim wird ausschließlich aufgerufen, wenn der Nutzer
+   das optionale Straßenfeld ausfüllt (`src/lib/geocode.js`); die PLZ löst
+   `src/lib/plz.js` lokal aus einer statischen Tabelle auf. Google Fonts,
+   unpkg und ein Nominatim-Aufruf je Tastendruck haben zuvor ungefragt
+   Besucher-IPs an Dritte übertragen. Gegenprobe: Netzwerk-Tab öffnen —
+   außer PVGIS über die eigene API-Route und den Kartenkacheln darf nichts
+   Externes erscheinen.
+2. **Einspeisevergütung immer über `einspeiseStaffel(kwp)`**, nie `EINSPEISE`
+   direkt. Der ≤10-kWp-Satz auf jede Anlagengröße anzuwenden überschätzte
+   die Einspeiseerlöse bei 30 kWp um rund 9 %.
+3. **Speicher darf die Amortisation nie verkürzen.** Bekannte Restabweichung:
+   bei 2–3 kWh sinkt sie um 0,1 Jahre (7,8 → 7,7). Ursache sind zwei belegte
+   Werte (ADAC-Autarkiekurve, 400 €/kWh) — ohne neue Recherche nicht
+   anfassen.
+4. **Speicher- und Hauptrechner müssen denselben Mehr-Eigenverbrauch
+   liefern.** Beide leiten ihn aus `autarkieSchaetzung()` ab. Eine eigene
+   lineare Faustregel im Speicher-Rechner wich bei 10 kWh um Faktor 1,57 ab.
+
+Prüfskript-Muster für alle vier: Node gegen `src/lib/*.js` laufen lassen und
+die Werte vergleichen, nicht nur den Code lesen.
+
+## Was noch offen ist (vor Livegang)
+
+- `src/pages/impressum/` und `src/pages/datenschutz/`: Pflichtangaben stehen
+  auf `[BITTE EINTRAGEN]` mit sichtbarem Warnbanner. **Die Seite darf so
+  nicht öffentlich gehen** (§ 5 TMG). Vorher standen dort erfundene
+  Musterdaten — nicht wieder einfügen, auch nicht als Beispiel.
+- `LEAD_WEBHOOK_URL` (Vercel-Env) ist nicht gesetzt. Solange sie fehlt,
+  landen Leads nur im Funktions-Log (`pv-lead`), niemand wird benachrichtigt.
+- `public/og-default.png` (1200×630) fehlt. Bis dahin gibt
+  `BaseLayout.astro` bewusst **kein** `og:image` aus — Schalter
+  `OG_STANDARD_VORHANDEN` umlegen, sobald die Datei da ist.
+- `public/favicon.svg` ist noch das Astro-Standardlogo.
+- Keine Bilder im gesamten Projekt außer dem Logo. Artikel und Startseite
+  brauchen welche; Quelle ist voraussichtlich der Firmen-NAS.
+- Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
+  (ADAC, Verbraucherzentrale, co2online). Ausbau wartet auf die
+  Themen-Priorisierung durch PPC.
+- Recherche-Ergebnis (August 2026): Speicherkosten-Band in `calculate.js`
+  (300–470 €/kWh, Marktpreisquelle) weicht vom Fraunhofer-ISE-LCOE-
+  Modellinput (400–1.000 €/kWh) ab — bewusste Nutzerentscheidung, NICHT
+  geändert. Bei künftiger Änderung Invariante 3 gegenprüfen.
 
 ## Session Checklist
 
@@ -197,6 +293,12 @@ Platzhalter (`[FIRMENNAME]`) verwenden.
       Defaults, keine bekannten AI-Tell-Kombinationen)
 - [ ] Neue/geänderte Geldbeträge oder Prozentwerte haben Quelle+Stand
 - [ ] Neue Artikel: eigene Gliederung, keine Autoren-Byline (aktuell),
-      Quellenangaben im Text, endet mit der automatischen CTA-Box
+      Quellenangaben im Text, max. 8–9 FAQ-Fragen, Links auf andere Artikel
 - [ ] Deutsch durchgehend, mobile-first
 - [ ] `npm run build` läuft fehlerfrei nach der Änderung
+- [ ] Bei Änderungen an Rechen-Logik: die vier Invarianten oben **numerisch**
+      geprüft, nicht nur den Code gelesen
+- [ ] Bei UI-Änderungen: einmal live im Browser durchgeklickt, Konsole leer,
+      Netzwerk-Tab ohne fremde Hosts, 360 px ohne horizontales Scrollen
+- [ ] Bei Frontmatter-Änderungen: gegen den **Build** geprüft, nicht gegen
+      den Dev-Server (siehe Cache-Falle unter Befehle)
