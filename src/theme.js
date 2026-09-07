@@ -39,9 +39,10 @@ const theme = {
     floating: "0 2px 8px rgba(20,27,34,0.18)",
   },
 
+  // Muss mit --font-body / --font-display in global.css übereinstimmen.
   font: {
-    family: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-    display: "'Space Grotesk', -apple-system, sans-serif",
+    family: "'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    display: "'Archivo', -apple-system, BlinkMacSystemFont, sans-serif",
   },
 
   maxWidth: 680,

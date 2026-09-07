@@ -1,11 +1,27 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { CATEGORIES, categoryLabel } from "../../lib/categories.js";
+import { CATEGORIES } from "../../lib/categories.js";
 
-const articles = (await getCollection("articles")).sort(
-  (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
-);
+// Vorher: 17 gleich große weiße Karten in einem 3-Spalten-Raster. Das ist das
+// Muster, das jede KI-generierte Übersichtsseite produziert — und es half hier
+// niemandem: Alle Artikel wirkten gleich wichtig, die Kategorie-Chips oben
+// hatten keine Entsprechung in der Liste darunter, und die Beschreibungen
+// waren auf drei schmale Spalten zerhackt.
+//
+// Jetzt ein echtes Register: nach Kategorie gruppiert, als typografische
+// Zeilen. Die Gruppierung ist keine Dekoration, sie bildet die Struktur ab,
+// die es ohnehin gibt (das `category`-Feld im Frontmatter) — und beantwortet
+// die Frage, die jemand auf einer Übersichtsseite hat: "Was gibt es zu
+// meinem Thema?"
+const artikel = await getCollection("articles");
+
+const gruppen = CATEGORIES.map((c) => ({
+  ...c,
+  artikel: artikel
+    .filter((a) => a.data.category === c.slug)
+    .sort((a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()),
+})).filter((g) => g.artikel.length > 0);
 
 const breadcrumbLd = {
   "@context": "https://schema.org",
@@ -14,130 +30,202 @@ const breadcrumbLd = {
     { "@type": "ListItem", position: 1, name: "Ratgeber", item: new URL("/ratgeber/", Astro.site).toString() },
   ],
 };
+
+const nf = new Intl.NumberFormat("de-DE");
 ---
 
 <BaseLayout
   title="Photovoltaik-Ratgeber | Photovoltaik Aktuell"
-  description="Alle Artikel zu Photovoltaik: Kosten & Förderung, Technik, Speicher, Einspeisevergütung, Balkonkraftwerk, Ökobilanz und Checklisten — nach Kategorie filterbar."
+  description="Alle Artikel zu Photovoltaik: Kosten & Förderung, Technik, Speicher, Einspeisevergütung, Balkonkraftwerk, Ökobilanz und Checklisten — nach Kategorie sortiert."
 >
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 
-  <section class="prose ratgeber-header">
-    <h1>Ratgeber</h1>
-    <p>Alle Artikel rund um Photovoltaik — von den Grundlagen bis zur Checkliste vor dem Kauf.</p>
-  </section>
+  <div class="container">
+    <header class="kopf">
+      <h1>Ratgeber</h1>
+      <p>
+        {nf.format(artikel.length)} Artikel, nach Thema sortiert. Jede Zahl im
+        Text mit Quelle — von den Grundlagen bis zur Checkliste vor dem Kauf.
+      </p>
+    </header>
 
-  <section class="container">
-    <nav class="filter-bar" aria-label="Nach Kategorie filtern">
-      <a href="/ratgeber/" class="filter-chip active" aria-current="page">Alle</a>
-      {CATEGORIES.map((c) => (
-        <a href={`/ratgeber/${c.slug}/`} class="filter-chip">{c.label}</a>
+    <nav class="sprung" aria-label="Zu einer Kategorie springen">
+      {gruppen.map((g) => (
+        <a href={`#${g.slug}`}>
+          {g.label} <span class="anzahl">{g.artikel.length}</span>
+        </a>
       ))}
     </nav>
 
-    <ul class="article-grid">
-      {articles.map((a) => (
-        <li class="article-card">
-          <a href={`/ratgeber/${a.id}/`}>
-            <span class="card-cat">{categoryLabel(a.data.category)}</span>
-            <h2>{a.data.title}</h2>
-            <p>{a.data.description}</p>
+    {gruppen.map((g) => (
+      <section class="gruppe" id={g.slug}>
+        <div class="gruppe-kopf">
+          <h2>{g.label}</h2>
+          <a href={`/ratgeber/${g.slug}/`} class="gruppe-link">
+            Nur {g.label} →
           </a>
-        </li>
-      ))}
-    </ul>
-  </section>
+        </div>
+
+        <ul class="eintraege">
+          {g.artikel.map((a) => (
+            <li>
+              <a href={`/ratgeber/${a.id}/`}>
+                <h3>{a.data.title}</h3>
+                <p>{a.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
 </BaseLayout>
 
 <style>
-  .ratgeber-header {
-    padding: 40px 20px 24px;
+  .kopf {
+    max-width: 44ch;
+    padding: clamp(40px, 6vw, 68px) 0 clamp(24px, 3vw, 32px);
   }
 
-  .ratgeber-header h1 {
-    font-size: 30px;
+  .kopf h1 {
+    font-size: var(--schrift-2xl);
+    margin: 0 0 12px;
   }
 
-  .ratgeber-header p {
+  .kopf p {
+    margin: 0;
     color: var(--color-text-secondary);
-    font-size: 16px;
+    font-size: var(--schrift-md);
+    text-wrap: pretty;
   }
 
-  .filter-bar {
+  /* Sprungmarken statt Filter-Chips: die Chips führten vorher auf eigene
+     Unterseiten und rissen den Nutzer aus der Übersicht. Hier bleibt er auf
+     der Seite; die Kategorieseiten sind weiter über jede Gruppe erreichbar. */
+  .sprung {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 8px 0 28px;
+    padding-bottom: clamp(28px, 4vw, 44px);
+    border-bottom: 1px solid var(--color-border);
   }
 
-  .filter-chip {
+  .sprung a {
     display: inline-flex;
-    padding: 8px 14px;
-    border-radius: var(--radius-pill);
+    align-items: baseline;
+    gap: 7px;
+    padding: 7px 13px;
     border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
     background: var(--color-surface);
     color: var(--color-text-secondary);
     text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--schrift-sm);
+    font-weight: 500;
+    transition: border-color 0.15s, color 0.15s;
   }
 
-  .filter-chip:hover {
-    border-color: var(--color-accent);
+  .sprung a:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+  }
+
+  .anzahl {
+    font-size: var(--schrift-xs);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+  }
+
+  .gruppe {
+    padding: clamp(36px, 5vw, 56px) 0 0;
+    scroll-margin-top: 24px;
+  }
+
+  .gruppe:last-of-type {
+    padding-bottom: clamp(48px, 7vw, 80px);
+  }
+
+  .gruppe-kopf {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
+  .gruppe-kopf h2 {
+    font-size: var(--schrift-lg);
+    margin: 0;
+  }
+
+  .gruppe-link {
+    font-size: var(--schrift-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .gruppe-link:hover {
     color: var(--color-accent-hover);
   }
 
-  .filter-chip.active {
-    background: var(--color-text-primary);
-    border-color: var(--color-text-primary);
-    color: #fff;
-  }
-
-  .article-grid {
+  /* Zeilen statt Karten. Der Titel trägt, die Beschreibung erklärt — beide
+     linksbündig auf derselben Achse, damit die Augen beim Überfliegen nicht
+     zwischen drei Spalten springen müssen. */
+  .eintraege {
     list-style: none;
     margin: 0;
-    padding: 0 0 56px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 18px;
+    padding: 0;
   }
 
-  .article-card {
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    transition: border-color 0.15s;
+  .eintraege li {
+    border-top: 1px solid var(--color-border);
   }
 
-  .article-card:hover {
-    border-color: var(--color-accent);
-  }
-
-  .article-card a {
+  /* Beim Überfahren rückt die Zeile leicht ein. Über `transform` statt
+     `padding-left`: letzteres löst bei jedem Frame ein neues Layout aus und
+     ruckelt in einer langen Liste sichtbar. */
+  .eintraege a {
     display: block;
-    padding: 22px 20px;
+    padding: 18px 16px 20px 0;
     text-decoration: none;
     color: inherit;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s;
   }
 
-  .card-cat {
-    display: block;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--color-accent);
-    margin-bottom: 8px;
+  .eintraege a:hover {
+    background: var(--color-surface);
+    transform: translateX(10px);
   }
 
-  .article-card h2 {
-    font-size: 18px;
-    margin: 0 0 8px;
+  @media (prefers-reduced-motion: reduce) {
+    .eintraege a {
+      transition: background-color 0.15s;
+    }
+    .eintraege a:hover {
+      transform: none;
+    }
   }
 
-  .article-card p {
-    font-size: 14px;
-    color: var(--color-text-secondary);
+  .eintraege h3 {
+    font-size: var(--schrift-md);
+    font-weight: 600;
+    margin: 0 0 5px;
+    max-width: 54ch;
+  }
+
+  .eintraege a:hover h3 {
+    color: var(--color-accent-hover);
+  }
+
+  .eintraege p {
     margin: 0;
+    font-size: var(--schrift-sm);
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    max-width: 68ch;
+    text-wrap: pretty;
   }
 </style>

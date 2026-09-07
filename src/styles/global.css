@@ -1,28 +1,61 @@
-/* Space Grotesk selbst gehostet statt über fonts.googleapis.com eingebunden.
-   Grund: Der Remote-Einbindung überträgt bei jedem Seitenaufruf die IP-Adresse
-   des Besuchers an Google in den USA — ohne Einwilligung ein DSGVO-Verstoß
-   (LG München I, 20.01.2022, Az. 3 O 17493/20) und in der Datenschutzerklärung
-   dieser Seite nicht genannt. Nebeneffekt: zwei render-blockierende
-   Drittanbieter-Requests weniger.
-   Dateien: variable Schnittstelle (wght 300–700), Subsets latin + latin-ext,
-   heruntergeladen von fonts.gstatic.com (Space Grotesk v22, SIL Open Font
-   License 1.1). unicode-range unverändert aus der Google-Fonts-CSS übernommen,
-   damit der Browser nur das tatsächlich benötigte Subset lädt. */
+/* ── Schriften ──────────────────────────────────────────────────────────
+   Selbst gehostet, nie über fonts.googleapis.com: die Remote-Einbindung
+   überträgt bei jedem Aufruf die Besucher-IP an Google in den USA — ohne
+   Einwilligung ein DSGVO-Verstoß (LG München I, 20.01.2022, 3 O 17493/20).
+
+   Vorher lief hier Space Grotesk. Die Schrift stand zwar in CLAUDE.md, kam
+   aber aus einem früheren Claude-Designdokument, nicht aus einem
+   Markenhandbuch — das PPC-Logo verwendet sie nicht. Sie gehört zu den
+   Schriften, die auf KI-generierten Oberflächen inzwischen überall stehen,
+   und genau so wirkte die Seite auch.
+
+   Ersetzt durch ein Paar mit echter Kontrastachse statt zweier verwandter
+   Grotesk-Schnitte:
+
+   - Archivo (Omnibus-Type, OFL) für Oberfläche, Überschriften und Zahlen.
+     Eine Grotesk aus der Zeitungs- und Beschilderungstradition: hohe
+     x-Höhe, leicht verengt, sachlich. Passt zu einer Seite, die wie ein
+     Prüfbericht argumentiert, und bringt echte Ziffern mit.
+   - Source Serif 4 (Adobe, OFL) ausschließlich für den Fließtext der
+     Artikel. Serife dort, wo tatsächlich lange gelesen wird — die
+     Trennung ist inhaltlich begründet: Artikel werden gelesen,
+     Oberflächen werden überflogen.
+
+   Beide als variable Schnittstelle, Subsets latin + latin-ext,
+   unicode-range unverändert aus der Google-Fonts-CSS. */
 @font-face {
-  font-family: 'Space Grotesk';
+  font-family: 'Archivo';
   font-style: normal;
-  font-weight: 300 700;
+  font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/space-grotesk-latin-ext.woff2') format('woff2');
+  src: url('/fonts/archivo-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-  font-family: 'Space Grotesk';
+  font-family: 'Archivo';
   font-style: normal;
-  font-weight: 300 700;
+  font-weight: 400 700;
   font-display: swap;
-  src: url('/fonts/space-grotesk-latin.woff2') format('woff2');
+  src: url('/fonts/archivo-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/source-serif-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Source Serif 4';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('/fonts/source-serif-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
@@ -51,10 +84,22 @@
   --radius-lg: 12px;
   --radius-pill: 999px;
 
-  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Space Grotesk', -apple-system, sans-serif;
+  --font-body: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Archivo', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-lesen: 'Source Serif 4', Georgia, 'Times New Roman', serif;
 
-  --max-width-content: 720px;
+  /* Typo-Skala, Verhältnis 1,25 (große Terz). Vorher lagen die Stufen
+     unsystematisch zwischen 16 und 50 px, wodurch nichts eine erkennbare
+     Rangfolge hatte. */
+  --schrift-xs: 0.75rem;    /* 12px — Labels, Fußnoten */
+  --schrift-sm: 0.875rem;   /* 14px — Sekundärtext */
+  --schrift-base: 1rem;     /* 16px */
+  --schrift-md: 1.125rem;   /* 18px — Lesetext Artikel */
+  --schrift-lg: 1.375rem;   /* 22px */
+  --schrift-xl: 1.75rem;    /* 28px */
+  --schrift-2xl: 2.25rem;   /* 36px */
+
+  --max-width-content: 660px;
   --max-width-wide: 1180px;
 }
 
@@ -89,8 +134,16 @@ body {
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.18;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
   margin: 0 0 0.5em;
+}
+
+/* Ziffern in Tabellen und Kennzahlen untereinander ausrichten. Auf einer
+   Seite, die durchgehend mit Zahlen argumentiert, ist das kein Detail. */
+table, .zahl, [data-zahl] {
+  font-variant-numeric: tabular-nums;
 }
 
 a {
@@ -127,18 +180,18 @@ img {
 }
 
 .prose h2 {
-  font-size: 24px;
-  margin-top: 2em;
+  font-size: var(--schrift-xl);
+  margin-top: 1.9em;
 }
 
 .prose h3 {
-  font-size: 19px;
-  margin-top: 1.6em;
+  font-size: var(--schrift-lg);
+  margin-top: 1.7em;
 }
 
 .prose p, .prose ul, .prose ol {
   color: var(--color-text-primary);
-  font-size: 16px;
+  font-size: var(--schrift-base);
 }
 
 .prose ul, .prose ol {
@@ -146,6 +199,100 @@ img {
 }
 
 .prose figcaption, .prose .source-note {
-  font-size: 13px;
+  font-size: var(--schrift-sm);
+  color: var(--color-text-secondary);
+}
+
+/* ── Artikel-Fließtext ──────────────────────────────────────────────────
+   Nur hier greift die Serife: Artikel werden gelesen, nicht überflogen.
+   Überschriften bleiben in Archivo, damit die Rangfolge über den
+   Schriftwechsel sichtbar wird statt nur über die Größe. */
+.article-body {
+  font-family: var(--font-lesen);
+  font-size: var(--schrift-md);
+  line-height: 1.68;
+  letter-spacing: 0.003em;
+}
+
+.article-body p {
+  font-size: inherit;
+  margin: 0 0 1.15em;
+  text-wrap: pretty;
+}
+
+.article-body h2,
+.article-body h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.018em;
+}
+
+.article-body ul,
+.article-body ol {
+  font-size: inherit;
+  margin: 0 0 1.3em;
+  padding-left: 1.15em;
+}
+
+.article-body li {
+  margin-bottom: 0.5em;
+  padding-left: 0.2em;
+}
+
+.article-body li::marker {
   color: var(--color-text-muted);
+}
+
+.article-body strong {
+  font-weight: 600;
+}
+
+/* Hervorgehobene Begriffe am Absatzanfang tragen in diesen Artikeln die
+   Gliederung ("**Überspannungsschutz:** ...") — als Sperrsatz statt fett,
+   sonst flimmert der Text. */
+.article-body a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--color-accent);
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.article-body a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* Tabellen sind in diesen Artikeln Datenträger (Ertragsfaktoren,
+   Vergütungssätze) — sie brauchen Ziffernausrichtung und müssen auf
+   schmalen Displays scrollen dürfen, ohne die Seite zu sprengen. */
+.article-body table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--schrift-sm);
+  margin: 1.6em 0;
+}
+
+.article-body th,
+.article-body td {
+  text-align: left;
+  padding: 10px 14px 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.article-body th {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  border-bottom-color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+.article-body td {
+  color: var(--color-text-secondary);
+}
+
+.article-body blockquote {
+  margin: 1.6em 0;
+  padding-left: 1.1em;
+  border-left: 2px solid var(--color-border);
+  color: var(--color-text-secondary);
 }

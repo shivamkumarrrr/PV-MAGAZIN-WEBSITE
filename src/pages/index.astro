@@ -174,7 +174,7 @@ const nf = new Intl.NumberFormat("de-DE");
   }
 
   .hero h1 {
-    font-size: clamp(30px, 5.2vw, 50px);
+    font-size: clamp(2rem, 5vw, 3.25rem);
     line-height: 1.1;
     letter-spacing: -0.02em;
     text-wrap: balance;
@@ -229,7 +229,7 @@ const nf = new Intl.NumberFormat("de-DE");
   }
 
   .abschnitt-kopf h2 {
-    font-size: clamp(22px, 2.6vw, 28px);
+    font-size: var(--schrift-xl);
     letter-spacing: -0.015em;
     margin: 0 0 8px;
   }
@@ -276,7 +276,7 @@ const nf = new Intl.NumberFormat("de-DE");
   }
 
   .rechner-haupt h3 {
-    font-size: clamp(20px, 2.2vw, 25px);
+    font-size: var(--schrift-lg);
     margin: 0 0 10px;
     letter-spacing: -0.01em;
   }
@@ -427,70 +427,86 @@ const nf = new Intl.NumberFormat("de-DE");
 
   /* ── Ratgeber ───────────────────────────────────────────────────────── */
 
-  /* Vorher standen Kategorie und Titel auf einer Zeile mit
-     justify-content: space-between — auf breiten Bildschirmen klebten die
-     Titel dadurch an der rechten Kante, mit einem Loch dazwischen. Jetzt
-     gestapelt, linksbündig, mit der Beschreibung als dritter Zeile. */
+  /* Zeilen statt Karten — dieselbe Form wie das Register auf /ratgeber/,
+     damit beide Listen sich gleich lesen. Vorher standen Kategorie und
+     Titel auf einer Zeile mit justify-content: space-between, wodurch die
+     Titel auf breiten Bildschirmen an der rechten Kante klebten. */
   .artikel-liste {
     list-style: none;
-    margin: 0 0 24px;
+    margin: 0 0 20px;
     padding: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
   }
 
-  /* Zwei Spalten statt vier: die Titel sind lang, in einer 280px-Spalte
-     brachen sie auf drei Zeilen um. Vier Artikel füllen 2×2 exakt. */
-  @media (min-width: 640px) {
-    .artikel-liste {
-      grid-template-columns: 1fr 1fr;
-    }
+  .artikel-liste li {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .artikel-liste li:last-child {
+    border-bottom: 1px solid var(--color-border);
   }
 
   .artikel-liste a {
-    display: block;
-    height: 100%;
-    padding: 20px 22px;
-    background: var(--color-surface);
+    display: grid;
+    gap: 4px 24px;
+    padding: 18px 12px 20px 0;
     text-decoration: none;
     color: inherit;
-    transition: background-color 0.15s;
+    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s;
+  }
+
+  /* Kategorie in eine eigene schmale Spalte: sie wird beim Überfliegen
+     gesucht, soll dem Titel aber nicht die Zeile wegnehmen. */
+  @media (min-width: 760px) {
+    .artikel-liste a {
+      grid-template-columns: 170px 1fr;
+    }
+
+    .artikel-kategorie {
+      grid-row: span 2;
+      padding-top: 3px;
+    }
   }
 
   .artikel-liste a:hover {
-    background: var(--color-accent-subtle);
+    background: var(--color-surface);
+    transform: translateX(10px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .artikel-liste a {
+      transition: background-color 0.15s;
+    }
+    .artikel-liste a:hover {
+      transform: none;
+    }
   }
 
   .artikel-kategorie {
-    display: block;
-    font-size: 11.5px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-size: var(--schrift-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--color-text-secondary);
-    margin-bottom: 7px;
+    color: var(--color-text-muted);
   }
 
   .artikel-titel {
-    display: block;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 16.5px;
-    line-height: 1.35;
-    margin-bottom: 6px;
-    text-wrap: balance;
+    font-size: var(--schrift-md);
+    line-height: 1.3;
+    max-width: 54ch;
+  }
+
+  .artikel-liste a:hover .artikel-titel {
+    color: var(--color-accent-hover);
   }
 
   .artikel-beschreibung {
-    display: block;
-    font-size: 13.5px;
+    font-size: var(--schrift-sm);
     line-height: 1.55;
     color: var(--color-text-secondary);
+    max-width: 68ch;
+    text-wrap: pretty;
   }
 
   .alle-artikel {
