@@ -9,6 +9,9 @@ import { useState, useEffect, useRef } from "react";
 // erst im Effekt (läuft nur im Browser). Das CSS ist SSR-sicher und wird
 // von Vite normal gebündelt.
 import "leaflet/dist/leaflet.css";
+// divIcon bringt standardmäßig weißen Hintergrund und Rahmen mit — beides
+// weg, damit nur das SVG sichtbar ist.
+import "./locationMap.css";
 import theme from "../../../theme.js";
 import { IconMapPin, IconMap, IconSatellite } from "../../Icons.jsx";
 
@@ -47,11 +50,28 @@ export default function LocationMap({ lat, lon, address, plz, onLocationChange }
 
     const timer = setTimeout(() => setTimedOut(true), 4000);
 
+    // Eigener Marker als Inline-SVG. Leaflets Standard-Icon lädt drei PNGs
+    // über Pfade, die relativ zur aufrufenden Seite aufgelöst werden — seit
+    // Leaflet lokal gebündelt wird, endeten die in 404 und die Karte zeigte
+    // ein kaputtes Bildsymbol. Ein divIcon braucht keine Bilddatei.
+    const markerIcon = () =>
+      L.divIcon({
+        className: "pv-marker",
+        html:
+          '<svg width="26" height="34" viewBox="0 0 26 34" aria-hidden="true">' +
+          `<path d="M13 33C13 33 24 21.5 24 13A11 11 0 1 0 2 13c0 8.5 11 20 11 20z" fill="${theme.color.accent}" stroke="${theme.color.white}" stroke-width="2" stroke-linejoin="round"/>` +
+          `<circle cx="13" cy="13" r="4" fill="${theme.color.white}"/>` +
+          "</svg>",
+        iconSize: [26, 34],
+        iconAnchor: [13, 33],
+        popupAnchor: [0, -30],
+      });
+
     const placeMarker = (map, latlng) => {
       if (markerRef.current) {
         markerRef.current.setLatLng(latlng);
       } else {
-        markerRef.current = L.marker(latlng, { draggable: true }).addTo(map);
+        markerRef.current = L.marker(latlng, { draggable: true, icon: markerIcon() }).addTo(map);
         markerRef.current.on("dragend", () => {
           const p = markerRef.current.getLatLng();
           onLocationChange?.(p.lat, p.lng);
