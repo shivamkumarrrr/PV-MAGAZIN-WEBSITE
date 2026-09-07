@@ -4,7 +4,16 @@ description: "CO2-Ersparnis pro Kilowattstunde, energetische Amortisationszeit d
 category: "oekobilanz"
 datePublished: 2026-08-12
 dateModified: 2026-08-12
-relatedRechner: "photovoltaik"
+relatedRechner: "co2"
+faq:
+  - frage: "Verbraucht die Herstellung eines Solarmoduls mehr Energie, als es einspart?"
+    antwort: "Nein. Für kristalline Silizium-Module liegt die energetische Amortisationszeit nach Fraunhofer-ISE-Untersuchungen unter deutschen Standortbedingungen bei etwa ein bis zweieinhalb Jahren. Bei 25 bis 30 Jahren Laufzeit produziert die Anlage über 90 Prozent ihrer Betriebszeit einen echten Energie- und CO2-Nettogewinn."
+  - frage: "Wie viel CO2 spart eine PV-Anlage pro Jahr?"
+    antwort: "Jede selbst erzeugte Kilowattstunde vermeidet nach Zahlen des Umweltbundesamts (Jahreswert 2025) rund 0,344 kg CO2-Äquivalent. Für eine typische Einfamilienhaus-Anlage mit 8.000 bis 9.000 kWh Jahresertrag ergibt das grob 2,7 bis 3,1 Tonnen pro Jahr."
+  - frage: "Wie viele Bäume entspricht das?"
+    antwort: "Ein ausgewachsener Baum bindet nach ADAC-Angaben rund 12,5 kg CO2 pro Jahr. Eine Anlage mit 3 Tonnen Einsparung entspricht damit rechnerisch rund 240 Bäumen pro Jahr — als Größenordnungs-Anker gemeint, nicht als exakte ökologische Äquivalenz, denn Bäume leisten weit mehr als CO2-Bindung."
+  - frage: "Sind Rohstoffabbau und Recycling in der Rechnung enthalten?"
+    antwort: "Ja. Die zitierten Fraunhofer-ISE-Amortisationszeiten beziehen sich auf den gesamten Herstellungs- und Lieferkettenaufwand, nicht nur auf die reine Modulproduktion."
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
@@ -52,7 +61,7 @@ entspricht damit rechnerisch der CO2-Bindungsleistung von rund 240 Bäumen
 pro Jahr — nicht als exakte ökologische Äquivalenz gemeint (Bäume leisten
 weit mehr als nur CO2-Bindung), sondern als Größenordnungs-Anker.
 
-<RechnerCta text="Der Rechner zeigt für Ihre eigene Anlagengröße sowohl die CO2-Einsparung in kg als auch das Baum-Äquivalent." />
+<RechnerCta text="Der Rechner zeigt für Ihre eigene Anlagengröße sowohl die CO2-Einsparung in kg als auch das Baum-Äquivalent." href="/rechner/co2/" />
 
 ## Was die Ökobilanz nicht abbildet — und warum das in Ordnung ist
 

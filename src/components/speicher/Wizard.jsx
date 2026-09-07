@@ -1,8 +1,8 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { siteConfig } from "../../config.js";
 import { calculateSpeicher, SPEICHER_LEBENSDAUER_JAHRE } from "../../lib/calculateSpeicher.js";
 
 const STEPS = ["Ihre Anlage", "Speicher"];
@@ -19,6 +19,17 @@ export default function SpeicherWizard() {
   const [showResult, setShowResult] = useState(false);
 
   const result = calculateSpeicher(speicherKwh, kwp, jahresverbrauch);
+
+  // Klartext-Zusammenfassung + Feldwerte für das Lead-Formular.
+  const leadZusammenfassung = `${kwp} kWp · ${speicherKwh} kWh Speicher · ${result.jahresMehrErsparnis.toLocaleString("de-DE")} €/Jahr Mehr-Ersparnis`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    speicherKwh: `${speicherKwh} kWh`,
+    mehrEigenverbrauch: `${result.mehrEigenverbrauch.toLocaleString("de-DE")} kWh/Jahr`,
+    jahresersparnis: `${result.jahresMehrErsparnis.toLocaleString("de-DE")} €`,
+    investition: `${result.investition.toLocaleString("de-DE")} €`,
+    amortisation: result.amortisation != null ? `${result.amortisation} Jahre` : "nicht bezifferbar",
+  };
 
   const restart = () => {
     setShowResult(false);
@@ -79,7 +90,8 @@ export default function SpeicherWizard() {
               {result.mehrEigenverbrauch.toLocaleString("de-DE")} kWh/Jahr
             </div>
             <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 2 }}>
-              Faustregel {result.nutzbarKwh.toLocaleString("de-DE")} kWh nutzbar × 200 kWh
+              +{result.autarkieGewinnProzentpunkte.toLocaleString("de-DE")} Prozentpunkte Autarkie
+              {result.speicherKwh > 0 && ` · ${result.mehrEigenverbrauchProKwh.toLocaleString("de-DE")} kWh je kWh Speicher`}
             </div>
           </div>
           <div style={{ flex: "1 1 140px" }}>
@@ -104,9 +116,9 @@ export default function SpeicherWizard() {
 
         <div
           style={{
-            background: result.lohntSich ? "#eaf8ef" : "#fdeeea",
+            background: result.lohntSich ? theme.color.successSubtle : theme.color.dangerSubtle,
             borderRadius: theme.radius.lg,
-            border: `1.5px solid ${result.lohntSich ? "#2f9e63" : theme.color.accent}`,
+            border: `1.5px solid ${result.lohntSich ? theme.color.success : theme.color.accent}`,
             padding: "18px 18px",
             marginBottom: 16,
           }}
@@ -119,6 +131,10 @@ export default function SpeicherWizard() {
           <p style={{ fontSize: 12.5, color: theme.color.textSecondary, margin: 0, lineHeight: 1.65 }}>
             {result.speicherKwh <= 0
               ? "Sie haben keinen Speicher gewählt — ohne Speicher gibt es keinen Mehr-Eigenverbrauch zu bewerten."
+              : result.amortisation === null
+              ? "Bei dieser Kombination aus Anlagengröße und Verbrauch bleibt kein nennenswerter Überschuss übrig, den "
+                + "ein Speicher noch zwischenspeichern könnte — der Mehr-Eigenverbrauch geht gegen null. Eine "
+                + "Amortisation lässt sich damit nicht sinnvoll angeben."
               : result.lohntSich
               ? `Mit einer Amortisation von ca. ${result.amortisation.toLocaleString("de-DE")} Jahren liegt dieser Speicher im Bereich der üblichen Lebensdauer (${SPEICHER_LEBENSDAUER_JAHRE} Jahre). `
                 + "Wichtig: Der größte Nutzen eines Speichers ist nicht die reine Wirtschaftlichkeit, sondern höhere "
@@ -135,50 +151,15 @@ export default function SpeicherWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-          {!result.lohntSich && result.speicherKwh > 0 && (
-            <a
-              href="/rechner/"
-              style={{
-                display: "block",
-                textAlign: "center",
-                padding: 14,
-                borderRadius: theme.radius.lg,
-                background: theme.color.accent,
-                color: theme.color.white,
-                fontWeight: 600,
-                fontSize: 14,
-                textDecoration: "none",
-              }}
-            >
-              Weitere Rechner entdecken →
-            </a>
-          )}
-          {siteConfig.contact.calendlyUrl && (
-            <a
-              href={siteConfig.contact.calendlyUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "block",
-                textAlign: "center",
-                padding: 14,
-                borderRadius: theme.radius.lg,
-                border: `1.5px solid ${theme.color.border}`,
-                color: theme.color.textSecondary,
-                fontWeight: 600,
-                fontSize: 14,
-                textDecoration: "none",
-              }}
-            >
-              Kostenlose Beratung buchen
-            </a>
-          )}
-          <button
-            onClick={restart}
-            style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}
-          >
-            Neu berechnen
-          </button>
+          <LeadForm
+            rechner="speicher"
+            zusammenfassung={leadZusammenfassung}
+            daten={leadDaten}
+            onRestart={restart}
+          />
+          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+            Alle Rechner im Überblick →
+          </a>
         </div>
       </div>
     );

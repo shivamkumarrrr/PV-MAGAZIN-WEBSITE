@@ -1,8 +1,8 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { siteConfig } from "../../config.js";
 import { calculateMieterstrom, zuschlagFuer, empfehlungDirektverbrauch } from "../../lib/calculateMieterstrom.js";
 import { ERTRAG_PRO_KWP } from "../../lib/calculate.js";
 
@@ -17,6 +17,7 @@ export default function MieterstromWizard() {
   const [direktQuote, setDirektQuote] = useState(0.4);
   const [mpPreis, setMpPreis] = useState(0.28);
   const [investition, setInvestition] = useState(33000);
+  const [betriebskosten, setBetriebskosten] = useState(0);
 
   const [showResult, setShowResult] = useState(false);
 
@@ -27,9 +28,21 @@ export default function MieterstromWizard() {
     direktVerbrauchQuote: direktQuote,
     mieterstromPreis: mpPreis,
     investition,
+    betriebskostenProWeJahr: betriebskosten,
   });
 
   const restart = () => setShowResult(false);
+
+  const leadZusammenfassung = `${kwp} kWp · ${we} WE · ${euro(result.gesamtEinnahmen)}/Jahr Einnahmen`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    wohneinheiten: `${we} (davon ${result.teilnehmendeWe} teilnehmend)`,
+    mieterstromErloes: `${result.erloesMieterstrom.toLocaleString("de-DE")} €/Jahr`,
+    investition: `${investition.toLocaleString("de-DE")} €`,
+    amortisation: result.amortisation != null
+      ? `${result.amortisation} Jahre${result.vorBetriebskosten ? " (vor Betriebskosten)" : ""}`
+      : "nicht bezifferbar",
+  };
 
   if (showResult) {
     return (
@@ -43,7 +56,15 @@ export default function MieterstromWizard() {
             {result.kwp.toLocaleString("de-DE")} kWp · {result.we} WE · {result.teilnehmendeWe} teilnehmende Haushalte
           </div>
           <div style={{ marginTop: 16, padding: "10px 16px", background: "rgba(255,255,255,0.1)", borderRadius: theme.radius.md, fontSize: 13, opacity: 0.95 }}>
-            Amortisation: etwa <strong>{result.amortisation.toLocaleString("de-DE", { maximumFractionDigits: 1 })} Jahre</strong> bei einer Investition von {euro(investition)}
+            {result.amortisation === null ? (
+              <>Bei diesen Annahmen bleibt kein positiver Deckungsbeitrag — eine Amortisation lässt sich nicht angeben.</>
+            ) : (
+              <>
+                Amortisation{result.vorBetriebskosten ? " vor Betriebskosten" : ""}: etwa{" "}
+                <strong>{result.amortisation.toLocaleString("de-DE", { maximumFractionDigits: 1 })} Jahre</strong>{" "}
+                bei einer Investition von {euro(investition)}
+              </>
+            )}
           </div>
         </div>
 
@@ -86,17 +107,15 @@ export default function MieterstromWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          {siteConfig.contact.calendlyUrl && (
-            <a href={siteConfig.contact.calendlyUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              Kostenlose Beratung buchen
-            </a>
-          )}
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="mieterstrom"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );
@@ -115,11 +134,21 @@ export default function MieterstromWizard() {
       <Slider label="Direktverbrauchsquote" value={Math.round(direktQuote * 100)} onChange={(v) => setDirektQuote(v / 100)} min={20} max={80} step={5} unit="%" />
       <Slider label="Mieterstrompreis" value={Math.round(mpPreis * 100)} onChange={(v) => setMpPreis(v / 100)} min={20} max={35} step={0.5} unit="ct/kWh" />
       <Slider label="Investition (Gesamt)" value={investition} onChange={setInvestition} min={10000} max={120000} step={1000} unit="€" />
+      <Slider label="Betriebskosten je Wohneinheit" value={betriebskosten} onChange={setBetriebskosten} min={0} max={300} step={10} unit="€/Jahr" />
 
       <p style={{ fontSize: 12, color: theme.color.textMuted, margin: "4px 0 14px" }}>
         Der Mieterstrompreis darf maximal 90 % des örtlichen Grundversorgertarifs
         betragen — realistisch sind 25–30 ct/kWh. Üblich ist eine
         Direktverbrauchsquote von rund 40 % ohne Speicher, 60 % mit Speicher.
+        Die Teilnahmequote bestimmt, welcher Anteil dieses Direktverbrauchs
+        tatsächlich als Mieterstrom abgenommen wird — der Rest wird eingespeist.
+      </p>
+      <p style={{ fontSize: 12, color: theme.color.textMuted, margin: "0 0 14px" }}>
+        Die <strong>Betriebskosten</strong> (Messstellenbetrieb, Abrechnung,
+        Bilanzkreis, Lieferantenpflichten) sind bewusst nicht vorbelegt — sie
+        unterscheiden sich je nach Dienstleister stark. Tragen Sie hier den
+        Wert aus Ihrem Angebot ein; bei 0 € rechnet das Ergebnis ausdrücklich
+        <em> vor</em> Betriebskosten und fällt entsprechend zu günstig aus.
       </p>
 
       <ContinueButton label="Wirtschaftlichkeit berechnen" onClick={() => setShowResult(true)} />

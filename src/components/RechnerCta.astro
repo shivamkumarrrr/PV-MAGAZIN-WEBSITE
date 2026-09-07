@@ -4,6 +4,8 @@
 // inhaltlich passenden Stelle ist kontextuell relevanter als ein
 // durchgehendes Widget). Zwei Varianten: "inline" (schmal, im Fließtext)
 // und "final" (größere Abschluss-Box am Artikelende).
+import { rechnerName } from "../lib/rechner.js";
+
 interface Props {
   variant?: "inline" | "final";
   text?: string;
@@ -15,6 +17,13 @@ const {
   text = "Berechnen Sie Ertrag, Ersparnis und Amortisation für Ihr eigenes Dach.",
   href = "/rechner/photovoltaik/",
 } = Astro.props;
+
+// Titel der Abschluss-Box aus dem Ziel-Link ableiten statt fest zu verdrahten.
+// Vorher stand hier immer "Photovoltaik-Rechner" — auch bei Artikeln, die auf
+// den Balkonkraftwerk-, Gestehungskosten-, E-Auto- oder Reinigungsrechner
+// verlinken.
+const zielSlug = href.replace(/^\/rechner\//, "").replace(/\/$/, "");
+const titel = rechnerName(zielSlug);
 ---
 
 {variant === "inline" ? (
@@ -25,7 +34,7 @@ const {
 ) : (
   <div class="cta-final">
     <div class="cta-final-eyebrow">Passend dazu</div>
-    <h3 class="cta-final-title">Photovoltaik-Rechner</h3>
+    <h3 class="cta-final-title">{titel}</h3>
     <p class="cta-final-text">{text}</p>
     <a href={href} class="cta-final-button">Zum Rechner →</a>
   </div>

@@ -96,7 +96,10 @@ const MONATS_VERBRAUCH_ANTEILE = [0.094, 0.086, 0.086, 0.08, 0.08, 0.075, 0.075,
 // Jahresgänge des EU-PVGIS-Ertragsrechners für Deutschland; Formvergleich mit öffentlichen deutschen
 // Ertragsverteilungen (z.B. photovoltaikanbieter.com, PV-Ertrag-Tabelle 2026). Stand Aug 2026,
 // bei Bedarf neu prüfen.
-const MONATS_ERTRAG_ANTEILE_FALLBACK = [0.035, 0.055, 0.09, 0.11, 0.125, 0.125, 0.125, 0.115, 0.09, 0.065, 0.04, 0.025];
+// Exportiert, weil die Startseite denselben Jahresgang als Ertragskurve zeigt.
+// Eine Quelle der Wahrheit: die Kurve auf der Startseite und die Rechnung im
+// Rechner dürfen nie unterschiedliche Verläufe zeigen.
+export const MONATS_ERTRAG_ANTEILE_FALLBACK = [0.035, 0.055, 0.09, 0.11, 0.125, 0.125, 0.125, 0.115, 0.09, 0.065, 0.04, 0.025];
 
 // ─── Konstanten: Quelle, Stand, Prüf-Rhythmus ───
 
@@ -113,6 +116,14 @@ export let STROMPREIS = 0.37;
 // Einzige Quelle der Wahrheit für die Teileinspeisung — EINSPEISEVERGUETUNG_TEIL weiter unten leitet
 // sich hiervon ab, damit die Info-Sektion und die Berechnung nie auseinanderlaufen können.
 export let EINSPEISE = 0.077;
+
+// Staffelung für Anlagen >10 kWp: nur der Anteil ÜBER 10 kWp bekommt den niedrigeren Satz.
+// Quelle: Bundesnetzagentur, "EEG-Förderung und -Fördersätze" — Inbetriebnahme 01.08.2026–31.01.2027.
+// Teileinspeisung: ≤10 kWp = 7,70 Ct/kWh, 10–40 kWp = 6,66 Ct/kWh, 40–100 kWp = 5,44 Ct/kWh.
+// Stand Aug 2026; mit jeder halbjährlichen EEG-Degression (Stichtage 1. Februar/1. August) prüfen.
+// Übernommen aus dem pvrechner-Quellprojekt (dort gegen die BNetzA-Tabelle validiert).
+export const EINSPEISE_10_40 = 0.0666; // €/kWh, Teileinspeisung, 10–40 kWp
+export const EINSPEISE_40_100 = 0.0544; // €/kWh, Teileinspeisung, 40–100 kWp
 
 // Fallback-Jahresertrag ohne PVGIS-Daten (bundesweiter Durchschnitt). Fraunhofer ISE zitiert für
 // deutsche PV-Dachanlagen im Schnitt ~922 Vollbenutzungsstunden (≈922 kWh/kWp — "Aktuelle Fakten zur
@@ -206,8 +217,28 @@ export const EINSPEISEVERGUETUNG_STAND = "2026";
 // Wert duplizieren — ein Update nur an EINSPEISE reicht, beide bleiben synchron.
 // Achtung: Das ist eine Init-Kopie, keine Live-Bindung — configureEconomics hält sie nach
 // einem Override von EINSPEISE explizit synchron (siehe unten).
-export let EINSPEISEVERGUETUNG_TEIL = EINSPEISE; // Ct/kWh, Teileinspeisung, Anlagen bis 10 kWp
-export let EINSPEISEVERGUETUNG_VOLL = 0.123; // Ct/kWh, Volleinspeisung, Anlagen bis 10 kWp
+// Achtung: beide Werte hier sind in €/kWh angegeben (0,077 = 7,70 Ct/kWh), nicht in Ct.
+export let EINSPEISEVERGUETUNG_TEIL = EINSPEISE; // €/kWh, Teileinspeisung, Anlagen bis 10 kWp
+// Volleinspeisung ≤10 kWp (erhöhter Satz, kein Eigenverbrauch), €/kWh. Quelle:
+// Bundesnetzagentur, "EEG-Förderung und -Fördersätze" — Fördersätze für Inbetriebnahme
+// 1.8.2026 bis 31.1.2027 (§ 21 Abs. 1, § 53 Abs. 1 EEG): 12,22 Ct/kWh (vorher, bis
+// 31.7.2026: 12,34 Ct/kWh). Stand Aug 2026; mit jeder halbjährlichen EEG-Degression
+// (Stichtage 1. Februar/1. August) prüfen.
+export let EINSPEISEVERGUETUNG_VOLL = 0.1222; // €/kWh, Volleinspeisung, Anlagen bis 10 kWp
+
+// Gewichteter Durchschnitt der Teileinspeisungsvergütung für eine Anlage der Größe `kwp`.
+// Die ersten 10 kWp bekommen den ≤10-kWp-Satz, der Rest staffelt sich nach EEG-Tabelle.
+// Vorher rechnete diese Datei für JEDE Anlagengröße mit dem ≤10-kWp-Satz — das
+// überschätzte die Einspeiseerlöse aller Anlagen über 10 kWp (bei 30 kWp um ca. 9 %).
+// Quelle: Bundesnetzagentur, Inbetriebnahme 01.08.2026–31.01.2027.
+export function einspeiseStaffel(kwp) {
+  if (kwp <= 0) return EINSPEISE;
+  if (kwp <= 10) return EINSPEISE;
+  if (kwp <= 40) {
+    return (10 * EINSPEISE + (kwp - 10) * EINSPEISE_10_40) / kwp;
+  }
+  return (10 * EINSPEISE + 30 * EINSPEISE_10_40 + (kwp - 40) * EINSPEISE_40_100) / kwp;
+}
 
 // Kundenspezifische Wirtschaftlichkeits-Overrides (Injection statt Import, damit
 // calculate.js von der Seite losgelöst einbettbar bleibt — CLAUDE.md Architektur).
@@ -279,6 +310,24 @@ const SPEICHER_BONUS = [
   { s: 3.5, bonus: 0.30 },
 ];
 
+// Validierung gegen Patricks reale Anlage (12.8.2026, Geschäftsführer-Feedback): 5,2 kWp,
+// 6,4 kWh Speicher, 4.239 kWh Verbrauch → Modell liefert 70% Autarkie, sein SMA-Portal
+// zeigt real 48% (22 Prozentpunkte Abweichung, über der von ihm gesetzten 10pp-Schwelle
+// für "Kennlinie stimmt nicht"). VOR einer Änderung recherchiert (HTW Berlin Stromspeicher-
+// Inspektion 2025 + pv-magazine-Bericht dazu): HTW beziffert den Autarkie-Zugewinn pro kWh
+// Speicher als Sättigungskurve (erste 4 kWh: 4–6pp/kWh, 4–8 kWh: 2–3pp/kWh, ab 10 kWh:
+// ≤1pp/kWh) — für 6,4 kWh ergibt das ≈26pp Bonus, sehr nah an dem, was diese Tabelle bei
+// s≈1,5 liefert (≈24pp). Dieselbe HTW-Quelle bestätigt zudem 60–80% Autarkie als typisch
+// für ausreichend dimensionierte PV+Speicher-Systeme — das Modell (70%) liegt also im
+// literaturgestützten Rahmen. Der pv-magazine-Bericht zur selben HTW-Studie stellt außerdem
+// fest, dass verschiedene seriöse Online-Rechner bei identischen Eingaben um >20 Prozentpunkte
+// voneinander abweichen können — die Lücke zu einem einzelnen realen Haushalt liegt damit
+// innerhalb bekannter Modell-vs-Realität-Varianz, nicht zwingend ein Kennlinienfehler.
+// Fazit: SPEICHER_BONUS NICHT auf diesen einen Datenpunkt hin verbogen (würde die Kennlinie
+// für alle anderen, besser zur Literatur passenden Fälle verschlechtern).
+// Eigenverbrauchsquote (die zweite, hier NICHT modellierte Kennzahl) traf mit 60% vs.
+// Patricks realen 65% deutlich näher (5pp) — dort besteht kein Änderungsbedarf.
+
 function interpolate(table, x, keyX, keyY) {
   if (x <= table[0][keyX]) return table[0][keyY];
   for (let i = 1; i < table.length; i++) {
@@ -316,8 +365,19 @@ export function autarkieSchaetzung(kwp, gesamtVerbrauch, speicherKwh, tageszeit 
 // Formatierung zurück; die Einheit hängt der Aufrufer an.
 export function formatSpan(v, pct = 12) {
   if (!v || isNaN(v)) return "0";
-  const lo = Math.max(0, Math.round(v * (1 - pct / 100)));
-  const hi = Math.round(v * (1 + pct / 100));
+  // Bei negativem v (z.B. kumulierte Nettoersparnis in frühen Jahren, bevor
+  // sich die Investition amortisiert hat) macht "v * (1 + pct/100)" den Wert
+  // BETRAGSMÄSSIG größer (weiter von 0 entfernt), nicht "höher" — die Zuordnung
+  // lo/hi kehrt sich also um. Vorher wurde das nicht beachtet UND lo wurde
+  // immer auf 0 geklemmt, auch wenn beide Grenzen negativ waren — Ergebnis war
+  // eine unsinnige Anzeige wie "0–-664". Fix: beide Kandidaten ausrechnen,
+  // numerisch sortieren, und den 0-Boden nur für tatsächlich nicht-negative
+  // Werte anwenden (kWh/€, die nie negativ sein können).
+  const a = v * (1 - pct / 100);
+  const b = v * (1 + pct / 100);
+  let lo = Math.round(Math.min(a, b));
+  const hi = Math.round(Math.max(a, b));
+  if (v > 0) lo = Math.max(0, lo);
   return `${lo.toLocaleString("de-DE")}–${hi.toLocaleString("de-DE")}`;
 }
 
@@ -356,9 +416,12 @@ export function wechselrichterKosten(kwp) {
 // 25-Jahres-Projektion mit Moduldegradation, laufenden Betriebskosten und einem einmaligen
 // Wechselrichter-Austausch. Die jährliche Strompreissteigerung fließt bewusst NUR hier ein
 // (nicht in den prominent angezeigten Jahres-Ersparnis-Wert) und ist als Annahme gekennzeichnet.
+// Gibt { netto25, netto10, netto15, netto20 } zurück (alle in €).
 function projiziere25Jahre(jahresertrag, autarkieRate, gesamtVerbrauch, investition, kwp) {
+  const einspeiseRate = einspeiseStaffel(kwp);
   let kumulierteErsparnis = 0;
   let kumulierteWartung = 0;
+  let netto10 = 0, netto15 = 0, netto20 = 0;
   for (let jahr = 1; jahr <= 25; jahr++) {
     const ertragJahrN = jahresertrag * Math.pow(1 - DEGRADATION_PRO_JAHR, jahr - 1);
     // eigenverbrauch kann nie größer sein als das, was in diesem Jahr tatsächlich erzeugt wird —
@@ -366,11 +429,16 @@ function projiziere25Jahre(jahresertrag, autarkieRate, gesamtVerbrauch, investit
     const eigenverbrauchJahrN = Math.min(gesamtVerbrauch * autarkieRate, ertragJahrN);
     const einspeisungJahrN = ertragJahrN - eigenverbrauchJahrN;
     const strompreisJahrN = STROMPREIS * Math.pow(1 + STROMPREIS_STEIGERUNG_PRO_JAHR, jahr - 1);
-    kumulierteErsparnis += eigenverbrauchJahrN * strompreisJahrN + einspeisungJahrN * EINSPEISE;
+    kumulierteErsparnis += eigenverbrauchJahrN * strompreisJahrN + einspeisungJahrN * einspeiseRate;
     kumulierteWartung += investition * WARTUNG_PROZENT_PRO_JAHR;
+    const nettoBisher = kumulierteErsparnis - kumulierteWartung;
+    if (jahr === 10) netto10 = Math.round(nettoBisher - investition);
+    if (jahr === 15) netto15 = Math.round(nettoBisher - investition);
+    if (jahr === 20) netto20 = Math.round(nettoBisher - investition);
   }
   const wechselrichterKostenWert = wechselrichterKosten(kwp);
-  return Math.round(kumulierteErsparnis - kumulierteWartung - wechselrichterKostenWert - investition);
+  const netto25 = Math.round(kumulierteErsparnis - kumulierteWartung - wechselrichterKostenWert - investition);
+  return { netto25, netto10, netto15, netto20 };
 }
 
 export function calculate(dach, ausrichtung, neigung, verbrauch, speicherKwh, eauto, waermepumpe, pvgisData, dachform, eautoProfil, tageszeit) {
@@ -404,17 +472,27 @@ export function calculate(dach, ausrichtung, neigung, verbrauch, speicherKwh, ea
   const eigenverbrauch = Math.round(Math.min(gesamtVerbrauch * autarkieRate, jahresertrag));
   const einspeisung = jahresertrag - eigenverbrauch;
 
+  // Gestaffelte Einspeisevergütung: erste 10 kWp zum ≤10-kWp-Satz, Rest nach EEG-Tabelle.
+  // Quelle: Bundesnetzagentur, Inbetriebnahme 01.08.2026–31.01.2027.
+  const einspeiseRate = einspeiseStaffel(kwp);
   const ersparnisEigen = eigenverbrauch * STROMPREIS;
-  const ersparnisEinspeisung = einspeisung * EINSPEISE;
+  const ersparnisEinspeisung = einspeisung * einspeiseRate;
   const jahresErsparnis = Math.round(ersparnisEigen + ersparnisEinspeisung);
 
   const investition = Math.round(kwp * KOSTEN_PRO_KWP + speicherKwh * SPEICHER_KOSTEN_PRO_KWH);
 
-  const amortisation = Math.round((investition / jahresErsparnis) * 10) / 10;
+  // Ohne jährliche Ersparnis gibt es keine sinnvolle Amortisationszeit — `null`
+  // statt Infinity/NaN, damit die UI bewusst "–" anzeigen kann statt einer Zahl.
+  const amortisation = jahresErsparnis > 0
+    ? Math.round((investition / jahresErsparnis) * 10) / 10
+    : null;
   const co2 = Math.round(jahresertrag * CO2_PER_KWH);
   const co2Baeume = Math.round(co2 / CO2_KG_PRO_BAUM_JAHR);
-  const ersparnis25 = projiziere25Jahre(jahresertrag, autarkieRate, gesamtVerbrauch, investition, kwp);
-  const autarkie = Math.round((eigenverbrauch / gesamtVerbrauch) * 100);
+  const { netto25: ersparnis25, netto10: ersparnis10, netto15: ersparnis15, netto20: ersparnis20 } =
+    projiziere25Jahre(jahresertrag, autarkieRate, gesamtVerbrauch, investition, kwp);
+  // Bei Verbrauch 0 ist der Autarkiegrad nicht definiert (0/0) — vorher lieferte
+  // das NaN, was als "NaN %" bis in die Anzeige durchschlug.
+  const autarkie = gesamtVerbrauch > 0 ? Math.round((eigenverbrauch / gesamtVerbrauch) * 100) : 0;
   const monatlich = Math.round(jahresErsparnis / 12);
   // Abgeleiteter Anzeigewert für die Transparenzbox: Anteil des ERTRAGS, der selbst verbraucht wird
   // (andere Kennzahl als Autarkie, s.o.) — nicht eigenständig modelliert, ergibt sich aus eigenverbrauch/jahresertrag.
@@ -423,5 +501,5 @@ export function calculate(dach, ausrichtung, neigung, verbrauch, speicherKwh, ea
   // Monatliche Verteilung (Eigenverbrauch/Einspeisung/Netzbezug) für die Balance-Grafik.
   const balance = monatlicheBalance(jahresertrag, gesamtVerbrauch, eigenverbrauch, monthly);
 
-  return { kwp, module, nutzbar: Math.round(nutzbar), jahresertrag, eigenverbrauch, einspeisung, jahresErsparnis, investition, amortisation, co2, co2Baeume, ersparnis25, gesamtVerbrauch, autarkie, monatlich, dataSource, monthly, eigenverbrauchsquote, balance };
+  return { kwp, module, nutzbar: Math.round(nutzbar), jahresertrag, eigenverbrauch, einspeisung, jahresErsparnis, investition, amortisation, einspeiseRate, co2, co2Baeume, ersparnis25, ersparnis10, ersparnis15, ersparnis20, gesamtVerbrauch, autarkie, monatlich, dataSource, monthly, eigenverbrauchsquote, balance };
 }

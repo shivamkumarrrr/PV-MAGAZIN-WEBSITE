@@ -4,7 +4,16 @@ description: "Was ein Speicher wirklich verändert — und was nicht: Autarkiege
 category: "speicher"
 datePublished: 2026-08-12
 dateModified: 2026-08-12
-relatedRechner: "photovoltaik"
+relatedRechner: "speicher"
+faq:
+  - frage: "Verkürzt ein Speicher die Amortisationszeit?"
+    antwort: "Nein, er verlängert sie gegenüber derselben Anlage ohne Speicher. Der Speicher kostet zusätzlich Geld und erhöht die jährliche Ersparnis nur um den Wert des zusätzlich selbst genutzten statt eingespeisten Stroms. Diese Differenz ist real, gleicht die Speicher-Investition aber nicht kurzfristig aus."
+  - frage: "Wie groß sollte ein Speicher sein?"
+    antwort: "Die HTW Berlin nennt in ihrem Unabhängigkeitsrechner-FAQ als Faustregel etwa 1 bis 1,2 kWh Speicherkapazität pro 1.000 kWh Jahresverbrauch. Für einen Vier-Personen-Haushalt mit rund 4.000 kWh sind das grob 4 bis 5 kWh nutzbare Kapazität."
+  - frage: "Was kostet ein Batteriespeicher?"
+    antwort: "Speicher werden nach nutzbarer Kapazität in kWh bepreist, nicht nach Anlagengröße. Für den heute marktüblichen Zelltyp LiFePO₄ nennen aktuelle Marktpreisübersichten rund 300 bis 470 Euro pro kWh nutzbarer Kapazität."
+  - frage: "Wann lohnt sich ein Speicher eher nicht?"
+    antwort: "Bei kleinen Anlagen im Verhältnis zum Verbrauch, die ohnehin kaum mehr als den Tagesbedarf decken, bringt ein Speicher wenig zusätzlichen Autarkiegewinn bei gleichem Preis pro kWh. Auch bei stark abendlastigem Verbrauch ohne relevante Mittagsspitze verpufft der Effekt teilweise."
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
@@ -44,7 +53,7 @@ Speicherkapazität pro 1.000 kWh Jahresverbrauch des Haushalts. Für einen
 5 kWh nutzbare Kapazität — deutlich weniger, als mancher Verkaufsprospekt
 suggeriert.
 
-<RechnerCta text="Der Speicher-Schritt im Rechner zeigt einen dimensionierten Vorschlag für Ihren eigenen Verbrauch — mit Live-Vorschau, wie sich Ihr Autarkiegrad dadurch verändert." />
+<RechnerCta text="Der Speicher-Schritt im Rechner zeigt einen dimensionierten Vorschlag für Ihren eigenen Verbrauch — mit Live-Vorschau, wie sich Ihr Autarkiegrad dadurch verändert." href="/rechner/speicher/" />
 
 ## Die unbequeme Wahrheit: Amortisation wird länger, nicht kürzer
 

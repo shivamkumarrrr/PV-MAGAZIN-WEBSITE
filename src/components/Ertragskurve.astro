@@ -1,0 +1,173 @@
+---
+import { MONATS_ERTRAG_ANTEILE_FALLBACK, ERTRAG_PRO_KWP } from "../lib/calculate.js";
+
+// Das Signature-Element der Startseite (CLAUDE.md Design-Regel 11: EIN
+// starkes Motiv statt vieler Mini-Dekorationen). Bewusst kein Stockfoto und
+// kein Icon-Ornament, sondern genau das, was dieses Produkt tut: der
+// Jahresgang des Solarertrags in Deutschland.
+//
+// Die Monatsanteile kommen aus calculate.js — dieselbe Kurve, mit der der
+// Rechner arbeitet. Eine Illustration mit erfundenem Verlauf wäre hier
+// besonders unehrlich, weil die ganze Seite mit Quellentreue argumentiert.
+//
+// Farbe: --color-sky. CLAUDE.md reserviert Sky ausdrücklich für Datenelemente
+// und verbietet, es mit dem Akzent-Orange zu mischen — das Orange gehört den
+// Handlungsaufforderungen.
+interface Props {
+  kwp?: number;
+}
+const { kwp = 10 } = Astro.props;
+
+const MONATE = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+const werte = MONATS_ERTRAG_ANTEILE_FALLBACK.map((a) => Math.round(a * kwp * ERTRAG_PRO_KWP));
+const jahresertrag = werte.reduce((s, v) => s + v, 0);
+const max = Math.max(...werte);
+
+// Zeichenfläche. Oben Platz für den höchsten Punkt, unten für die Monatslabels.
+const B = 520;
+const H = 240;
+const padL = 6;
+const padR = 6;
+const padT = 18;
+const padB = 26;
+const innenB = B - padL - padR;
+const innenH = H - padT - padB;
+
+const punkte = werte.map((v, i) => ({
+  x: padL + (i / (werte.length - 1)) * innenB,
+  y: padT + innenH - (v / max) * innenH,
+  v,
+  monat: MONATE[i],
+}));
+
+// Weiche Kurve über Catmull-Rom-artige Kontrollpunkte. Ein Polygonzug würde
+// den Jahresgang kantiger darstellen, als er physikalisch ist.
+function kurve(p: { x: number; y: number }[]) {
+  let d = `M ${p[0].x.toFixed(1)} ${p[0].y.toFixed(1)}`;
+  for (let i = 0; i < p.length - 1; i++) {
+    const a = p[i];
+    const b = p[i + 1];
+    const cx = (a.x + b.x) / 2;
+    d += ` C ${cx.toFixed(1)} ${a.y.toFixed(1)}, ${cx.toFixed(1)} ${b.y.toFixed(1)}, ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
+  }
+  return d;
+}
+
+const linie = kurve(punkte);
+const flaeche = `${linie} L ${punkte[punkte.length - 1].x.toFixed(1)} ${(padT + innenH).toFixed(1)} L ${punkte[0].x.toFixed(1)} ${(padT + innenH).toFixed(1)} Z`;
+
+const sommer = punkte[6]; // Juli, Höhepunkt des Jahresgangs
+const nf = new Intl.NumberFormat("de-DE");
+---
+
+<figure class="kurve">
+  <svg
+    viewBox={`0 0 ${B} ${H}`}
+    role="img"
+    aria-label={`Jahresgang des Solarertrags einer ${kwp}-kWp-Anlage in Deutschland: von rund ${nf.format(werte[11])} Kilowattstunden im Dezember auf rund ${nf.format(max)} Kilowattstunden im Juli.`}
+    preserveAspectRatio="none"
+  >
+    <!-- Grundlinie statt vollem Raster: die Kurvenform ist die Aussage,
+         nicht das Ablesen einzelner Werte. -->
+    <line x1={padL} y1={padT + innenH} x2={B - padR} y2={padT + innenH} class="achse" />
+
+    <path d={flaeche} class="flaeche" />
+    <path d={linie} class="linie" pathLength="1" />
+
+    <circle cx={sommer.x} cy={sommer.y} r="4" class="hoehepunkt" />
+  </svg>
+
+  <div class="monate" aria-hidden="true">
+    {MONATE.map((m) => <span>{m}</span>)}
+  </div>
+
+  <figcaption>
+    Jahresgang einer {kwp}-kWp-Anlage: <strong>{nf.format(jahresertrag)} kWh</strong> im Jahr,
+    im Juli rund {nf.format(max)} kWh, im Dezember {nf.format(werte[11])}.
+    Bundesweiter Durchschnitt — im Rechner ersetzen echte PVGIS-Daten für Ihre
+    Postleitzahl diesen Verlauf.
+  </figcaption>
+</figure>
+
+<style>
+  .kurve {
+    margin: 0;
+  }
+
+  svg {
+    display: block;
+    width: 100%;
+    height: clamp(150px, 24vw, 220px);
+    overflow: visible;
+  }
+
+  .achse {
+    stroke: var(--color-border);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .flaeche {
+    fill: var(--color-sky-subtle);
+  }
+
+  .linie {
+    fill: none;
+    stroke: var(--color-sky);
+    stroke-width: 2;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .hoehepunkt {
+    fill: var(--color-sky);
+    stroke: var(--color-bg);
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .monate {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    margin-top: 6px;
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-secondary);
+    text-align: center;
+  }
+
+  figcaption {
+    margin-top: 12px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    max-width: 46ch;
+  }
+
+  figcaption strong {
+    color: var(--color-text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Die Kurve zeichnet sich beim Laden einmal. Ein Moment, nicht verstreute
+     Effekte — und der Ruhezustand ist die fertige Kurve, nicht opacity:0. */
+  @media (prefers-reduced-motion: no-preference) {
+    .linie {
+      animation: zeichnen 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .hoehepunkt {
+      animation: erscheinen 0.4s ease-out 0.9s both;
+    }
+  }
+
+  @keyframes zeichnen {
+    from { stroke-dasharray: 1; stroke-dashoffset: 1; }
+    to { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  }
+
+  @keyframes erscheinen {
+    from { r: 0; }
+    to { r: 4; }
+  }
+</style>

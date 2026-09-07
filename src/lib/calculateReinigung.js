@@ -17,7 +17,7 @@
 //    Absturzsicherung 2,50–4,50 €/m²; Anfahrt 50–150 €; Mindestauftrag 250–350 €.
 //  - Mischwert: Eigenverbrauch = Bezugspreis (STROMPREIS), Einspeisung =
 //    Einspeisevergütung (EINSPEISE) — identisch zum PV-Hauptrechner.
-import { STROMPREIS, EINSPEISE, ERTRAG_PRO_KWP } from "./calculate.js";
+import { STROMPREIS, einspeiseStaffel, ERTRAG_PRO_KWP, M2_PRO_KWP } from "./calculate.js";
 
 // Basale Ertragsverluste nach Umgebung (in %, als Dezimalbruch mit 1 = 100 %).
 export const UMGEBUNG = [
@@ -50,15 +50,20 @@ export const REINIGUNG_EUR_M2 = {
   "mindestauftrag": 300,
 };
 
-export const M2_PRO_KWP_REINIGUNG = 4.7;
+// Früher stand hier ein eigenes `M2_PRO_KWP_REINIGUNG = 4.7` — derselbe Wert
+// wie M2_PRO_KWP in calculate.js, nur dupliziert (entgegen dem Kommentar
+// darüber, der schon auf calculate.js verwies). Bei einer neuen Modul-
+// Generation wäre nur eine der beiden Stellen aktualisiert worden. Re-Export
+// unter dem alten Namen, damit bestehende Importe weiterlaufen.
+export { M2_PRO_KWP as M2_PRO_KWP_REINIGUNG } from "./calculate.js";
 
 export function schaetzeErtrag(kwp) {
   return Math.round(kwp * ERTRAG_PRO_KWP);
 }
 
-export function eindeutigerMischwert(eigenverbrauchAnteil) {
+export function eindeutigerMischwert(eigenverbrauchAnteil, kwp = 0) {
   const ev = Math.max(0, Math.min(1, eigenverbrauchAnteil));
-  return ev * STROMPREIS + (1 - ev) * EINSPEISE;
+  return ev * STROMPREIS + (1 - ev) * einspeiseStaffel(kwp);
 }
 
 export function calculateReinigung({
@@ -78,10 +83,10 @@ export function calculateReinigung({
   const jahresertrag = Math.round(kwp * ERTRAG_PRO_KWP);
   const verlustKwh = Math.round(jahresertrag * verlust);
 
-  const mischwert = eindeutigerMischwert(eigenverbrauchAnteil);
+  const mischwert = eindeutigerMischwert(eigenverbrauchAnteil, kwp);
   const verlustEuroJahr = Math.round(verlustKwh * mischwert);
 
-  const flaecheM2 = Math.round(kwp * M2_PRO_KWP_REINIGUNG);
+  const flaecheM2 = Math.round(kwp * M2_PRO_KWP);
   const preisProM2 = zugaenglichkeit === "gutZugaenglich"
     ? REINIGUNG_EUR_M2.gutZugaenglich
     : REINIGUNG_EUR_M2.steildach;

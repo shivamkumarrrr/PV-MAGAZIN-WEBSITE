@@ -1,8 +1,8 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { siteConfig } from "../../config.js";
 import { calculateCo2, schaetzeCo2Ertrag, AUTO_CO2_PRO_KM, ZUG_CO2_PRO_PERSONEN_KM } from "../../lib/calculateCo2.js";
 
 function formatKg(v) {
@@ -21,6 +21,13 @@ export default function Co2Wizard() {
   };
 
   const result = calculateCo2(kwp, ertrag);
+
+  const leadZusammenfassung = `${kwp} kWp · ${result.co2ProJahr.toLocaleString("de-DE")} kg CO₂/Jahr gespart`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    jahresertrag: `${ertrag.toLocaleString("de-DE")} kWh`,
+    co2ProJahr: `${result.co2ProJahr.toLocaleString("de-DE")} kg`,
+  };
 
   const restart = () => {
     setShowResult(false);
@@ -65,17 +72,15 @@ export default function Co2Wizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          {siteConfig.contact.calendlyUrl && (
-            <a href={siteConfig.contact.calendlyUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              Kostenlose Beratung buchen
-            </a>
-          )}
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="co2"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );

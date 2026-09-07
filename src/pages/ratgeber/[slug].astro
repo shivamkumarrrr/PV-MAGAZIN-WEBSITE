@@ -15,12 +15,15 @@ const { Content } = await render(entry);
 ---
 
 <ArticleLayout
+  slug={entry.id}
   title={entry.data.title}
   description={entry.data.description}
   category={entry.data.category}
   datePublished={entry.data.datePublished}
   dateModified={entry.data.dateModified}
   relatedRechner={entry.data.relatedRechner}
+  ogImage={entry.data.ogImage}
+  faq={entry.data.faq}
 >
   <Content />
 </ArticleLayout>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import theme from "../../theme.js";
 import { getCity, getCoords } from "../../lib/plz.js";
+import { geocodeAddress } from "../../lib/geocode.js";
 import { fetchPVGIS, PVGIS_ASPECT, PVGIS_ANGLE } from "../../lib/pvgis.js";
 import { calculate, computeKwp, computeGesamtVerbrauch, HAUSHALT, SPEICHER_KWH_PRO_1000_VERBRAUCH } from "../../lib/calculate.js";
 import StepStandort from "./steps/StepStandort.jsx";
@@ -55,19 +56,10 @@ export default function Wizard() {
   // it during render — no separate reset-effect needed.
   const [manualCoords, setManualCoords] = useState(null); // { lat, lon, plz }
 
-const [plzCoords, setPlzCoords] = useState(null);
-  const [resolvedCity, setResolvedCity] = useState(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (plz.length === 5) {
-      getCoords(plz).then(c => { if (!cancelled) setPlzCoords(c); });
-      getCity(plz).then(c => { if (!cancelled) setResolvedCity(c); });
-    } else {
-      if (!cancelled) { setPlzCoords(null); setResolvedCity(null); }
-    }
-    return () => { cancelled = true; };
-  }, [plz]);
+  // Synchron aus der statischen PLZ-Tabelle (siehe plz.js) — kein Netzwerk-
+  // Aufruf und damit kein Effekt/Race mehr für die reine PLZ-Auflösung.
+  const plzCoords = useMemo(() => getCoords(plz), [plz]);
+  const resolvedCity = useMemo(() => getCity(plz), [plz]);
 
   const coords = manualCoords && manualCoords.plz === plz ? manualCoords : plzCoords;
   const displayLocation = resolvedCity ? `${plz} ${resolvedCity}` : plz;
@@ -90,15 +82,56 @@ const [plzCoords, setPlzCoords] = useState(null);
     setPvgisLoading(false);
   }, [coords, neigung, ausrichtung]);
 
+  // Debounced statt bei jeder Ziffer/jedem Zeichen: verhindert Anfragen-Spam
+  // und die Race-Conditions, die vorher auftraten wenn PLZ (oder die davon
+  // abgeleiteten coords) schnell hintereinander wechselten. loadPVGIS() in
+  // den Deps sorgt dafür, dass auch ein durch Adress-Geocoding (unten) oder
+  // Marker-Drag geänderter coords-Wert nach der Pause automatisch neu lädt.
+  const pvgisDebounceRef = useRef(null);
   useEffect(() => {
-    if (plz.length === 5) loadPVGIS();
+    if (pvgisDebounceRef.current) clearTimeout(pvgisDebounceRef.current);
+    if (plz.length !== 5) return;
+    pvgisDebounceRef.current = setTimeout(() => loadPVGIS(), 800);
+    return () => clearTimeout(pvgisDebounceRef.current);
   }, [plz, loadPVGIS]);
+
+  // Straße+Hausnummer → Nominatim-Geocoding mit der KOMBINIERTEN Adresse
+  // (präziser als der PLZ-Regionsmittelpunkt). 800 ms nach dem letzten
+  // Tastendruck in PLZ ODER Straße, nicht pro Zeichen. Eigener State-Pfad
+  // wie beim manuellen Marker-Drag: setManualCoords → coords ändert sich →
+  // der Effekt oben lädt PVGIS automatisch neu, keine doppelte Logik nötig.
+  // Kein Treffer/Netzwerkfehler → manualCoords bleibt unverändert, coords
+  // fällt still auf den PLZ-Wert zurück (kein Error-State). Das Adressfeld
+  // war vorher reine Deko: es wurde erhoben, aber nie ausgewertet.
+  const geoDebounceRef = useRef(null);
+  useEffect(() => {
+    if (geoDebounceRef.current) clearTimeout(geoDebounceRef.current);
+    if (plz.length !== 5 || address.trim().length <= 3) return;
+    geoDebounceRef.current = setTimeout(() => {
+      geocodeAddress(address.trim(), plz, resolvedCity).then((geo) => {
+        if (geo) setManualCoords({ lat: geo.lat, lon: geo.lon, plz });
+      });
+    }, 800);
+    return () => clearTimeout(geoDebounceRef.current);
+  }, [plz, address, resolvedCity]);
+
+  // Standort-Schritt: eine vollständige PLZ ist Pflicht, bevor es weitergeht —
+  // ohne PLZ landet man nur beim standortunabhängigen Schätzwert statt echten
+  // PVGIS-Daten. War vorher nicht gegated (Bug): der "Weiter"-Button war auf
+  // Schritt 0 immer aktiv, unabhängig vom PLZ-Feld.
+  useEffect(() => {
+    if (step === 0) setStepReady(plz.length === 5);
+  }, [step, plz]);
 
   const goStep = (newStep) => {
     setAnimDir(newStep > step ? "right" : "left");
     setAnimKey((k) => k + 1);
     setStep(newStep);
-    setStepReady(!SUB_FLOW_STEPS.includes(newStep));
+    // Optimistischer Default; für Schritt 0 (PLZ-Pflicht) und die Sub-Flow-
+    // Schritte korrigiert der jeweilige useEffect das direkt danach anhand
+    // des echten Zustands — hier lieber zu vorsichtig (false) als kurz einen
+    // Button zeigen, der es noch nicht sein darf.
+    setStepReady(newStep !== 0 && !SUB_FLOW_STEPS.includes(newStep));
   };
 
   const goBack = () => {
@@ -329,8 +362,11 @@ const [plzCoords, setPlzCoords] = useState(null);
                 JEDEM Sub-Screen sofort klickbar und sprang bei Klick direkt zum
                 nächsten Hauptschritt, unabhängig vom Sub-Flow-Fortschritt (auf
                 der Dachfläche z.B. zusätzlich zum eigenen ContinueButton sichtbar
-                → zwei Buttons mit unterschiedlicher Wirkung). */}
-            {(!SUB_FLOW_STEPS.includes(step) || stepReady) && (
+                → zwei Buttons mit unterschiedlicher Wirkung).
+                Schritt 0 (Standort) ist kein Sub-Flow, wird hier aber genauso
+                gegated: stepReady wird erst true, wenn die PLZ vollständig ist
+                (siehe eigener useEffect oben). */}
+            {((!SUB_FLOW_STEPS.includes(step) && step !== 0) || stepReady) && (
               <button
                 onClick={() => {
                   if (step < steps.length - 1) goStep(step + 1);

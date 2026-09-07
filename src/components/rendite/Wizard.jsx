@@ -1,5 +1,6 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { AUSRICHTUNG, NEIGUNG } from "../../lib/calculate.js";
@@ -27,6 +28,21 @@ export default function RenditeWizard() {
     return eauto === "ja" ? "Hauptwagen" : null;
   }
   const result = calculateRenditeStandalone(dach, dachform, ausrichtung, neigung, verbrauch, speicherKwh, eauto, eautoProfil(), waermepumpe);
+
+  const leadZusammenfassung = `${result.kwp} kWp · ${result.roiProzent}% ROI über ${result.laufzeit} Jahre`;
+  const leadDaten = {
+    anlagengroesse: `${result.kwp} kWp`,
+    dachflaeche: `${dach} m²`,
+    dachform,
+    ausrichtung,
+    neigung,
+    speicher: speicherKwh > 0 ? `Ja, ${speicherKwh} kWh` : "Nein",
+    investition: `${result.investition.toLocaleString("de-DE")} €`,
+    rendite: `${result.ueberschuss.toLocaleString("de-DE")} € Überschuss`,
+    roi: `${result.roiProzent} %`,
+    laufzeit: `${result.laufzeit} Jahre`,
+    amortisation: result.amortisationsJahr != null ? `${result.amortisationsJahr} Jahre` : "nicht innerhalb der Laufzeit",
+  };
 
   const restart = () => {
     setShowResult(false);
@@ -106,12 +122,15 @@ export default function RenditeWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="rendite"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );

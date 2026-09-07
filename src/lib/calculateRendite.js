@@ -8,7 +8,7 @@
 // statt kumuliertem Endwert, damit der Nutzer den Verlauf sieht.
 import {
   STROMPREIS,
-  EINSPEISE,
+  einspeiseStaffel,
   KOSTEN_PRO_KWP,
   SPEICHER_KOSTEN_PRO_KWH,
   ERTRAG_PRO_KWP,
@@ -49,11 +49,10 @@ export function berechneJahresCashflow(jahresertrag, autarkieRate, gesamtVerbrau
     const einspeisung = Math.max(0, ertrag - eigenverbrauch);
     const strompreisN = STROMPREIS * Math.pow(1 + STROMPREIS_STEIGERUNG_PRO_JAHR, jahr - 1);
     const ersparnisOption = eigenverbrauch * strompreisN; // vermiedener Netzbezug
-    const ersparnisEinspeisung = einspeisung * EINSPEISE;
-    let kosten = speicherKwh > 0 ? 0 : 0; // Betriebskosten separat unten
+    const ersparnisEinspeisung = einspeisung * einspeiseStaffel(kwp);
     const wartung = (kwp * KOSTEN_PRO_KWP + speicherKwh * SPEICHER_KOSTEN_PRO_KWH) * WARTUNG_PROZENT_PRO_JAHR;
     const wechselrichter = jahr === WECHSELRICHTER_ERSATZ_JAHR ? wechselrichterKosten(kwp) : 0;
-    kosten = wartung + wechselrichter;
+    const kosten = wartung + wechselrichter;
     jahre.push({
       jahr,
       ertragKwh: Math.round(ertrag),
@@ -69,7 +68,8 @@ export function berechneJahresCashflow(jahresertrag, autarkieRate, gesamtVerbrau
   return jahre;
 }
 
-export function calculateRendite(kwp, dach, speicherKwh, eauto, eautoProfil, waermepumpe, verbrauch, jahresertrag, autarkieRate) {  const investition = Math.round(kwp * KOSTEN_PRO_KWP + speicherKwh * SPEICHER_KOSTEN_PRO_KWH);
+export function calculateRendite(kwp, speicherKwh, eauto, eautoProfil, waermepumpe, verbrauch, jahresertrag, autarkieRate) {
+  const investition = Math.round(kwp * KOSTEN_PRO_KWP + speicherKwh * SPEICHER_KOSTEN_PRO_KWH);
   const gesamtVerbrauch = computeGesamtVerbrauch(verbrauch, eauto, waermepumpe, eautoProfil);
 
   const jahre = berechneJahresCashflow(jahresertrag, autarkieRate, gesamtVerbrauch, speicherKwh, kwp);
@@ -85,14 +85,19 @@ export function calculateRendite(kwp, dach, speicherKwh, eauto, eautoProfil, wae
   const ueberschuss = cashflowGesamt - investition;
 
   // Break-even-Jahr (Amortisation innerhalb der Laufzeit), anteilig.
+  // Verglichen wird die NETTOPOSITION (kumulierter Cashflow minus Investition),
+  // nicht der rohe kumulierte Cashflow: letzterer ist schon im ersten Jahr
+  // positiv, wodurch die Rechnung den Break-even um rund den Faktor 10 zu
+  // früh meldete (60 m² Satteldach/Süd/4.000 kWh: 0,9 statt 9 Jahre).
   let amortisationsJahr = null;
-  let vorher = -investition;
+  let vorher = -investition; // Nettoposition zum Zeitpunkt 0
   for (const r of kumuliert) {
-    if (vorher < 0 && r.kumuliert >= 0) {
-      amortisationsJahr = r.jahr - 1 + (-vorher) / (r.kumuliert - vorher);
+    const netto = r.kumuliert - investition;
+    if (vorher < 0 && netto >= 0) {
+      amortisationsJahr = r.jahr - 1 + (-vorher) / (netto - vorher);
       break;
     }
-    vorher = r.kumuliert;
+    vorher = netto;
   }
 
   const roiProzent = Math.round((ueberschuss / investition) * 100);
@@ -108,7 +113,7 @@ export function calculateRendite(kwp, dach, speicherKwh, eauto, eautoProfil, wae
     kumuliert,
     cashflowGesamt: Math.round(cashflowGesamt),
     ueberschuss,
-    amortisationsJahr: amortisationsJahr ? Math.round(amortisationsJahr * 10) / 10 : null,
+    amortisationsJahr: amortisationsJahr != null ? Math.round(amortisationsJahr * 10) / 10 : null,
     roiProzent,
     alternativ,
     alternativGewinn: alternativ - investition,
@@ -128,6 +133,6 @@ export function calculateRenditeStandalone(dach, dachform, ausrichtung, neigung,
   const gesamtVerbrauch = computeGesamtVerbrauch(verbrauch, eauto, waermepumpe, eautoProfil);
   const autarkieRate = autarkieSchaetzung(kwp, gesamtVerbrauch, speicherKwh);
 
-  const rendite = calculateRendite(kwp, dach, speicherKwh, eauto, eautoProfil, waermepumpe, verbrauch, jahresertrag, autarkieRate);
+  const rendite = calculateRendite(kwp, speicherKwh, eauto, eautoProfil, waermepumpe, verbrauch, jahresertrag, autarkieRate);
   return { ...rendite, kwp, jahresertrag, gesamtVerbrauch, autarkieRate };
 }

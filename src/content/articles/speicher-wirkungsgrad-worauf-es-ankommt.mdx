@@ -4,7 +4,18 @@ description: "HTW Berlins Stromspeicher-Inspektion 2026 zeigt: Effizienzuntersch
 category: "speicher"
 datePublished: 2026-08-24
 dateModified: 2026-08-24
-relatedRechner: "photovoltaik"
+relatedRechner: "speicher"
+faq:
+  - frage: "Wie groß ist der Effizienzunterschied zwischen Speichern?"
+    antwort: "Erheblich. In der Stromspeicher-Inspektion 2026 der HTW Berlin erreichte der beste getestete 10-kW-Speicher einen System Performance Index von 97 Prozent, das Schlusslicht nur 89,3 Prozent — laut HTW entspricht das einem 3,5-fach höheren Verlust."
+  - frage: "Was kostet ein ineffizienter Speicher pro Jahr?"
+    antwort: "Die HTW Berlin beziffert den jährlichen Kostenvorteil des effizientesten gegenüber dem am wenigsten effizienten getesteten System auf rund 200 Euro — bei vergleichbarer Speicherkapazität."
+  - frage: "Spielt der Standby-Verbrauch eine Rolle?"
+    antwort: "Ja. Die effizientesten Systeme im HTW-Test zogen nur 4 Watt im Leerlauf, das Schlusslicht 64 Watt. Über ein Jahr gerechnet summiert sich dieser Unterschied spürbar."
+  - frage: "Stimmt die Kapazitätsangabe auf dem Datenblatt?"
+    antwort: "Nicht immer. Die im Labor gemessene nutzbare Kapazität wich bei den getesteten Systemen um minus 7 bis plus 8 Prozentpunkte von der Herstellerangabe ab. Ein Grund ist die unterschiedlich streng begrenzte Entladetiefe. Seit November 2025 regelt die Norm DIN VDE V 0510-200 erstmals einheitlich, wie der nutzbare Energieinhalt anzugeben ist."
+  - frage: "Lohnt es sich, den Speicher mit günstigem Netzstrom zu laden?"
+    antwort: "Das hängt direkt vom Systemwirkungsgrad ab. Die Preisdifferenz zwischen Lade- und Entladezeitpunkt muss mindestens die kombinierten Wechselrichter- und Batterieverluste ausgleichen. Bei 71 Prozent Systemwirkungsgrad muss der Preis um mehr als das 1,4-Fache über dem Ladepreis liegen; bei ineffizienten Systemen wird diese Schwelle oft gar nicht erreicht."
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
@@ -48,7 +59,7 @@ Bereitschaftsbetrieb. Die effizientesten Systeme im Test (SAX Power, Fox
 ESS) zogen nur 4 Watt im Leerlauf, das Schlusslicht 64 Watt — auch das
 läuft über ein Jahr gerechnet spürbar zusammen.
 
-<RechnerCta text="Der Rechner zeigt Ihre Autarkie-Verbesserung durch einen Speicher — die konkrete Geräteauswahl innerhalb dieser Kapazität entscheidet dann über die tatsächliche Ersparnis." />
+<RechnerCta text="Der Rechner zeigt Ihre Autarkie-Verbesserung durch einen Speicher — die konkrete Geräteauswahl innerhalb dieser Kapazität entscheidet dann über die tatsächliche Ersparnis." href="/rechner/speicher/" />
 
 ## Nutzbare Kapazität: Datenblatt vs. Messwert
 

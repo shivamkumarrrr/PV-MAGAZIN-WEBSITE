@@ -28,12 +28,12 @@ const breadcrumbLd = {
   </section>
 
   <section class="container">
-    <div class="filter-bar" role="tablist" aria-label="Nach Kategorie filtern">
-      <a href="/ratgeber/" class="filter-chip active">Alle</a>
+    <nav class="filter-bar" aria-label="Nach Kategorie filtern">
+      <a href="/ratgeber/" class="filter-chip active" aria-current="page">Alle</a>
       {CATEGORIES.map((c) => (
         <a href={`/ratgeber/${c.slug}/`} class="filter-chip">{c.label}</a>
       ))}
-    </div>
+    </nav>
 
     <ul class="article-grid">
       {articles.map((a) => (

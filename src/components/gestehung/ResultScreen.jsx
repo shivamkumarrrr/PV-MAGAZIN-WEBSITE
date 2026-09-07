@@ -1,12 +1,21 @@
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import BarCompare from "../calculator/ui/BarCompare.jsx";
 import { LCOE_REFERENZ_PV, LCOE_REFERENZ_PV_SPEICHER, PV_LEBENSDAUER_JAHRE, SPEICHER_LEBENSDAUER_JAHRE } from "../../lib/calculateGestehung.js";
-import { siteConfig } from "../../config.js";
 
 export default function ResultScreen({ result, kwp, speicherAktiv, speicherKwh, onRestart }) {
   const referenz = speicherAktiv ? LCOE_REFERENZ_PV_SPEICHER : LCOE_REFERENZ_PV;
   const referenzMinCent = Math.round(referenz.min * 1000) / 10;
   const referenzMaxCent = Math.round(referenz.max * 1000) / 10;
+
+  const leadZusammenfassung = `${kwp} kWp · ${result.lcoeCent.toLocaleString("de-DE")} ct/kWh Gestehungskosten (Netzstrom ${result.strompreisCent.toLocaleString("de-DE")} ct)`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    speicher: speicherAktiv ? `Ja, ${speicherKwh} kWh` : "Nein",
+    lcoe: `${result.lcoeCent.toLocaleString("de-DE")} ct/kWh`,
+    strompreisVergleich: `${result.strompreisCent.toLocaleString("de-DE")} ct/kWh`,
+    investition: `${Math.round(result.investition).toLocaleString("de-DE")} €`,
+  };
 
   return (
     <div style={{ maxWidth: theme.maxWidth, margin: "0 auto", fontFamily: theme.font.family }}>
@@ -130,56 +139,15 @@ export default function ResultScreen({ result, kwp, speicherAktiv, speicherKwh, 
           marginBottom: 16,
         }}
       >
-        <a
-          href="/rechner/"
-          style={{
-            display: "block",
-            textAlign: "center",
-            padding: 14,
-            borderRadius: theme.radius.lg,
-            background: theme.color.accent,
-            color: theme.color.white,
-            fontWeight: 600,
-            fontSize: 14,
-            textDecoration: "none",
-          }}
-        >
-          Weitere Rechner entdecken →
-        </a>
-        {siteConfig.contact.calendlyUrl && (
-          <a
-            href={siteConfig.contact.calendlyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "block",
-              textAlign: "center",
-              padding: 14,
-              borderRadius: theme.radius.lg,
-              border: `1.5px solid ${theme.color.border}`,
-              color: theme.color.textSecondary,
-              fontWeight: 600,
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
-            Kostenlose Beratung buchen
-          </a>
-        )}
-        <button
-          onClick={onRestart}
-          style={{
-            padding: 12,
-            borderRadius: theme.radius.lg,
-            border: "none",
-            background: "transparent",
-            color: theme.color.textMuted,
-            fontSize: 13,
-            cursor: "pointer",
-          }}
-        >
-          Neu berechnen
-        </button>
+      <LeadForm
+        rechner="gestehungskosten"
+        zusammenfassung={leadZusammenfassung}
+        daten={leadDaten}
+        onRestart={onRestart}
+      />
+      <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+        Alle Rechner im Überblick →
+      </a>
       </div>
     </div>
   );

@@ -5,6 +5,17 @@ category: "kosten-foerderung"
 datePublished: 2026-08-24
 dateModified: 2026-08-24
 relatedRechner: "gestehungskosten"
+faq:
+  - frage: "Was sind Stromgestehungskosten?"
+    antwort: "Sie rechnen alle Kosten einer Erzeugungsanlage über die gesamte Lebensdauer zusammen — Investition, Betrieb, Wartung und Komponentenaustausch — und teilen die Summe durch die insgesamt erzeugte Strommenge. Das Ergebnis ist ein Preis pro Kilowattstunde, direkt vergleichbar mit dem Tarif des Stromanbieters."
+  - frage: "Was kostet eine Kilowattstunde Solarstrom?"
+    antwort: "Das Fraunhofer ISE beziffert PV-Dachanlagen in Deutschland (Studie Juli 2024) auf 4,1 bis 14,4 Cent pro Kilowattstunde ohne Speicher und 6,0 bis 22,5 Cent mit Batteriespeicher. Der durchschnittliche Haushaltsstrompreis liegt laut BDEW bei rund 37 Cent."
+  - frage: "Worin unterscheiden sich Gestehungskosten und Amortisation?"
+    antwort: "Die Amortisation beantwortet, wann die Investition wieder drin ist. Die Stromgestehungskosten beantworten, wie günstig der erzeugte Strom selbst ist — unabhängig davon, wie lange die Anlage schon läuft. Beide Kennzahlen ergänzen sich, statt sich zu ersetzen."
+  - frage: "Reichen niedrige Gestehungskosten für eine gute Investition?"
+    antwort: "Nein. Sie sagen nichts darüber aus, wie viel vom erzeugten Strom tatsächlich selbst genutzt wird. Eine Anlage mit niedrigen Gestehungskosten, aber wenig Eigenverbrauch, kann länger brauchen als eine etwas teurere Anlage mit hohem Eigenverbrauchsanteil."
+  - frage: "Wie rechnet Ihr Gestehungskostenrechner?"
+    antwort: "Vereinfacht und undiskontiert: Gesamtkosten geteilt durch Gesamtertrag über die Lebensdauer, inklusive Degradation. Das ist transparent nachvollziehbar, aber methodisch einfacher als das vollständige Fraunhofer-Modell mit Kapitalkosten-Diskontierung. Für eine Größenordnungs-Einordnung reicht es."
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
@@ -54,7 +65,7 @@ klar unter dem, was für Netzstrom bezahlt wird — am unteren Ende (reine
 PV-Anlage, günstiger Standort) liegt der Unterschied bei mehr als dem
 Achtfachen.
 
-<RechnerCta text="Wie hoch die Stromgestehungskosten für Ihre eigene Anlage ausfallen, hängt von Investition, Ertrag und Lebensdauer ab — der Gestehungskostenrechner rechnet das für Ihre Eckdaten durch." />
+<RechnerCta text="Wie hoch die Stromgestehungskosten für Ihre eigene Anlage ausfallen, hängt von Investition, Ertrag und Lebensdauer ab — der Gestehungskostenrechner rechnet das für Ihre Eckdaten durch." href="/rechner/gestehungskosten/" />
 
 ## Warum diese Zahl trotzdem nicht die einzige Kennzahl sein sollte
 

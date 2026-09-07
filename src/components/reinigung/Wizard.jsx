@@ -1,9 +1,9 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import OptionGroup from "../calculator/ui/OptionGroup.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { siteConfig } from "../../config.js";
 import {
   calculateReinigung,
   UMGEBUNG,
@@ -35,6 +35,13 @@ export default function ReinigungWizard() {
     eigenverbrauchAnteil: eigen,
     zugaenglichkeit,
   });
+
+  const leadZusammenfassung = `${kwp} kWp · ${result.verlustEuroJahr.toLocaleString("de-DE")} €/Jahr Verschmutzungsverlust · Reinigung ${result.reinigungKosten.toLocaleString("de-DE")} €`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    ertragsverlust: `${result.verlustKwh.toLocaleString("de-DE")} kWh/Jahr (${result.verlustEuroJahr.toLocaleString("de-DE")} €)`,
+    reinigungKosten: `${result.reinigungKosten.toLocaleString("de-DE")} €`,
+  };
 
   const restart = () => setShowResult(false);
 
@@ -88,17 +95,15 @@ export default function ReinigungWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          {siteConfig.contact.calendlyUrl && (
-            <a href={siteConfig.contact.calendlyUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              Kostenlose Beratung buchen
-            </a>
-          )}
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="reinigung"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );

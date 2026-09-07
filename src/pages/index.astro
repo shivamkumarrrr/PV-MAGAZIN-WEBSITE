@@ -1,150 +1,328 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import Ertragskurve from "../components/Ertragskurve.astro";
 import { getCollection } from "astro:content";
 import { categoryLabel } from "../lib/categories.js";
+import { RECHNER } from "../lib/rechner.js";
 
-const articles = (await getCollection("articles")).sort(
+// Gestaltungsansatz: Die Seite argumentiert durchgehend mit belegten Zahlen —
+// also sieht sie aus wie ein Messprotokoll, nicht wie eine Werbeseite. Kein
+// Verlaufsbanner, keine Sonnen-Symbole, keine lachende Familie auf dem Dach;
+// das sind die Reflexe, die jede zweite Solar-Landingpage bedient.
+//
+// EIN Signature-Element (CLAUDE.md Design-Regel 11): die Ertragskurve im
+// Hero, gezeichnet aus denselben Monatsanteilen, mit denen der Rechner
+// arbeitet. Alles andere bleibt bewusst ruhig.
+//
+// Bewusst KEIN Eyebrow-Label über jedem Abschnitt — das wiederholte
+// Kleinversalien-Kicker-Muster ist ein bekannter Generierungs-Tell. Die
+// Überschriften tragen sich selbst.
+const artikel = (await getCollection("articles")).sort(
   (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
 );
-const latest = articles.slice(0, 4);
+const neueste = artikel.slice(0, 4);
+
+const hauptRechner = RECHNER.find((r) => r.slug === "photovoltaik");
+const weitereRechner = RECHNER.filter((r) => r.slug !== "photovoltaik");
+
+// Die Quellen sind das eigentliche Unterscheidungsmerkmal gegenüber ADAC,
+// co2online und den Anbieter-Rechnern — deshalb ein eigener Abschnitt statt
+// einer Fußnote. Jede Zeile nennt, was diese Quelle konkret liefert; eine
+// reine Logo-Reihe wäre eine Behauptung, das hier ist überprüfbar.
+const quellen = [
+  { name: "PVGIS", traeger: "EU Joint Research Centre", liefert: "Sonneneinstrahlung und Monatserträge für die exakten Koordinaten Ihrer Adresse" },
+  { name: "BDEW", traeger: "Bundesverband der Energie- und Wasserwirtschaft", liefert: "Haushaltsstrompreis und saisonales Lastprofil" },
+  { name: "Bundesnetzagentur", traeger: "§ 49 EEG", liefert: "Einspeisevergütung samt Staffelung über 10 kWp und Mieterstromzuschlag" },
+  { name: "Fraunhofer ISE", traeger: "Institut für Solare Energiesysteme", liefert: "Systemkosten je kWp, Volllaststunden und Stromgestehungskosten" },
+  { name: "HTW Berlin", traeger: "Stromspeicher-Inspektion", liefert: "Speicher-Dimensionierung und gemessene Systemwirkungsgrade" },
+  { name: "ADAC", traeger: "Ratgeber Photovoltaik", liefert: "Autarkiegrade, Haushaltsverbrauch und Wechselrichter-Austauschkosten" },
+  { name: "Umweltbundesamt", traeger: "Emissionsbilanz Strommix", liefert: "CO₂-Faktor je Kilowattstunde Netzstrom" },
+];
+
+const nf = new Intl.NumberFormat("de-DE");
 ---
 
 <BaseLayout
   title="Photovoltaik-Ratgeber & PV-Rechner | Photovoltaik Aktuell"
   description="Unabhängiger Ratgeber zu Photovoltaik-Kosten, Förderung, Speicher und Einspeisevergütung — plus PV-Rechner mit echten PVGIS-Satellitendaten für Ihren Standort."
 >
-  <section class="hub-intro">
-    <div class="prose">
-      <h1>Photovoltaik verstehen — und für Ihr Dach durchrechnen</h1>
-      <p class="intro-text">
-        Zwei Wege zum gleichen Ziel: im <strong>Ratgeber</strong> lesen Sie sich
-        in Kosten, Förderung, Technik und Speicher ein — im <strong>Rechner</strong>{" "}
-        bekommen Sie sofort eine konkrete Zahl für Ihr eigenes Dach, auf Basis
-        echter PVGIS-Satellitendaten.
-      </p>
+  <section class="hero">
+    <div class="hero-inner container">
+      <div class="hero-text">
+        <h1>Was Ihr Dach wirklich bringt — nachgerechnet, nicht geschätzt</h1>
+        <div class="hero-aktionen">
+          <a href="/rechner/photovoltaik/" class="knopf-primaer">Ertrag berechnen</a>
+          <a href="/ratgeber/" class="knopf-sekundaer">Zum Ratgeber</a>
+        </div>
+      </div>
+
+      <div class="hero-grafik">
+        <Ertragskurve kwp={10} />
+      </div>
     </div>
   </section>
 
-  <section class="entry-points container">
-    <a href="/ratgeber/" class="entry-card">
-      <span class="entry-eyebrow">Lesen</span>
-      <h2>Ratgeber</h2>
-      <p>Grundlagen, Kosten & Förderung, Speicher, Einspeisevergütung, Balkonkraftwerk, Ökobilanz und Checklisten.</p>
-      <span class="entry-link">Zum Ratgeber →</span>
-    </a>
-    <a href="/rechner/" class="entry-card">
-      <span class="entry-eyebrow">Rechnen</span>
+  <section class="rechner container">
+    <div class="abschnitt-kopf">
       <h2>Rechner</h2>
-      <p>PV-Rechner mit echten PVGIS-Satellitendaten: Anlagengröße, Ertrag, Ersparnis, Autarkiegrad, Amortisation.</p>
-      <span class="entry-link">Zum Rechner →</span>
+      <p>Konkrete Zahlen für Ihr Dach, Ihren Verbrauch, Ihren Standort.</p>
+    </div>
+
+    <a href={`/rechner/${hauptRechner.slug}/`} class="rechner-haupt">
+      <div class="rechner-haupt-text">
+        <h3>{hauptRechner.title}</h3>
+        <p>{hauptRechner.beschreibung}</p>
+        <span class="rechner-haupt-link">Rechner starten →</span>
+      </div>
+      <dl class="rechner-haupt-fakten">
+        <div>
+          <dt>Datenquelle</dt>
+          <dd>PVGIS-Satellitendaten</dd>
+        </div>
+        <div>
+          <dt>Schritte</dt>
+          <dd>4</dd>
+        </div>
+        <div>
+          <dt>Ergebnis</dt>
+          <dd>kWp, Ertrag, Ersparnis, Amortisation</dd>
+        </div>
+      </dl>
     </a>
+
+    <ul class="rechner-liste">
+      {weitereRechner.map((r) => (
+        <li>
+          <a href={`/rechner/${r.slug}/`}>
+            <span class="rechner-name">{r.kurz}</span>
+            <span class="rechner-zweck">{r.beschreibung}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
   </section>
 
-  {latest.length > 0 && (
-    <section class="latest container">
-      <h2>Neu im Ratgeber</h2>
-      <ul class="latest-list">
-        {latest.map((a) => (
-          <li>
-            <a href={`/ratgeber/${a.id}/`}>
-              <span class="latest-cat">{categoryLabel(a.data.category)}</span>
-              <span class="latest-title">{a.data.title}</span>
-            </a>
-          </li>
+  <section class="quellen">
+    <div class="container">
+      <div class="abschnitt-kopf">
+        <h2>Woher die Zahlen kommen</h2>
+        <p>
+          Keine Anbieter-Schätzungen. Jede Konstante in unseren Rechnern ist im
+          Quellcode mit Quelle, Stand und Prüf-Rhythmus hinterlegt.
+        </p>
+      </div>
+
+      <dl class="quellen-liste">
+        {quellen.map((q) => (
+          <div class="quelle">
+            <dt>
+              {q.name}
+              <span class="quelle-traeger">{q.traeger}</span>
+            </dt>
+            <dd>{q.liefert}</dd>
+          </div>
         ))}
-      </ul>
-    </section>
-  )}
+      </dl>
+    </div>
+  </section>
+
+  <section class="ratgeber container">
+    <div class="abschnitt-kopf">
+      <h2>Neu im Ratgeber</h2>
+      <p>Von den Grundlagen bis zur Checkliste vor dem Kauf.</p>
+    </div>
+
+    <ul class="artikel-liste">
+      {neueste.map((a) => (
+        <li>
+          <a href={`/ratgeber/${a.id}/`}>
+            <span class="artikel-kategorie">{categoryLabel(a.data.category)}</span>
+            <span class="artikel-titel">{a.data.title}</span>
+            <span class="artikel-beschreibung">{a.data.description}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <a href="/ratgeber/" class="alle-artikel">
+      Alle {nf.format(artikel.length)} Artikel ansehen →
+    </a>
+  </section>
 </BaseLayout>
 
 <style>
-  .hub-intro {
-    padding: 48px 0 32px;
+  /* ── Hero ───────────────────────────────────────────────────────────── */
+
+  .hero {
     border-bottom: 1px solid var(--color-border);
   }
 
-  .hub-intro h1 {
-    font-size: 32px;
-    max-width: 620px;
-  }
-
-  .intro-text {
-    font-size: 17px;
-    color: var(--color-text-secondary);
-    max-width: 620px;
-  }
-
-  .entry-points {
+  .hero-inner {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    padding: 40px 20px;
+    gap: clamp(28px, 5vw, 56px);
+    padding-top: clamp(40px, 7vw, 76px);
+    padding-bottom: clamp(36px, 6vw, 64px);
+    align-items: center;
   }
 
-  @media (max-width: 720px) {
-    .entry-points {
-      grid-template-columns: 1fr;
+  /* Asymmetrisch: der Text trägt mehr Gewicht als die Grafik, statt beide
+     Spalten gleich breit zu setzen. */
+  @media (min-width: 860px) {
+    .hero-inner {
+      grid-template-columns: 1.05fr 0.95fr;
     }
   }
 
-  .entry-card {
+  .hero h1 {
+    font-size: clamp(30px, 5.2vw, 50px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    margin: 0 0 28px;
+    max-width: 19ch;
+  }
+
+  .hero-aktionen {
     display: flex;
-    flex-direction: column;
-    padding: 28px 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .knopf-primaer,
+  .knopf-sekundaer {
+    display: inline-flex;
+    align-items: center;
+    padding: 14px 26px;
+    border-radius: var(--radius-pill);
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+  }
+
+  .knopf-primaer {
+    background: var(--color-accent);
+    color: #fff;
+    border: 1px solid var(--color-accent);
+  }
+
+  .knopf-primaer:hover {
+    background: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+
+  .knopf-sekundaer {
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+  }
+
+  .knopf-sekundaer:hover {
+    border-color: var(--color-text-primary);
+  }
+
+  /* ── Gemeinsamer Abschnittskopf ─────────────────────────────────────── */
+
+  .abschnitt-kopf {
+    margin-bottom: 28px;
+    max-width: 56ch;
+  }
+
+  .abschnitt-kopf h2 {
+    font-size: clamp(22px, 2.6vw, 28px);
+    letter-spacing: -0.015em;
+    margin: 0 0 8px;
+  }
+
+  .abschnitt-kopf p {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+
+  .rechner,
+  .ratgeber {
+    padding-top: clamp(48px, 7vw, 80px);
+    padding-bottom: clamp(48px, 7vw, 80px);
+  }
+
+  /* ── Rechner ────────────────────────────────────────────────────────── */
+
+  /* Der Hauptrechner bekommt bewusst eine andere Form als die übrigen zehn:
+     eine Reihe identischer Kacheln würde verschweigen, dass genau einer
+     davon mit echten Standortdaten arbeitet. */
+  .rechner-haupt {
+    display: grid;
+    gap: 24px;
+    padding: clamp(24px, 3vw, 34px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
     text-decoration: none;
     color: inherit;
+    margin-bottom: 20px;
     transition: border-color 0.15s;
   }
 
-  .entry-card:hover {
+  .rechner-haupt:hover {
     border-color: var(--color-accent);
   }
 
-  .entry-eyebrow {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--color-accent);
-    margin-bottom: 6px;
+  @media (min-width: 760px) {
+    .rechner-haupt {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: start;
+    }
   }
 
-  .entry-card h2 {
+  .rechner-haupt h3 {
+    font-size: clamp(20px, 2.2vw, 25px);
     margin: 0 0 10px;
-    font-size: 22px;
+    letter-spacing: -0.01em;
   }
 
-  .entry-card p {
+  .rechner-haupt-text p {
+    margin: 0 0 16px;
     color: var(--color-text-secondary);
     font-size: 15px;
-    margin: 0 0 16px;
-    flex-grow: 1;
+    max-width: 44ch;
   }
 
-  .entry-link {
+  .rechner-haupt-link {
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
+    color: var(--color-accent);
+  }
+
+  .rechner-haupt-fakten {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 0;
+    padding-top: 4px;
+  }
+
+  .rechner-haupt-fakten dt {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    margin-bottom: 2px;
+  }
+
+  .rechner-haupt-fakten dd {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
     color: var(--color-text-primary);
   }
 
-  .latest {
-    padding: 8px 20px 56px;
-  }
-
-  .latest h2 {
-    font-size: 22px;
-    margin-bottom: 16px;
-  }
-
-  .latest-list {
+  .rechner-liste {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 1px;
     background: var(--color-border);
     border: 1px solid var(--color-border);
@@ -152,28 +330,178 @@ const latest = articles.slice(0, 4);
     overflow: hidden;
   }
 
-  .latest-list a {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 14px 18px;
-    background: var(--color-surface);
-    text-decoration: none;
-    color: var(--color-text-primary);
+  /* Genau zwei Spalten: die zehn Nebenrechner gehen restlos auf. Mit
+     auto-fit blieben bei vier Spalten zwei leere Zellen übrig, in denen
+     der Rand-Hintergrund als grauer Block sichtbar wurde. */
+  @media (min-width: 640px) {
+    .rechner-liste {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 
-  .latest-list a:hover {
+  .rechner-liste a {
+    display: block;
+    height: 100%;
+    padding: 18px 20px;
+    background: var(--color-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.15s;
+  }
+
+  .rechner-liste a:hover {
     background: var(--color-accent-subtle);
   }
 
-  .latest-cat {
-    flex-shrink: 0;
-    font-size: 12px;
+  .rechner-name {
+    display: block;
+    font-family: var(--font-display);
     font-weight: 600;
-    color: var(--color-text-muted);
+    font-size: 16px;
+    margin-bottom: 5px;
   }
 
-  .latest-title {
-    font-weight: 500;
+  .rechner-zweck {
+    display: block;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+  }
+
+  /* ── Quellen ────────────────────────────────────────────────────────── */
+
+  .quellen {
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    padding-top: clamp(48px, 7vw, 80px);
+    padding-bottom: clamp(48px, 7vw, 80px);
+  }
+
+  /* Typografische Liste statt Logo-Reihe oder Icon-Text-Pillen: Was eine
+     Quelle liefert, ist überprüfbar — ein Logo ist nur eine Behauptung. */
+  .quellen-liste {
+    margin: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  @media (min-width: 720px) {
+    .quellen-liste {
+      grid-template-columns: 1fr 1fr;
+      column-gap: 40px;
+    }
+  }
+
+  .quelle {
+    padding: 16px 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .quelle dt {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-text-primary);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .quelle-traeger {
+    font-family: var(--font-body);
+    font-weight: 400;
+    font-size: 12.5px;
+    color: var(--color-text-secondary);
+  }
+
+  .quelle dd {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    max-width: 50ch;
+  }
+
+  /* ── Ratgeber ───────────────────────────────────────────────────────── */
+
+  /* Vorher standen Kategorie und Titel auf einer Zeile mit
+     justify-content: space-between — auf breiten Bildschirmen klebten die
+     Titel dadurch an der rechten Kante, mit einem Loch dazwischen. Jetzt
+     gestapelt, linksbündig, mit der Beschreibung als dritter Zeile. */
+  .artikel-liste {
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  /* Zwei Spalten statt vier: die Titel sind lang, in einer 280px-Spalte
+     brachen sie auf drei Zeilen um. Vier Artikel füllen 2×2 exakt. */
+  @media (min-width: 640px) {
+    .artikel-liste {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .artikel-liste a {
+    display: block;
+    height: 100%;
+    padding: 20px 22px;
+    background: var(--color-surface);
+    text-decoration: none;
+    color: inherit;
+    transition: background-color 0.15s;
+  }
+
+  .artikel-liste a:hover {
+    background: var(--color-accent-subtle);
+  }
+
+  .artikel-kategorie {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+    margin-bottom: 7px;
+  }
+
+  .artikel-titel {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 16.5px;
+    line-height: 1.35;
+    margin-bottom: 6px;
+    text-wrap: balance;
+  }
+
+  .artikel-beschreibung {
+    display: block;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+  }
+
+  .alle-artikel {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .alle-artikel:hover {
+    color: var(--color-accent-hover);
   }
 </style>
