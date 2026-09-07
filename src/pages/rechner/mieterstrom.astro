@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Wizard from "../../components/mieterstrom/Wizard.jsx";
+---
+
+<BaseLayout
+  title="Mieterstromrechner — PV im Mehrfamilienhaus | Photovoltaik Aktuell"
+  description="Lohnt sich eine Photovoltaik-Anlage auf Ihrem Mehrfamilienhaus? Mieterstrom-Erlös, Zuschlag und Amortisation in einem berechnen."
+>
+  <section class="prose rechner-intro">
+    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / Mieterstrom</nav>
+    <h1>Mieterstromrechner</h1>
+    <p>
+      Eine PV-Anlage auf dem Dach eines Mehrfamilienhauses liefert Strom
+      direkt an die Mieter — das Modell heißt Mieterstrom. Dieser Rechner gibt
+      eine erste wirtschaftliche Einschätzung: Erlös an die Mieter,
+      Mieterstromzuschlag, Einspeisung des Überschusses und die daraus
+      resultierende Amortisation.
+    </p>
+  </section>
+
+  <section class="container wizard-wrap">
+    <Wizard client:load />
+  </section>
+</BaseLayout>
+
+<style>
+  .rechner-intro {
+    padding: 32px 20px 20px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .rechner-intro h1 {
+    font-size: 28px;
+  }
+
+  .rechner-intro p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  .rechner-intro a {
+    color: var(--color-accent);
+  }
+
+  .wizard-wrap {
+    padding-bottom: 56px;
+  }
+</style>
