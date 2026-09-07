@@ -1,0 +1,60 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Wizard from "../../components/reinigung/Wizard.jsx";
+---
+
+<BaseLayout
+  title="PV-Reinigungsrechner — Lohnt sich die Reinigung? | Photovoltaik Aktuell"
+  description="Wie viel Ertrag kostet Sie Verschmutzung durch Staub, Pollen oder Vogelkot — und rechnet sich eine professionelle Reinigung? Jetzt berechnen."
+>
+  <section class="prose rechner-intro">
+    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / Reinigung</nav>
+    <h1>PV-Reinigungsrechner</h1>
+    <p>
+      Schmutz senkt den Ertrag Ihrer Anlage — wie stark, hängt von Umgebung,
+      Dachneigung und der Zeit seit der letzten Reinigung ab. Dieser Rechner
+      stellt dem jährlichen Ertragsverlust die Kosten einer professionellen
+      Reinigung gegenüber. Bei gut geneigten Dächern in freier Lage ist die
+      Antwort oft: gar nicht reinigen.
+    </p>
+  </section>
+
+  <section class="container wizard-wrap">
+    <Wizard client:load />
+  </section>
+</BaseLayout>
+
+<style>
+  .rechner-intro {
+    padding: 32px 20px 20px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .rechner-intro h1 {
+    font-size: 28px;
+  }
+
+  .rechner-intro p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  .rechner-intro a {
+    color: var(--color-accent);
+  }
+
+  .wizard-wrap {
+    padding-bottom: 56px;
+  }
+</style>
