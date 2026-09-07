@@ -137,7 +137,7 @@ export default function SpeicherWizard() {
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
           {!result.lohntSich && result.speicherKwh > 0 && (
             <a
-              href="/rechner/photovoltaik/"
+              href="/rechner/"
               style={{
                 display: "block",
                 textAlign: "center",
@@ -150,7 +150,7 @@ export default function SpeicherWizard() {
                 textDecoration: "none",
               }}
             >
-              Komplette PV-Anlage inkl. Speicher durchrechnen →
+              Weitere Rechner entdecken →
             </a>
           )}
           {siteConfig.contact.calendlyUrl && (

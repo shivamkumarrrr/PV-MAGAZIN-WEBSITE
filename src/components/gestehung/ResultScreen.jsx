@@ -131,7 +131,7 @@ export default function ResultScreen({ result, kwp, speicherAktiv, speicherKwh, 
         }}
       >
         <a
-          href="/rechner/photovoltaik/"
+          href="/rechner/"
           style={{
             display: "block",
             textAlign: "center",
@@ -144,7 +144,7 @@ export default function ResultScreen({ result, kwp, speicherAktiv, speicherKwh, 
             textDecoration: "none",
           }}
         >
-          Echten Ertrag &amp; Ersparnis für Ihr Dach berechnen →
+          Weitere Rechner entdecken →
         </a>
         {siteConfig.contact.calendlyUrl && (
           <a

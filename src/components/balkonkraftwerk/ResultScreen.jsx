@@ -102,7 +102,7 @@ export default function ResultScreen({ result, modulleistung, onRestart }) {
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
         <a
-          href="/rechner/photovoltaik/"
+          href="/rechner/"
           style={{
             display: "block",
             textAlign: "center",
@@ -115,7 +115,7 @@ export default function ResultScreen({ result, modulleistung, onRestart }) {
             textDecoration: "none",
           }}
         >
-          Eigenes Dach vorhanden? Zum vollen PV-Rechner →
+          Weitere Rechner entdecken →
         </a>
         {siteConfig.contact.calendlyUrl && (
           <a
