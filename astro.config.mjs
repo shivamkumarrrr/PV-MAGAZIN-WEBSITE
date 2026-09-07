@@ -6,11 +6,9 @@ import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import vercel from '@astrojs/vercel';
 
-// https://astro.build/config
+// @see https://photovoltaikaktuell.vercel.app
 export default defineConfig({
-  // TODO: echte Domain eintragen, sobald verfügbar (wird für sitemap.xml
-  // und canonical URLs gebraucht).
-  site: 'https://pv-content-hub.example',
+  site: 'https://photovoltaikaktuell.vercel.app',
   integrations: [react(), mdx(), sitemap()],
   adapter: vercel(),
 });

@@ -4,12 +4,13 @@
 // (Photovoltaik Aktuell, ein Produkt der PPC GmbH), kein White-Label.
 export const siteConfig = {
   lead: {
-    // "demo" = kein Backend, simuliert Erfolg. Auf "web3forms" | "formspree" |
-    // "webhook" umstellen, sobald ein echter Endpunkt feststeht.
-    mode: "demo",
+    // "webhook" → POST an eigene Vercel-Funktion src/pages/api/lead.ts
+    // "web3forms" → Web3Forms-Zugangsschlüssel (kostenlos, 250/mo)
+    // "formspree" → Formspree-Kennung (50/mo kostenlos)
+    mode: "webhook",
     web3formsKey: "",
     formspreeId: "",
-    webhookUrl: "",
+    webhookUrl: "/api/lead",
   },
   contact: {
     calendlyUrl: "https://calendly.com/ppc-beratung/solaranlage",

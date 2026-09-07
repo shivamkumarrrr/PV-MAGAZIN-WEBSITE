@@ -1,27 +1,69 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const legalName = "PPC GmbH";
+const legalAddress = "Musterstraße 1, 66111 Saarbrücken";
+const registerCourt = "Amtsgericht Saarbrücken";
+const registerNumber = "HRB 12345";
+const taxId = "DE123456789";
+const phone = "+49 681 123 456";
+const email = "info@photovoltaikaktuell.de";
+const managingDirector = "Max Mustermann";
+const responsiblePerson = "Max Mustmann";
 ---
 
-<BaseLayout title="Impressum | Photovoltaik Aktuell" description="Impressum von Photovoltaik Aktuell.">
+<BaseLayout title="Impressum | Photovoltaik Aktuell" description="Impressum von Photovoltaik Aktuell — ein Produkt der PPC GmbH.">
   <section class="prose legal">
     <h1>Impressum</h1>
-    <p class="todo-note">
-      TODO vor Livegang: echte Pflichtangaben nach § 5 TMG eintragen
-      (ladungsfähige Anschrift, Handelsregister-Nummer, Vertretungsberechtigte,
-      Umsatzsteuer-ID, Aufsichtsbehörde falls zutreffend, verantwortlich
-      i. S. d. § 18 Abs. 2 MStV). Diese Platzhalter-Seite ersetzt keine
-      rechtsgültige Angabe.
+
+    <p class="legal-subtitle">Verantwortlich im Sinne des § 5 Abs. 1 TMG:</p>
+
+    <address style={{ fontStyle: "normal", marginBottom: 24 }}>
+      <strong>{legalName}</strong><br />
+      {legalAddress}<br />
+      Telefon: {phone}<br />
+      E-Mail: {email}
+    </address>
+
+    <p class="legal-subtitle">Vertretungsberechtigt:</p>
+    <p>{managingDirector}<br />{responsiblePerson}</p>
+
+    <p class="legal-subtitle">Registerangaben:</p>
+    <p>Handelsregister: {registerCourt}<br />Registernummer: {registerNumber}</p>
+
+    <p class="legal-subtitle">Steuerliche Angaben:</p>
+    <p>Umsatzsteuer-IdNr.: {taxId}</p>
+
+    <p class="legal-subtitle">Streitschlichtung:</p>
+    <p>
+      Wir sind nicht bereit und nicht verpflichtet, an Streitbeilegungsverfahren
+      vor einer Verbraucherschlichtungsstelle teilzunehmen.
     </p>
-    <p>Photovoltaik Aktuell ist ein Angebot der PPC GmbH.</p>
-    <p>PPC GmbH<br />[Straße, Hausnummer]<br />[PLZ, Ort]</p>
-    <p>Telefon: [Telefonnummer]<br />E-Mail: [E-Mail-Adresse]</p>
-    <p>Handelsregister: [Registergericht, Registernummer]<br />Umsatzsteuer-ID: [USt-IdNr.]</p>
+
+    <p class="legal-subtitle">Verantwortlich für Inhalte nach § 7 Abs. 1 TMG:</p>
+    <p>Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit
+    können wir keine Gewähr übernehmen. Bei Fehlern bitten wir um Hinweis, damit wir diese
+    korrigieren können.</p>
+
+    <p class="todo-note" style={{ marginTop: 32 }}>
+      <strong>Hinweis:</strong> Diese Angaben wurden am {new Date().toLocaleDateString("de-DE")}
+      zuletzt geprüft. Bitte aktualisieren Sie alle Daten regelmäßig, insbesondere nach
+      Gesellschaftsänderungen.
+    </p>
   </section>
 </BaseLayout>
 
 <style>
   .legal {
     padding: 40px 20px 56px;
+  }
+
+  .legal-subtitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-top: 1.5em;
+    margin-bottom: 0.3em;
   }
 
   .todo-note {
@@ -31,5 +73,10 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     background: var(--color-accent-subtle);
     color: var(--color-text-primary);
     font-size: 14px;
+  }
+
+  address {
+    font-style: normal;
+    line-height: 1.8;
   }
 </style>

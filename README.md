@@ -41,3 +41,18 @@ All commands are run from the root of the project, from a terminal:
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+
+## Leads (Angebotsanfragen)
+
+Das Formular im PV-Rechner (`/rechner/photovoltaik/`) postet zur Vercel-Funktion
+`src/pages/api/lead.ts`. Ohne weitere Konfiguration werden die Leads strukturiert
+in den **Vercel-Funktions-Logs** geloggt (durchsuchbar nach dem Tag `pv-lead`).
+
+Für die Weiterleitung an ein CRM, eine E-Mail-Pipeline oder einen Zapier/Make-
+Webhook einmalig eine env-Variable setzen (Vercel → Settings → Environment Variables):
+
+```
+LEAD_WEBHOOK_URL=https://example.com/webhook
+```
+
+Solange diese Variable nicht gesetzt ist, bleibt die Funktion ein reiner Logger.

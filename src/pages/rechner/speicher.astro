@@ -1,0 +1,64 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Wizard from "../../components/speicher/Wizard.jsx";
+---
+
+<BaseLayout
+  title="Speicher-Rechner — Lohnt sich ein Batteriespeicher? | Photovoltaik Aktuell"
+  description="Berechnen Sie, ob sich ein Batteriespeicher zu Ihrer Photovoltaik-Anlage rechnet — Mehr-Eigenverbrauch, jährliche Ersparnis und Amortisation."
+>
+  <section class="prose rechner-intro">
+    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / Speicher</nav>
+    <h1>Speicher-Rechner</h1>
+    <p>
+      Ein Batteriespeicher erhöht Ihre Autarkie, kostet aber Geld. Dieser
+      Rechner schätzt nüchtern ab, wie viel mehr Strom Sie mit einem Speicher
+      selbst verbrauchen, was das pro Jahr bringt und ob sich die Investition
+      innerhalb der Speicher-Lebensdauer amortisiert. Hintergründe liefert der
+      Artikel{" "}
+      <a href="/ratgeber/speicher-wirkungsgrad-worauf-es-ankommt/">
+        Speicher-Wirkungsgrad: Worauf es ankommt
+      </a>
+      .
+    </p>
+  </section>
+
+  <section class="container wizard-wrap">
+    <Wizard client:load />
+  </section>
+</BaseLayout>
+
+<style>
+  .rechner-intro {
+    padding: 32px 20px 20px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .rechner-intro h1 {
+    font-size: 28px;
+  }
+
+  .rechner-intro p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  .rechner-intro a {
+    color: var(--color-accent);
+  }
+
+  .wizard-wrap {
+    padding-bottom: 56px;
+  }
+</style>

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import theme from "../../theme.js";
 import { getCity, getCoords } from "../../lib/plz.js";
 import { fetchPVGIS, PVGIS_ASPECT, PVGIS_ANGLE } from "../../lib/pvgis.js";
@@ -55,8 +55,22 @@ export default function Wizard() {
   // it during render — no separate reset-effect needed.
   const [manualCoords, setManualCoords] = useState(null); // { lat, lon, plz }
 
-  const plzCoords = useMemo(() => getCoords(plz), [plz]);
+const [plzCoords, setPlzCoords] = useState(null);
+  const [resolvedCity, setResolvedCity] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (plz.length === 5) {
+      getCoords(plz).then(c => { if (!cancelled) setPlzCoords(c); });
+      getCity(plz).then(c => { if (!cancelled) setResolvedCity(c); });
+    } else {
+      if (!cancelled) { setPlzCoords(null); setResolvedCity(null); }
+    }
+    return () => { cancelled = true; };
+  }, [plz]);
+
   const coords = manualCoords && manualCoords.plz === plz ? manualCoords : plzCoords;
+  const displayLocation = resolvedCity ? `${plz} ${resolvedCity}` : plz;
 
   // Requests can race (PLZ or marker changed while a PVGIS call is in flight).
   // Each call takes a fresh sequence number; a slower older response must not
@@ -87,11 +101,6 @@ export default function Wizard() {
     setStepReady(!SUB_FLOW_STEPS.includes(newStep));
   };
 
-  // "← Zurück" im Wizard: auf Sub-Flow-Schritten (Dach/Verbrauch) zuerst einen
-  // Sub-Screen zurückgehen, erst am Anfang des Sub-Flows zum vorherigen
-  // Hauptschritt. Vorher sprang der Button immer zum vorherigen HAUPTschritt —
-  // wer z.B. von der Dach-Ausrichtung "Zurück" klickte, landete direkt in
-  // Schritt 1 (Standort) statt einen Screen zurückzugehen.
   const goBack = () => {
     if (SUB_FLOW_STEPS.includes(step) && subIndex[step] > 0) {
       subFlowRef.current?.back();
@@ -110,9 +119,6 @@ export default function Wizard() {
     setShowResult(false);
     setStep(0);
   };
-
-  const resolvedCity = useMemo(() => getCity(plz), [plz]);
-  const displayLocation = resolvedCity ? `${plz} ${resolvedCity}` : plz;
 
   const handleHaushalt = (label) => {
     setHaushalt(label);
@@ -384,9 +390,3 @@ export default function Wizard() {
     />
   );
 }
-
-
-
-
-
-// dachneigung is a bit odd 

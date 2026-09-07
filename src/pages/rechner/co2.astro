@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Wizard from "../../components/co2/Wizard.jsx";
+---
+
+<BaseLayout
+  title="CO₂-Einsparungsrechner — Was spart Ihre PV? | Photovoltaik Aktuell"
+  description="Wie viel CO₂ spart Ihre Photovoltaik-Anlage gegenüber dem deutschen Strommix? Berechnen Sie kg pro Jahr, über 25 Jahre und im Vergleich zu Auto & Bäumen."
+>
+  <section class="prose rechner-intro">
+    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / CO₂-Einsparung</nav>
+    <h1>CO₂-Einsparungsrechner</h1>
+    <p>
+      Jede Kilowattstunde, die Ihre Anlage erzeugt, ersetzt eine Kilowattstunde
+      aus dem stark fossil geprägten Netzstrommix. Dieser Rechner zeigt, wie viel
+      CO₂ Sie damit vermeiden — pro Jahr und über die Lebensdauer der Anlage,
+      anschaulich gemacht im Vergleich zu Bäumen, Autofahrten und Zügen.
+    </p>
+  </section>
+
+  <section class="container wizard-wrap">
+    <Wizard client:load />
+  </section>
+</BaseLayout>
+
+<style>
+  .rechner-intro {
+    padding: 32px 20px 20px;
+  }
+
+  .breadcrumb {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 10px;
+  }
+
+  .breadcrumb a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .rechner-intro h1 {
+    font-size: 28px;
+  }
+
+  .rechner-intro p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    max-width: 640px;
+  }
+
+  .rechner-intro a {
+    color: var(--color-accent);
+  }
+
+  .wizard-wrap {
+    padding-bottom: 56px;
+  }
+</style>
