@@ -1,4 +1,10 @@
 ---
+// Hydration bewusst `client:load`, nicht `client:visible`: Der Rechner IST
+// der Inhalt dieser Seite, kein Widget unterhalb des Falzes. Mit
+// `client:visible` steht das serverseitig gerenderte Formular sichtbar da,
+// reagiert aber noch nicht auf Klicks — genau daraus entsteht die Meldung
+// "der Rechner funktioniert nicht". Die eingesparte Ladezeit ist den toten
+// Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Wizard from "../../components/co2/Wizard.jsx";
 ---
@@ -19,7 +25,7 @@ import Wizard from "../../components/co2/Wizard.jsx";
   </section>
 
   <section class="container wizard-wrap">
-    <Wizard client:visible />
+    <Wizard client:load />
   </section>
 </BaseLayout>
 

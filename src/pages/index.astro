@@ -50,11 +50,6 @@ const nf = new Intl.NumberFormat("de-DE");
     <div class="hero-inner container">
       <div class="hero-text">
         <h1>Was Ihr Dach wirklich bringt — nachgerechnet, nicht geschätzt</h1>
-        <p class="hero-lede">
-          {nf.format(artikel.length)} Ratgeber-Artikel und {RECHNER.length} Rechner.
-          Jede Zahl mit Quelle, jeder Ertrag mit Satellitendaten für Ihre
-          Postleitzahl statt einem bundesweiten Mittelwert.
-        </p>
         <div class="hero-aktionen">
           <a href="/rechner/photovoltaik/" class="knopf-primaer">Ertrag berechnen</a>
           <a href="/ratgeber/" class="knopf-sekundaer">Zum Ratgeber</a>
@@ -183,16 +178,8 @@ const nf = new Intl.NumberFormat("de-DE");
     line-height: 1.1;
     letter-spacing: -0.02em;
     text-wrap: balance;
-    margin: 0 0 18px;
-    max-width: 19ch;
-  }
-
-  .hero-lede {
-    font-size: clamp(16px, 1.6vw, 18px);
-    color: var(--color-text-secondary);
-    max-width: 46ch;
-    text-wrap: pretty;
     margin: 0 0 28px;
+    max-width: 19ch;
   }
 
   .hero-aktionen {
