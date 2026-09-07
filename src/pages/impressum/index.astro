@@ -1,47 +1,31 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
-// ACHTUNG — VOR DEM LIVEGANG AUSFÜLLEN.
-// Hier standen bis zuletzt frei erfundene Musterdaten ("Musterstraße 1",
-// "HRB 12345", "DE123456789", "Max Mustermann"). Ein Impressum mit falschen
-// Angaben erfüllt § 5 TMG nicht und ist abmahnfähig; außerdem verstößt es
-// gegen die Projektregel "keine erfundene Firmenidentität" (CLAUDE.md).
-// Deshalb jetzt bewusst als unübersehbare Platzhalter — eine Seite mit
-// "[BITTE EINTRAGEN]" ist zwar unfertig, aber nicht irreführend.
-// Sobald die echten Daten der PPC GmbH vorliegen: Werte hier eintragen und
-// PLATZHALTER_AKTIV auf false setzen.
-const PLATZHALTER = "[BITTE EINTRAGEN]";
-
+// Echte Angaben der PPC GmbH, vom Betreiber geliefert (08.09.2026).
+// Vorher standen hier frei erfundene Musterdaten ("Musterstraße 1",
+// "HRB 12345", "Max Mustermann") — ein Impressum mit falschen Angaben
+// erfüllt § 5 TMG nicht und ist abmahnfähig. Nie wieder Beispieldaten
+// einsetzen; im Zweifel Platzhalter mit sichtbarem Warnbanner (siehe
+// Git-Historie dieser Datei für die Platzhalter-Variante).
 const legalName = "PPC GmbH";
-const legalStreet = PLATZHALTER;
-const legalCity = PLATZHALTER;
-const registerCourt = PLATZHALTER;
-const registerNumber = PLATZHALTER;
-const taxId = PLATZHALTER;
-const phone = PLATZHALTER;
-const email = PLATZHALTER;
-const managingDirector = PLATZHALTER;
+const legalStreet = "Viktoriastr. 19";
+const legalCity = "66111 Saarbrücken";
+const registerCourt = "Amtsgericht Saarbrücken";
+const registerNumber = "HRB 104259";
+const taxId = "DE314559800";
+const phone = "+49 681 410 99 410";
+const email = "info@photovoltaik.marketing";
+const managingDirector = "Patrick Palz";
 
 // Datum der letzten inhaltlichen Prüfung. Bewusst fest gepflegt statt
 // `new Date()`: ein automatisch mitwanderndes Datum behauptet bei jedem
 // Deployment eine Prüfung, die gar nicht stattgefunden hat.
-const geprueftAm = "07.09.2026";
-
-const werteFehlen = [legalStreet, legalCity, registerCourt, registerNumber, taxId, phone, email, managingDirector]
-  .some((v) => v === PLATZHALTER);
+const geprueftAm = "08.09.2026";
 ---
 
 <BaseLayout title="Impressum | Photovoltaik Aktuell" description="Impressum von Photovoltaik Aktuell — ein Produkt der PPC GmbH.">
   <section class="prose legal">
     <h1>Impressum</h1>
-
-    {werteFehlen && (
-      <p class="todo-note">
-        <strong>Hinweis:</strong> Dieses Impressum ist noch nicht vollständig.
-        Die mit <code>[BITTE EINTRAGEN]</code> markierten Pflichtangaben nach
-        § 5 TMG müssen vor der Veröffentlichung der Seite ergänzt werden.
-      </p>
-    )}
 
     <p class="legal-subtitle">Verantwortlich im Sinne des § 5 Abs. 1 TMG:</p>
 
@@ -53,7 +37,12 @@ const werteFehlen = [legalStreet, legalCity, registerCourt, registerNumber, taxI
       E-Mail: {email}
     </address>
 
-    <p class="legal-subtitle">Vertretungsberechtigt:</p>
+    <p>
+      Bitte nutzen Sie für alle Anfragen das{" "}
+      <a href="/rechner/photovoltaik/">Kontaktformular</a>.
+    </p>
+
+    <p class="legal-subtitle">Geschäftsführer:</p>
     <p>{managingDirector}</p>
 
     <p class="legal-subtitle">Registerangaben:</p>
@@ -68,10 +57,55 @@ const werteFehlen = [legalStreet, legalCity, registerCourt, registerNumber, taxI
       vor einer Verbraucherschlichtungsstelle teilzunehmen.
     </p>
 
-    <p class="legal-subtitle">Verantwortlich für Inhalte nach § 7 Abs. 1 TMG:</p>
-    <p>Die Inhalte dieser Seite wurden mit größter Sorgfalt erstellt. Für die Richtigkeit
-    können wir keine Gewähr übernehmen. Bei Fehlern bitten wir um Hinweis, damit wir diese
-    korrigieren können.</p>
+    <p class="legal-subtitle">Verantwortlich für den Inhalt nach § 18 Abs. 2 MStV:</p>
+    <address>
+      {managingDirector}<br />
+      {legalStreet}<br />
+      {legalCity}
+    </address>
+
+    <h2>Haftungsausschluss</h2>
+
+    <p class="legal-subtitle">Haftung für Inhalte</p>
+    <p>
+      Als Diensteanbieter sind wir gemäß § 7 Abs. 1 TMG für eigene Inhalte auf diesen
+      Seiten nach den allgemeinen Gesetzen verantwortlich. Nach §§ 8 bis 10 TMG sind wir
+      als Diensteanbieter jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde
+      Informationen zu überwachen oder nach Umständen zu forschen, die auf eine
+      rechtswidrige Tätigkeit hinweisen. Verpflichtungen zur Entfernung oder Sperrung der
+      Nutzung von Informationen nach den allgemeinen Gesetzen bleiben hiervon unberührt.
+      Eine diesbezügliche Haftung ist jedoch erst ab dem Zeitpunkt der Kenntnis einer
+      konkreten Rechtsverletzung möglich. Bei Bekanntwerden von entsprechenden
+      Rechtsverletzungen werden wir diese Inhalte umgehend entfernen.
+    </p>
+
+    <p class="legal-subtitle">Haftung für Links</p>
+    <p>
+      Unser Angebot enthält Links zu externen Webseiten Dritter, auf deren Inhalte wir
+      keinen Einfluss haben. Deshalb können wir für diese fremden Inhalte auch keine
+      Gewähr übernehmen. Für die Inhalte der verlinkten Seiten ist stets der jeweilige
+      Anbieter oder Betreiber der Seiten verantwortlich. Die verlinkten Seiten wurden zum
+      Zeitpunkt der Verlinkung auf mögliche Rechtsverstöße überprüft. Rechtswidrige
+      Inhalte waren zum Zeitpunkt der Verlinkung nicht erkennbar. Eine permanente
+      inhaltliche Kontrolle der verlinkten Seiten ist jedoch ohne konkrete Anhaltspunkte
+      einer Rechtsverletzung nicht zumutbar. Bei Bekanntwerden von Rechtsverletzungen
+      werden wir derartige Links umgehend entfernen.
+    </p>
+
+    <p class="legal-subtitle">Urheberrecht</p>
+    <p>
+      Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten
+      unterliegen dem deutschen Urheberrecht. Die Vervielfältigung, Bearbeitung,
+      Verbreitung und jede Art der Verwertung außerhalb der Grenzen des Urheberrechtes
+      bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.
+      Downloads und Kopien dieser Seite sind nur für den privaten, nicht kommerziellen
+      Gebrauch gestattet. Soweit die Inhalte auf dieser Seite nicht vom Betreiber erstellt
+      wurden, werden die Urheberrechte Dritter beachtet. Insbesondere werden Inhalte
+      Dritter als solche gekennzeichnet. Sollten Sie trotzdem auf eine
+      Urheberrechtsverletzung aufmerksam werden, bitten wir um einen entsprechenden
+      Hinweis. Bei Bekanntwerden von Rechtsverletzungen werden wir derartige Inhalte
+      umgehend entfernen.
+    </p>
 
     <p class="legal-footnote">
       Zuletzt geprüft am {geprueftAm}. Angaben bitte nach jeder
@@ -93,18 +127,9 @@ const werteFehlen = [legalStreet, legalCity, registerCourt, registerNumber, taxI
     margin-bottom: 0.3em;
   }
 
-  .todo-note {
-    margin: 0 0 24px;
-    padding: 14px 16px;
-    border: 1px solid var(--color-accent);
-    border-radius: var(--radius-md);
-    background: var(--color-accent-subtle);
-    color: var(--color-text-primary);
-    font-size: 14px;
-  }
-
-  .todo-note code {
-    font-size: 13px;
+  .legal h2 {
+    font-size: 22px;
+    margin-top: 2em;
   }
 
   .legal-footnote {
