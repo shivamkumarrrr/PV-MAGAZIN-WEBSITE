@@ -4,7 +4,18 @@ description: "Wärmepumpen erhöhen den Stromverbrauch spürbar — und passen d
 category: "technik"
 datePublished: 2026-08-24
 dateModified: 2026-08-24
-relatedRechner: "photovoltaik"
+relatedRechner: "kombi"
+faq:
+  - frage: "Wie viel Strom braucht eine Wärmepumpe zusätzlich?"
+    antwort: "Für einen typischen Vier-Personen-Haushalt rund 3.000 kWh pro Jahr, je nach Gebäudedämmung, Wärmepumpentyp und Warmwasserbedarf auch mehr. Das entspricht etwa drei Vierteln des gesamten Jahresverbrauchs eines durchschnittlichen Vier-Personen-Haushalts ohne Wärmepumpe."
+  - frage: "Passen PV und Wärmepumpe zeitlich überhaupt zusammen?"
+    antwort: "Nur eingeschränkt. Die PV erzeugt vor allem mittags, die Wärmepumpe hat ihren höchsten Bedarf in kälteren Monaten und häufig morgens und abends. Diese zeitliche Verschiebung ist der eigentliche Knackpunkt der Kombination."
+  - frage: "Wie lässt sich der Eigenverbrauch der Wärmepumpe erhöhen?"
+    antwort: "Zwei Wege verbessern ihn in der Praxis: ein Pufferspeicher für Warm- oder Heizungswasser, der gezielt in den sonnenreichen Mittagsstunden geladen wird (viele moderne Wärmepumpen-Regelungen können das ohne Zusatzhardware), und ein Batteriespeicher, der den Mittagsüberschuss für den Abend- und Morgenbedarf vorhält."
+  - frage: "Muss die PV-Anlage größer werden, wenn eine Wärmepumpe dazukommt?"
+    antwort: "Ja, sofern das Dach es hergibt. Eine Anlage, die nur auf den Verbrauch ohne Wärmepumpe ausgelegt wurde, deckt anteilig weniger des neuen Gesamtverbrauchs — der Autarkiegrad sinkt, wenn die Anlagengröße nicht mitwächst. Wer eine Wärmepumpe mittelfristig plant, sollte das bei der Dimensionierung von Anfang an mitdenken."
+  - frage: "Rechnet sich die Wärmepumpe durch die PV-Anlage?"
+    antwort: "Die beiden Effekte addieren sich, ersetzen sich aber nicht. Die Wärmepumpe amortisiert sich in erster Linie über eingesparte Heizkosten gegenüber Gas oder Öl, die PV-Anlage über Eigenverbrauchs- und Einspeiseersparnis. Im Winter laufen PV-Ertrag und Wärmebedarf am stärksten auseinander."
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
@@ -52,7 +63,7 @@ der Praxis:
   der auch für den allgemeinen Haushaltsstromverbrauch gilt (siehe der
   Artikel "Lohnt sich ein Stromspeicher?").
 
-<RechnerCta text="Der Rechner berücksichtigt eine geplante oder vorhandene Wärmepumpe direkt im Verbrauchs-Schritt — inklusive des Effekts auf Autarkiegrad und Anlagengröße." />
+<RechnerCta text="Der Rechner berücksichtigt eine geplante oder vorhandene Wärmepumpe direkt im Verbrauchs-Schritt — inklusive des Effekts auf Autarkiegrad und Anlagengröße." href="/rechner/kombi/" />
 
 ## Dimensionierung: größer planen, nicht nur mehr verbrauchen
 

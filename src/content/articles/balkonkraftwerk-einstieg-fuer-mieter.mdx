@@ -5,7 +5,24 @@ category: "balkonkraftwerk"
 datePublished: 2026-08-12
 dateModified: 2026-08-24
 relatedRechner: "balkonkraftwerk"
+faq:
+  - frage: "Wie viel Strom liefert ein Balkonkraftwerk im Jahr?"
+    antwort: "Bei 800 Watt Einspeiseleistung und einem typischen deutschen Standort grob 600 bis 850 kWh pro Jahr — abhängig von Ausrichtung, Neigung und Verschattung, genau wie bei einer Dachanlage."
+  - frage: "Was spare ich damit pro Jahr?"
+    antwort: "Bei einem Strompreis von rund 0,37 Euro pro kWh (BDEW-Durchschnitt) grob 220 bis 315 Euro jährlich — vorausgesetzt, der Strom wird zeitgleich verbraucht. Bei Grundlast-Geräten wie Kühlschrank, Router und Standby-Verbrauchern funktioniert das meist gut."
+  - frage: "Wann amortisiert sich ein Balkonkraftwerk?"
+    antwort: "Bei Anschaffungskosten von häufig 400 bis 800 Euro für ein komplettes Set nach grob 2 bis 4 Jahren — deutlich kürzer als bei einer Dachanlage, weil die Anschaffungssumme absolut viel kleiner ist. Die jährliche Ersparnis ist entsprechend aber auch kleiner."
+  - frage: "Darf mein Vermieter ein Balkonkraftwerk verbieten?"
+    antwort: "Nicht ohne sachlichen Grund. Mit dem Solarpaket I wurde 2024 in § 554 BGB ein eigener Zustimmungsanspruch für Mieter verankert. Ein pauschales Nein reicht rechtlich nicht mehr aus; bei einer Ablehnung sollte konkret nach dem sachlichen Grund gefragt werden, etwa Statik oder Denkmalschutz."
+  - frage: "Muss ich die Anlage anmelden?"
+    antwort: "Ja, aber nur noch im Marktstammdatenregister der Bundesnetzagentur. Die zusätzliche Anmeldung beim Netzbetreiber ist seit dem Solarpaket I nicht mehr nötig."
+  - frage: "Brauche ich einen neuen Stromzähler?"
+    antwort: "Nicht sofort. Auch mit einem alten Ferraris-Zähler ohne Rücklaufsperre darf ein Balkonkraftwerk übergangsweise betrieben werden, bis der ohnehin gesetzlich vorgesehene Tausch auf eine moderne Messeinrichtung erfolgt. Da sich Zählerübergangsfristen mehrfach geändert haben, lohnt vorab ein Blick auf die Vorgaben des zuständigen Netzbetreibers."
+  - frage: "Darf die Modulleistung über 800 Watt liegen?"
+    antwort: "Ja. Die 800-Watt-Bagatellgrenze bezieht sich auf die Einspeiseleistung des Wechselrichters, nicht auf die installierte Modulleistung. Der Wechselrichter begrenzt die tatsächliche Einspeisung."
 ---
+
+import RechnerCta from "../../components/RechnerCta.astro";
 
 Ein Balkonkraftwerk (auch Steckersolargerät oder Mini-PV genannt) ist
 keine kleine Version einer Dachanlage — es ist eine eigene Kategorie mit
@@ -89,6 +106,8 @@ kürzer als bei einer großen Dachanlage, weil die Anschaffungssumme
 absolut viel kleiner ist. Das relativiert sich allerdings: die absolute
 Ersparnis pro Jahr ist ebenfalls deutlich kleiner als bei einer
 Dachanlage im vierstelligen Bereich.
+
+<RechnerCta text="Für Ihre Modulleistung, Ausrichtung und Ihren Kaufpreis rechnet der Balkonkraftwerk-Rechner Ertrag und Amortisation konkret durch." href="/rechner/balkonkraftwerk/" />
 
 ## Für wen sich das lohnt — und für wen nicht
 

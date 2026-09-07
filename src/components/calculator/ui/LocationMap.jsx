@@ -1,4 +1,14 @@
 import { useState, useEffect, useRef } from "react";
+// Leaflet lokal aus node_modules statt per <script>/<link> von unpkg.com.
+// Grund: unpkg lieferte JS und CSS von einem Drittanbieter-CDN aus — bei
+// jedem Aufruf ging die IP-Adresse des Besuchers dorthin, ohne Nennung in
+// der Datenschutzerklärung und ohne Einwilligung. Nebenbei entfallen zwei
+// externe Requests und die Abhängigkeit von der Verfügbarkeit des CDN.
+// Leaflet greift beim Import auf `window` zu und darf deshalb nicht im
+// SSR-/Prerender-Durchlauf ausgewertet werden — daher dynamischer Import
+// erst im Effekt (läuft nur im Browser). Das CSS ist SSR-sicher und wird
+// von Vite normal gebündelt.
+import "leaflet/dist/leaflet.css";
 import theme from "../../../theme.js";
 import { IconMapPin, IconMap, IconSatellite } from "../../Icons.jsx";
 
@@ -15,6 +25,10 @@ const ESRI_ATTRIBUTION = "Satellitenbilder &copy; Esri";
 // click-to-move — both report back precise coordinates via onLocationChange
 // so the PVGIS request can use the exact spot instead of only the coarse
 // PLZ-prefix center.
+// Einmal geladenes Leaflet-Modul, damit ein erneutes Mounten der Karte
+// nicht wieder durch den dynamischen Import muss.
+let L = null;
+
 export default function LocationMap({ lat, lon, address, plz, onLocationChange }) {
   const [mapReady, setMapReady] = useState(false);
   const [timedOut, setTimedOut] = useState(false);
@@ -37,7 +51,7 @@ export default function LocationMap({ lat, lon, address, plz, onLocationChange }
       if (markerRef.current) {
         markerRef.current.setLatLng(latlng);
       } else {
-        markerRef.current = window.L.marker(latlng, { draggable: true }).addTo(map);
+        markerRef.current = L.marker(latlng, { draggable: true }).addTo(map);
         markerRef.current.on("dragend", () => {
           const p = markerRef.current.getLatLng();
           onLocationChange?.(p.lat, p.lng);
@@ -46,9 +60,17 @@ export default function LocationMap({ lat, lon, address, plz, onLocationChange }
       markerRef.current.bindPopup(address ? `${address}, ${plz}` : plz);
     };
 
-    const initMap = () => {
+    const initMap = async () => {
+      if (!L) {
+        try {
+          L = (await import("leaflet")).default;
+        } catch {
+          setTimedOut(true);
+          return;
+        }
+      }
       const container = document.getElementById(containerId);
-      if (!container || !window.L) return;
+      if (!container) return;
 
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -56,15 +78,15 @@ export default function LocationMap({ lat, lon, address, plz, onLocationChange }
         markerRef.current = null;
       }
 
-      const map = window.L.map(containerId, {
+      const map = L.map(containerId, {
         center: [lat, lon],
         zoom: 18,
         zoomControl: true,
         attributionControl: true, // required to credit OpenStreetMap contributors
       });
 
-      const osmLayer = window.L.tileLayer(OSM_TILE_URL, { maxZoom: 19, attribution: OSM_ATTRIBUTION });
-      const satLayer = window.L.tileLayer(ESRI_SAT_URL, { maxZoom: 20, attribution: ESRI_ATTRIBUTION });
+      const osmLayer = L.tileLayer(OSM_TILE_URL, { maxZoom: 19, attribution: OSM_ATTRIBUTION });
+      const satLayer = L.tileLayer(ESRI_SAT_URL, { maxZoom: 20, attribution: ESRI_ATTRIBUTION });
       layersRef.current = { osm: osmLayer, sat: satLayer };
       (satelliteRef.current ? satLayer : osmLayer).addTo(map);
 
@@ -79,45 +101,9 @@ export default function LocationMap({ lat, lon, address, plz, onLocationChange }
       setMapReady(true);
       clearTimeout(timer);
 
-      if (address && address.length > 3) {
-        // Public Nominatim endpoint (OSM's free geocoder): respects its usage
-        // policy for light traffic (~1 req/s, no bulk lookups). If this page
-        // ever sees high traffic, move this behind a small server-side proxy.
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address + ", " + plz + " Germany")}&limit=1`)
-          .then(r => r.json())
-          .then(data => {
-            if (data?.[0]) {
-              const geoLat = parseFloat(data[0].lat);
-              const geoLon = parseFloat(data[0].lon);
-              map.setView([geoLat, geoLon], 19);
-              placeMarker(map, [geoLat, geoLon]);
-              markerRef.current.openPopup();
-              onLocationChange?.(geoLat, geoLon);
-            }
-          })
-          .catch(() => {});
-      }
     };
 
-    if (window.L) {
-      initMap();
-    } else {
-      if (!document.getElementById("leaflet-css")) {
-        const link = document.createElement("link");
-        link.id = "leaflet-css";
-        link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        document.head.appendChild(link);
-      }
-      if (!document.getElementById("leaflet-js")) {
-        const script = document.createElement("script");
-        script.id = "leaflet-js";
-        script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-        script.onload = () => setTimeout(initMap, 100);
-        script.onerror = () => setTimedOut(true);
-        document.head.appendChild(script);
-      }
-    }
+    initMap();
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps

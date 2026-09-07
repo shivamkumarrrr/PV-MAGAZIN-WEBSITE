@@ -9,19 +9,27 @@
 // PV-Rechner sind — keine Duplikation der Formeln.
 import {
   STROMPREIS,
-  EINSPEISE,
+  einspeiseStaffel,
   KOSTEN_PRO_KWP,
   SPEICHER_KOSTEN_PRO_KWH,
   ERTRAG_PRO_KWP,
   AUSRICHTUNG,
   NEIGUNG,
+  WAERMEPUMPE_KWH,
+  E_AUTO_PROFILE,
   computeGesamtVerbrauch,
   computeKwp,
   autarkieSchaetzung,
 } from "./calculate.js";
 
-export const WP_JAHRESVERBRAUCH = 3000;
-export const EAUTO_JAHRESVERBRAUCH = 3000;
+// Anzeigewerte für den Erklärtext im Wizard. Bewusst AUS calculate.js
+// abgeleitet statt eigenständig gesetzt: vorher standen hier zwei feste
+// 3.000er, während compareScenarios() tatsächlich mit WAERMEPUMPE_KWH (3.000)
+// und dem E-Auto-Profil "Hauptwagen" (1.800 kWh) rechnete. Der Wizard behauptete
+// also "+3.000 kWh/Jahr fürs E-Auto", während das Modell 1.800 kWh ansetzte.
+export const WP_JAHRESVERBRAUCH = WAERMEPUMPE_KWH;
+export const EAUTO_JAHRESVERBRAUCH =
+  E_AUTO_PROFILE.find((p) => p.label === "Hauptwagen")?.kwh ?? E_AUTO_PROFILE[1].kwh;
 
 // Bequemer Einstieg: berechnet das Kernmodell für EIN Szenario und vergleicht
 // es gegen den Netzbezug ohne PV (Basis).
@@ -37,7 +45,7 @@ export function berechneSzenarioStandard(kwp, dachform, ausrichtung, neigung, ve
   const autarkieRate = autarkieSchaetzung(kwp, gesamtVerbrauch, speicherKwh);
   const eigenverbrauch = Math.round(Math.min(gesamtVerbrauch * autarkieRate, jahresertrag));
   const einspeisung = jahresertrag - eigenverbrauch;
-  const jahresErsparnis = Math.round(eigenverbrauch * STROMPREIS + einspeisung * EINSPEISE);
+  const jahresErsparnis = Math.round(eigenverbrauch * STROMPREIS + einspeisung * einspeiseStaffel(kwp));
 
   const investition = Math.round(kwp * KOSTEN_PRO_KWP + speicherKwh * SPEICHER_KOSTEN_PRO_KWH);
   const amortisation = jahresErsparnis > 0 ? Math.round((investition / jahresErsparnis) * 10) / 10 : null;

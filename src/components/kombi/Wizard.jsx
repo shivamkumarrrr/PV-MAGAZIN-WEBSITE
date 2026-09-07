@@ -1,5 +1,6 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { AUSRICHTUNG, NEIGUNG, computeKwp } from "../../lib/calculate.js";
@@ -36,6 +37,21 @@ export default function KombiWizard() {
 
   const { kwp } = computeKwp(dach, dachform);
   const result = compareScenarios(kwp, dachform, ausrichtung, neigung, verbrauch, speicherKwh, eauto, waermepumpe);
+
+  const bestesSzenario = result.szenarien[result.szenarien.length - 1];
+  const leadZusammenfassung = `${kwp} kWp · Szenario „${bestesSzenario.label}" · ${bestesSzenario.jahresErsparnis.toLocaleString("de-DE")} €/Jahr`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    dachflaeche: `${dach} m²`,
+    dachform,
+    ausrichtung,
+    neigung,
+    speicher: speicherKwh > 0 ? `Ja, ${speicherKwh} kWh` : "Nein",
+    eauto: eauto === "ja" ? "Ja" : "Nein",
+    waermepumpe: waermepumpe === "ja" ? "Ja" : "Nein",
+    jahresersparnis: `${bestesSzenario.jahresErsparnis.toLocaleString("de-DE")} €`,
+    investition: `${bestesSzenario.investition.toLocaleString("de-DE")} €`,
+  };
 
   const restart = () => setShowResult(false);
 
@@ -96,12 +112,15 @@ export default function KombiWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="kombi"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );

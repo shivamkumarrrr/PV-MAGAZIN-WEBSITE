@@ -1,0 +1,85 @@
+---
+// Sichtbarer FAQ-Block am Artikelende. Das zugehörige FAQPage-JSON-LD wird in
+// ArticleLayout.astro aus DENSELBEN Daten erzeugt — Google verlangt, dass
+// strukturierte Daten und der für Nutzer sichtbare Text übereinstimmen.
+// Umsetzung als <details>: aufklappbar ohne JavaScript, und der Antworttext
+// steht trotzdem im HTML (also für Crawler lesbar).
+interface Props {
+  faq: { frage: string; antwort: string }[];
+}
+const { faq } = Astro.props;
+---
+
+{faq && faq.length > 0 && (
+  <section class="faq" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">Häufige Fragen</h2>
+    {faq.map((f) => (
+      <details class="faq-item">
+        <summary>{f.frage}</summary>
+        <p>{f.antwort}</p>
+      </details>
+    ))}
+  </section>
+)}
+
+<style>
+  .faq {
+    margin-top: 2.5em;
+  }
+
+  .faq h2 {
+    font-size: 24px;
+    margin-bottom: 0.6em;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .faq-item:first-of-type {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .faq-item summary {
+    cursor: pointer;
+    padding: 14px 28px 14px 0;
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-text-primary);
+    position: relative;
+    list-style: none;
+  }
+
+  /* Standard-Dreieck ersetzen — in Safari/Chrome unterschiedlich benannt. */
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::after {
+    content: "";
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--color-text-muted);
+    border-bottom: 2px solid var(--color-text-muted);
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform 0.15s;
+  }
+
+  .faq-item[open] summary::after {
+    transform: translateY(-30%) rotate(225deg);
+  }
+
+  .faq-item summary:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .faq-item p {
+    margin: 0 0 16px;
+    font-size: 15px;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+  }
+</style>

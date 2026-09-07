@@ -1,32 +1,60 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
+// ACHTUNG — VOR DEM LIVEGANG AUSFÜLLEN.
+// Hier standen bis zuletzt frei erfundene Musterdaten ("Musterstraße 1",
+// "HRB 12345", "DE123456789", "Max Mustermann"). Ein Impressum mit falschen
+// Angaben erfüllt § 5 TMG nicht und ist abmahnfähig; außerdem verstößt es
+// gegen die Projektregel "keine erfundene Firmenidentität" (CLAUDE.md).
+// Deshalb jetzt bewusst als unübersehbare Platzhalter — eine Seite mit
+// "[BITTE EINTRAGEN]" ist zwar unfertig, aber nicht irreführend.
+// Sobald die echten Daten der PPC GmbH vorliegen: Werte hier eintragen und
+// PLATZHALTER_AKTIV auf false setzen.
+const PLATZHALTER = "[BITTE EINTRAGEN]";
+
 const legalName = "PPC GmbH";
-const legalAddress = "Musterstraße 1, 66111 Saarbrücken";
-const registerCourt = "Amtsgericht Saarbrücken";
-const registerNumber = "HRB 12345";
-const taxId = "DE123456789";
-const phone = "+49 681 123 456";
-const email = "info@photovoltaikaktuell.de";
-const managingDirector = "Max Mustermann";
-const responsiblePerson = "Max Mustmann";
+const legalStreet = PLATZHALTER;
+const legalCity = PLATZHALTER;
+const registerCourt = PLATZHALTER;
+const registerNumber = PLATZHALTER;
+const taxId = PLATZHALTER;
+const phone = PLATZHALTER;
+const email = PLATZHALTER;
+const managingDirector = PLATZHALTER;
+
+// Datum der letzten inhaltlichen Prüfung. Bewusst fest gepflegt statt
+// `new Date()`: ein automatisch mitwanderndes Datum behauptet bei jedem
+// Deployment eine Prüfung, die gar nicht stattgefunden hat.
+const geprueftAm = "07.09.2026";
+
+const werteFehlen = [legalStreet, legalCity, registerCourt, registerNumber, taxId, phone, email, managingDirector]
+  .some((v) => v === PLATZHALTER);
 ---
 
 <BaseLayout title="Impressum | Photovoltaik Aktuell" description="Impressum von Photovoltaik Aktuell — ein Produkt der PPC GmbH.">
   <section class="prose legal">
     <h1>Impressum</h1>
 
+    {werteFehlen && (
+      <p class="todo-note">
+        <strong>Hinweis:</strong> Dieses Impressum ist noch nicht vollständig.
+        Die mit <code>[BITTE EINTRAGEN]</code> markierten Pflichtangaben nach
+        § 5 TMG müssen vor der Veröffentlichung der Seite ergänzt werden.
+      </p>
+    )}
+
     <p class="legal-subtitle">Verantwortlich im Sinne des § 5 Abs. 1 TMG:</p>
 
-    <address style={{ fontStyle: "normal", marginBottom: 24 }}>
+    <address>
       <strong>{legalName}</strong><br />
-      {legalAddress}<br />
+      {legalStreet}<br />
+      {legalCity}<br />
       Telefon: {phone}<br />
       E-Mail: {email}
     </address>
 
     <p class="legal-subtitle">Vertretungsberechtigt:</p>
-    <p>{managingDirector}<br />{responsiblePerson}</p>
+    <p>{managingDirector}</p>
 
     <p class="legal-subtitle">Registerangaben:</p>
     <p>Handelsregister: {registerCourt}<br />Registernummer: {registerNumber}</p>
@@ -45,10 +73,9 @@ const responsiblePerson = "Max Mustmann";
     können wir keine Gewähr übernehmen. Bei Fehlern bitten wir um Hinweis, damit wir diese
     korrigieren können.</p>
 
-    <p class="todo-note" style={{ marginTop: 32 }}>
-      <strong>Hinweis:</strong> Diese Angaben wurden am {new Date().toLocaleDateString("de-DE")}
-      zuletzt geprüft. Bitte aktualisieren Sie alle Daten regelmäßig, insbesondere nach
-      Gesellschaftsänderungen.
+    <p class="legal-footnote">
+      Zuletzt geprüft am {geprueftAm}. Angaben bitte nach jeder
+      Gesellschaftsänderung aktualisieren.
     </p>
   </section>
 </BaseLayout>
@@ -67,12 +94,23 @@ const responsiblePerson = "Max Mustmann";
   }
 
   .todo-note {
+    margin: 0 0 24px;
     padding: 14px 16px;
-    border: 1px solid var(--color-border);
+    border: 1px solid var(--color-accent);
     border-radius: var(--radius-md);
     background: var(--color-accent-subtle);
     color: var(--color-text-primary);
     font-size: 14px;
+  }
+
+  .todo-note code {
+    font-size: 13px;
+  }
+
+  .legal-footnote {
+    margin-top: 32px;
+    font-size: 13px;
+    color: var(--color-text-muted);
   }
 
   address {

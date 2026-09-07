@@ -1,9 +1,18 @@
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import BalkonIcon from "./BalkonIcon.jsx";
-import { siteConfig } from "../../config.js";
 import { WECHSELRICHTER_GRENZE_W, EIGENVERBRAUCH_ANTEIL } from "../../lib/calculateBalkonkraftwerk.js";
 
 export default function ResultScreen({ result, modulleistung, onRestart }) {
+  const leadZusammenfassung = `${modulleistung} Wp · ${result.jahresertrag.toLocaleString("de-DE")} kWh/Jahr · ${result.jahresersparnis.toLocaleString("de-DE")} €/Jahr`;
+  const leadDaten = {
+    modulleistung: `${modulleistung} Wp`,
+    jahresertrag: `${result.jahresertrag.toLocaleString("de-DE")} kWh`,
+    jahresersparnis: `${result.jahresersparnis.toLocaleString("de-DE")} €`,
+    investition: `${result.investition.toLocaleString("de-DE")} €`,
+    amortisation: result.amortisation != null ? `${result.amortisation} Jahre` : "nicht bezifferbar",
+  };
+
   return (
     <div style={{ maxWidth: theme.maxWidth, margin: "0 auto", fontFamily: theme.font.family }}>
       <div
@@ -101,56 +110,15 @@ export default function ResultScreen({ result, modulleistung, onRestart }) {
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
-        <a
-          href="/rechner/"
-          style={{
-            display: "block",
-            textAlign: "center",
-            padding: 14,
-            borderRadius: theme.radius.lg,
-            background: theme.color.accent,
-            color: theme.color.white,
-            fontWeight: 600,
-            fontSize: 14,
-            textDecoration: "none",
-          }}
-        >
-          Weitere Rechner entdecken →
-        </a>
-        {siteConfig.contact.calendlyUrl && (
-          <a
-            href={siteConfig.contact.calendlyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "block",
-              textAlign: "center",
-              padding: 14,
-              borderRadius: theme.radius.lg,
-              border: `1.5px solid ${theme.color.border}`,
-              color: theme.color.textSecondary,
-              fontWeight: 600,
-              fontSize: 14,
-              textDecoration: "none",
-            }}
-          >
-            Kostenlose Beratung buchen
-          </a>
-        )}
-        <button
-          onClick={onRestart}
-          style={{
-            padding: 12,
-            borderRadius: theme.radius.lg,
-            border: "none",
-            background: "transparent",
-            color: theme.color.textMuted,
-            fontSize: 13,
-            cursor: "pointer",
-          }}
-        >
-          Neu berechnen
-        </button>
+      <LeadForm
+        rechner="balkonkraftwerk"
+        zusammenfassung={leadZusammenfassung}
+        daten={leadDaten}
+        onRestart={onRestart}
+      />
+      <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+        Alle Rechner im Überblick →
+      </a>
       </div>
     </div>
   );

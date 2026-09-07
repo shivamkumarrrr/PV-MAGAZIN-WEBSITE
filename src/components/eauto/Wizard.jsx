@@ -1,8 +1,8 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { siteConfig } from "../../config.js";
 import { calculateEAuto, empfehlungPVGroesse } from "../../lib/calculateEAuto.js";
 
 function euro(v) {
@@ -27,6 +27,14 @@ export default function EAutoWizard() {
     solarAnteil,
   });
   const empfehlung = empfehlungPVGroesse(km, hsVerbrauch);
+
+  const leadZusammenfassung = `${km.toLocaleString("de-DE")} km/Jahr · ${Math.round(solarAnteil * 100)} % Solaranteil · ${result.ersparnisProJahr.toLocaleString("de-DE")} €/Jahr gespart`;
+  const leadDaten = {
+    fahrleistung: `${km.toLocaleString("de-DE")} km/Jahr`,
+    solaranteil: `${Math.round(solarAnteil * 100)} %`,
+    ladekosten: `${result.kostenGemischt.toLocaleString("de-DE")} €/Jahr`,
+    jahresersparnis: `${result.ersparnisProJahr.toLocaleString("de-DE")} €`,
+  };
 
   const restart = () => setShowResult(false);
 
@@ -83,17 +91,15 @@ export default function EAutoWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          {siteConfig.contact.calendlyUrl && (
-            <a href={siteConfig.contact.calendlyUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              Kostenlose Beratung buchen
-            </a>
-          )}
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="eauto"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import theme from "../../theme.js";
+import { IconCheck } from "../Icons.jsx";
+import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { siteConfig } from "../../config.js";
 import { calculateSteuer, SteuerfreiesKwp } from "../../lib/calculateSteuer.js";
 
 function euro(v) {
@@ -15,6 +16,14 @@ export default function SteuerWizard() {
   const [showResult, setShowResult] = useState(false);
 
   const result = calculateSteuer(kwp, preis);
+
+  const leadZusammenfassung = `${kwp} kWp · ${result.ersparnisMwst.toLocaleString("de-DE")} € Umsatzsteuer gespart`;
+  const leadDaten = {
+    anlagengroesse: `${kwp} kWp`,
+    investition: `${preis.toLocaleString("de-DE")} €`,
+    mwstErsparnis: `${result.ersparnisMwst.toLocaleString("de-DE")} €`,
+    jahresertrag: `${result.jahresertrag.toLocaleString("de-DE")} kWh`,
+  };
 
   const restart = () => setShowResult(false);
 
@@ -38,7 +47,7 @@ export default function SteuerWizard() {
           <div style={{ fontSize: 11, color: theme.color.textMuted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 }}>Einkommensteuer</div>
           {result.steuerfrei ? (
             <>
-              <div style={{ fontSize: 20, fontWeight: 700, color: theme.color.success, fontVariantNumeric: "tabular-nums" }}>Steuerfrei ✓</div>
+              <div style={{ fontSize: 20, fontWeight: 700, color: theme.color.success, fontVariantNumeric: "tabular-nums", display: "flex", alignItems: "center", gap: 6 }}><IconCheck size={18} /> Steuerfrei</div>
               <div style={{ fontSize: 12.5, color: theme.color.textSecondary, marginTop: 4, lineHeight: 1.6 }}>
                 Ihre Anlage (≤{SteuerfreiesKwp} kWp) ist nach §&nbsp;3 Nr.&nbsp;72 EStG von der
                 Einkommensteuer befreit. Einspeisevergütung und der Wert des
@@ -64,17 +73,15 @@ export default function SteuerWizard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 10 }}>
-          <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, background: theme.color.accent, color: theme.color.white, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-            Alle Rechner im Überblick →
-          </a>
-          {siteConfig.contact.calendlyUrl && (
-            <a href={siteConfig.contact.calendlyUrl} target="_blank" rel="noopener noreferrer" style={{ display: "block", textAlign: "center", padding: 14, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 14, textDecoration: "none" }}>
-              Kostenlose Beratung buchen
-            </a>
-          )}
-          <button onClick={restart} style={{ padding: 12, borderRadius: theme.radius.lg, border: "none", background: "transparent", color: theme.color.textMuted, fontSize: 13, cursor: "pointer" }}>
-            Neu berechnen
-          </button>
+        <LeadForm
+          rechner="steuer"
+          zusammenfassung={leadZusammenfassung}
+          daten={leadDaten}
+          onRestart={restart}
+        />
+        <a href="/rechner/" style={{ display: "block", textAlign: "center", padding: 12, borderRadius: theme.radius.lg, border: `1.5px solid ${theme.color.border}`, color: theme.color.textSecondary, fontWeight: 600, fontSize: 13, textDecoration: "none" }}>
+          Alle Rechner im Überblick →
+        </a>
         </div>
       </div>
     );

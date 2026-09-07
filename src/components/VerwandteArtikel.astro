@@ -1,0 +1,101 @@
+---
+import { getCollection } from "astro:content";
+import { categoryLabel } from "../lib/categories.js";
+
+// Automatische Querverlinkung am Artikelende.
+//
+// Vorher enthielt KEIN einziger der 17 Artikel einen Link auf einen anderen
+// Artikel — kein Themencluster, kein Linkfluss, jede Seite eine Sackgasse.
+// Diese Auswahl wird abgeleitet statt gepflegt, damit sie beim Hinzufügen
+// eines Artikels nicht veraltet:
+//   1. gleicher relatedRechner (stärkstes Signal: gleiches Werkzeug = gleiches Thema)
+//   2. gleiche Kategorie
+//   3. auffüllen mit den neuesten übrigen Artikeln
+interface Props {
+  aktuellerSlug: string;
+  kategorie: string;
+  relatedRechner: string;
+  anzahl?: number;
+}
+const { aktuellerSlug, kategorie, relatedRechner, anzahl = 3 } = Astro.props;
+
+const alle = (await getCollection("articles"))
+  .filter((a) => a.id !== aktuellerSlug)
+  .sort((a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf());
+
+const gewichtet = [
+  ...alle.filter((a) => a.data.relatedRechner === relatedRechner),
+  ...alle.filter((a) => a.data.category === kategorie),
+  ...alle,
+];
+
+// Reihenfolge der ersten Fundstelle behalten, Duplikate raus.
+const vorschlaege = [...new Map(gewichtet.map((a) => [a.id, a])).values()].slice(0, anzahl);
+---
+
+{vorschlaege.length > 0 && (
+  <nav class="verwandte" aria-labelledby="verwandte-heading">
+    <h2 id="verwandte-heading">Weiterlesen</h2>
+    <ul>
+      {vorschlaege.map((a) => (
+        <li>
+          <a href={`/ratgeber/${a.id}/`}>
+            <span class="verwandte-cat">{categoryLabel(a.data.category)}</span>
+            <span class="verwandte-titel">{a.data.title}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .verwandte {
+    margin-top: 2.5em;
+  }
+
+  .verwandte h2 {
+    font-size: 24px;
+    margin-bottom: 0.6em;
+  }
+
+  .verwandte ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .verwandte a {
+    display: block;
+    padding: 14px 18px;
+    background: var(--color-surface);
+    text-decoration: none;
+    color: var(--color-text-primary);
+  }
+
+  .verwandte a:hover {
+    background: var(--color-accent-subtle);
+  }
+
+  .verwandte-cat {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-muted);
+    margin-bottom: 3px;
+  }
+
+  .verwandte-titel {
+    font-weight: 500;
+    font-size: 15px;
+  }
+</style>

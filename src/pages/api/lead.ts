@@ -34,10 +34,22 @@ const EXTERNAL_WEBHOOK = import.meta.env.LEAD_WEBHOOK_URL as string | undefined;
 // des gesamten Bodies (verhindert, dass unbekannte/Spam-Felder durchgereicht
 // oder zu große Payloads erzeugt werden).
 const ERLAUBTE_FELDER: (keyof LeadPayload)[] = [
-  "name", "email", "telefon", "nachricht", "plz", "anlagengroesse",
-  "jahresertrag", "jahresersparnis", "amortisation", "dachflaeche",
-  "dachform", "ausrichtung", "neigung", "speicher", "eauto", "waermepumpe",
-  "tageszeiten", "datenquelle",
+  // Gemeinsam für alle Rechner
+  "name", "email", "telefon", "nachricht",
+  // Herkunft: welcher Rechner den Lead erzeugt hat (Slug aus src/lib/rechner.js)
+  // plus eine Klartext-Zusammenfassung des Ergebnisses. Vorher konnten Leads
+  // nur aus dem Photovoltaik-Rechner kommen, deshalb gab es kein Herkunftsfeld.
+  "rechner", "zusammenfassung",
+  // Photovoltaik-Rechner
+  "plz", "anlagengroesse", "jahresertrag", "jahresersparnis", "amortisation",
+  "dachflaeche", "dachform", "ausrichtung", "neigung", "speicher", "eauto",
+  "waermepumpe", "tageszeiten", "datenquelle",
+  // Übrige Rechner (Speicher, Rendite, Kombi, CO2, Gestehungskosten,
+  // Balkonkraftwerk, Reinigung, E-Auto, Steuer, Mieterstrom)
+  "speicherKwh", "mehrEigenverbrauch", "investition", "rendite", "roi",
+  "laufzeit", "co2ProJahr", "lcoe", "strompreisVergleich", "modulleistung",
+  "reinigungKosten", "ertragsverlust", "fahrleistung", "solaranteil",
+  "ladekosten", "mwstErsparnis", "wohneinheiten", "mieterstromErloes",
 ];
 
 function bereinige(obj: LeadPayload): LeadPayload {
@@ -84,10 +96,12 @@ export const POST: APIRoute = async ({ request, clientAddress }) => {
   const lead = bereinige(body);
 
   // Strukturiert, einzeilig und über den Tag "pv-lead" durchsuchbar loggen.
-  // Format: pv-lead | <id> | <name> | <email> | <plz> | <anlagengroesse> | <ip>
+  // Format: pv-lead | <id> | <rechner> | <name> | <email> | <zusammenfassung> | <ip>
+  // `rechner` steht bewusst weit vorn: seit alle elf Rechner Leads erzeugen,
+  // ist die Herkunft die erste Frage beim Sichten der Logs.
   const id = crypto.randomUUID();
   console.log(
-    ["pv-lead", id, lead.name, lead.email, lead.plz || "keine PLZ", lead.anlagengroesse || "-", clientAddress || "-"].join(" | ")
+    ["pv-lead", id, lead.rechner || "unbekannt", lead.name, lead.email, lead.zusammenfassung || "-", clientAddress || "-"].join(" | ")
   );
 
   // Ausführlicher Datensatz als separates Log (optionaler Empfänger kann das

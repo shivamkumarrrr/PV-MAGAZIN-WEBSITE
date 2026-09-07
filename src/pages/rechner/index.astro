@@ -1,79 +1,18 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+// Die Tool-Liste lag früher als lokales Array in dieser Datei — dieselbe
+// Information brauchte aber auch RechnerCta.astro für den Titel der
+// "Passend dazu"-Box. Jetzt eine Quelle der Wahrheit: src/lib/rechner.js.
+import { RECHNER } from "../../lib/rechner.js";
 
-const tools = [
-  {
-    slug: "photovoltaik",
-    title: "Photovoltaik-Rechner",
-    description: "Anlagengröße, Jahresertrag, Ersparnis, Autarkiegrad und Amortisation — auf Basis echter PVGIS-Satellitendaten für Ihren Standort.",
-    status: "live",
-  },
-  {
-    slug: "kombi",
-    title: "PV + Wärmepumpe + E-Auto",
-    description: "Szenarien-Vergleich: Wie Ihre Verbraucher Eigenverbrauch, Autarkie und Amortisation der PV-Anlage verschieben.",
-    status: "live",
-  },
-  {
-    slug: "rendite",
-    title: "Rendite-Rechner",
-    description: "Ihre PV-Anlage als Geldanlage: Cashflow, Rendite und ROI über 20 Jahre — im Vergleich zu einer risikolosen Festgeld-Anlage.",
-    status: "live",
-  },
-  {
-    slug: "speicher",
-    title: "Speicherrechner",
-    description: "Ob sich ein Batteriespeicher zu Ihrer PV-Anlage lohnt — Mehr-Eigenverbrauch, jährliche Ersparnis und Amortisation, ehrlich eingeordnet.",
-    status: "live",
-  },
-  {
-    slug: "balkonkraftwerk",
-    title: "Balkonkraftwerk-Rechner",
-    description: "Ertrag und Amortisation für Stecker-Solargeräte, speziell für Mieter und kleine Budgets.",
-    status: "live",
-  },
-  {
-    slug: "co2",
-    title: "CO2-Einsparungsrechner",
-    description: "Wie viel CO2 spart Ihre Anlage gegenüber dem deutschen Strommix ein? Pro Jahr, über 25 Jahre und im Vergleich zu Bäumen & Autofahrten.",
-    status: "live",
-  },
-  {
-    slug: "gestehungskosten",
-    title: "Gestehungskostenrechner",
-    description: "Ihre eigenen Stromgestehungskosten in ct/kWh im Vergleich zum Netzstrompreis — nach Fraunhofer-ISE-Methodik.",
-    status: "live",
-  },
-  {
-    slug: "reinigung",
-    title: "Reinigungsrechner",
-    description: "Wie viel Ertrag kostet Sie Verschmutzung — und rechnet sich eine professionelle Reinigung Ihrer Anlage?",
-    status: "live",
-  },
-  {
-    slug: "eauto",
-    title: "E-Auto-Laderechner",
-    description: "Solarstromanteil, Ladekosten und passende PV-Größe für Ihr Elektroauto — nach Ihrem Fahrprofil.",
-    status: "live",
-  },
-  {
-    slug: "steuer",
-    title: "PV-Steuerrechner",
-    description: "Was sparen Sie durch Nullsteuersatz und Einkommensteuerbefreiung Ihrer Anlage?",
-    status: "live",
-  },
-  {
-    slug: "mieterstrom",
-    title: "Mieterstromrechner",
-    description: "PV auf dem Mehrfamilienhaus: Erlös an Mieter, Mieterstromzuschlag und Amortisation abschätzen.",
-    status: "live",
-  },
-];
+// Alle gelisteten Rechner sind live. Der frühere "status"-Schalter samt
+// "Bald verfügbar"-Karte ist entfallen, weil kein Eintrag ihn mehr nutzte.
+const tools = RECHNER;
 ---
 
 <BaseLayout
   title="PV-Rechner — Photovoltaik-Tools | Photovoltaik Aktuell"
-  description="Alle Photovoltaik-Rechner von Photovoltaik Aktuell an einem Ort: PV-Rechner mit echten PVGIS-Daten, bald ergänzt um Speicher-, Balkonkraftwerk-, CO2- und Gestehungskostenrechner."
+  description="Alle Photovoltaik-Rechner von Photovoltaik Aktuell an einem Ort: PV-Rechner mit echten PVGIS-Daten, Speicher, Rendite, Balkonkraftwerk, CO2, Gestehungskosten, Reinigung, E-Auto, Steuer und Mieterstrom."
 >
   <section class="prose rechner-header">
     <h1>Rechner</h1>
@@ -82,20 +21,11 @@ const tools = [
 
   <section class="container tool-grid">
     {tools.map((t) => (
-      t.status === "live" ? (
-        <a href={`/rechner/${t.slug}/`} class="tool-card live">
-          <span class="tool-status">Verfügbar</span>
-          <h2>{t.title}</h2>
-          <p>{t.description}</p>
-          <span class="tool-link">Jetzt rechnen →</span>
-        </a>
-      ) : (
-        <div class="tool-card upcoming">
-          <span class="tool-status muted">Bald verfügbar</span>
-          <h2>{t.title}</h2>
-          <p>{t.description}</p>
-        </div>
-      )
+      <a href={`/rechner/${t.slug}/`} class="tool-card">
+        <h2>{t.title}</h2>
+        <p>{t.beschreibung}</p>
+        <span class="tool-link">Jetzt rechnen →</span>
+      </a>
     ))}
   </section>
 </BaseLayout>
@@ -138,23 +68,6 @@ const tools = [
 
   a.tool-card:hover {
     border-color: var(--color-accent);
-  }
-
-  .tool-card.upcoming {
-    opacity: 0.7;
-  }
-
-  .tool-status {
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--color-accent);
-    margin-bottom: 8px;
-  }
-
-  .tool-status.muted {
-    color: var(--color-text-muted);
   }
 
   .tool-card h2 {

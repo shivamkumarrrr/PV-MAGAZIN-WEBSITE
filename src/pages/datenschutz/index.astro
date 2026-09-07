@@ -1,22 +1,33 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+
+// Bewusst fest gepflegt statt `new Date()`: ein automatisch mitwanderndes
+// "Stand"-Datum behauptet bei jedem Deployment eine inhaltliche Prüfung, die
+// gar nicht stattgefunden hat. Bei jeder echten Überarbeitung hochsetzen.
+const stand = "07.09.2026";
 ---
 
 <BaseLayout title="Datenschutz | Photovoltaik Aktuell" description="Datenschutzerklärung von Photovoltaik Aktuell (PPC GmbH).">
   <section class="prose legal">
     <h1>Datenschutzerklärung</h1>
 
-    <p class="legal-subtitle">Stand: {new Date().toLocaleDateString("de-DE")}</p>
+    <p class="legal-subtitle">Stand: {stand}</p>
 
     <p class="legal-subtitle">1. Verantwortlicher und Zweck der Verarbeitung</p>
     <p>
       Verantwortlicher für diese Webseite im Sinne der DSGVO ist:
     </p>
-    <address style={{ fontStyle: "normal" }}>
+    <address>
       <strong>PPC GmbH</strong><br />
-      Musterstraße 1, 66111 Saarbrücken<br />
-      E-Mail: info@photovoltaikaktuell.de
+      [BITTE EINTRAGEN]<br />
+      E-Mail: [BITTE EINTRAGEN]
     </address>
+    <p class="todo-note">
+      <strong>Hinweis:</strong> Diese Datenschutzerklärung ist noch nicht
+      vollständig — die mit <code>[BITTE EINTRAGEN]</code> markierten Angaben
+      (identisch zum <a href="/impressum/">Impressum</a>) müssen vor der
+      Veröffentlichung ergänzt und der Text anwaltlich geprüft werden.
+    </p>
     <p>
       Diese Seite erhebt und verarbeitet personenbezogene Daten ausschließlich zu dem
       Zweck, die Anfrage des Nutzers zu bearbeiten — insbesondere zur Bereitstellung des
@@ -34,16 +45,28 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       PVGIS-Daten des EU Joint Research Centre (re.jrc.ec.europa.eu) werden über einen
       serverseitigen Proxy abgerufen, um CORS-Beschränkungen zu umgehen. Dabei werden nur
       die vom Nutzer eingegebenen Koordinaten an PVGIS übermittelt — keine weiteren
-      personenbezogenen Daten.
+      personenbezogenen Daten und insbesondere nicht Ihre IP-Adresse.
+    </p>
+    <p>
+      Die Zuordnung Ihrer Postleitzahl zu Ort und Region erfolgt vollständig lokal
+      in Ihrem Browser, ohne Abfrage bei einem Dritten. Nur wenn Sie das optionale
+      Feld „Straße &amp; Hausnummer" ausfüllen, wird diese Adresse zur Umrechnung in
+      genaue Koordinaten an den Dienst Nominatim der OpenStreetMap Foundation
+      übermittelt (siehe Abschnitt 9).
     </p>
 
     <p class="legal-subtitle">3. Kontaktformular und Lead-Verarbeitung</p>
     <p>
-      Das Angebot-anfordern-Formular erhebt Name, E-Mail, Telefonnummer (optional) und eine
-      Nachricht. Diese Daten werden an einen Webhook-Endpunkt (serverlos über Vercel)
-      übermittelt und dienen ausschließlich der Kontaktaufnahme durch einen Fachbetrieb
-      aus dem Partnernetzwerk. Die Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1
-      lit. b DSGV zur Erfüllung einer vorvertraglichen Maßnahme.
+      Das Anfrageformular erhebt Name, E-Mail, Telefonnummer (optional) und eine
+      Nachricht. Zusammen mit diesen Angaben werden die Eckdaten Ihrer Berechnung
+      übermittelt (Anlagengröße, Ertrag, Ersparnis, Dachdaten, Postleitzahl), damit
+      wir Ihre Anfrage inhaltlich beantworten können. Empfänger ist die PPC GmbH
+      selbst; eine Weitergabe an Dritte zu Werbezwecken findet nicht statt. Die
+      Verarbeitung erfolgt auf Grundlage von Art. 6 Abs. 1 lit. b DSGVO zur
+      Durchführung vorvertraglicher Maßnahmen. Wir löschen die Daten, sobald der
+      Anlass der Anfrage erledigt ist und keine gesetzlichen Aufbewahrungsfristen
+      entgegenstehen. Sie können der weiteren Verarbeitung jederzeit formlos
+      widersprechen.
     </p>
 
     <p class="legal-subtitle">4. Calendly (Terminbuchung)</p>
@@ -51,7 +74,7 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       Über Calendly (calendly.com) können Beratungstermine gebucht werden. Dabei werden
       Daten an Calendly übermittelt — insbesondere Name, E-Mail und der gewählte
       Termin. Calendly ist ein Auftragsverarbeiter. Die Datenverarbeitung erfolgt auf
-      Grundlage von Art. 6 Abs. 1 lit. b DSGV. Details zur Datenverarbeitung durch
+      Grundlage von Art. 6 Abs. 1 lit. b DSGVO. Details zur Datenverarbeitung durch
       Calendly finden sich in der Calendly-Datenschutzerklärung
       (https://calendly.com/privacy).
     </p>
@@ -60,16 +83,20 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
     <p>
       Der Webserver erzeugt bei jedem Aufruf automatisch Logfiles, die den Browsertyp,
       die Betriebssystem, die Referrer-URL, die besuchte Seite und das Datum/Uhrzeit
-      enthalten. Diese Daten werden nicht mit Personen verknüpft und nach 7 Tagen
-      gelöscht. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGV (berechtigtes Interesse
+      enthalten. Diese Logs entstehen bei unserem Hosting-Dienstleister Vercel Inc.;
+      Speicherdauer und Löschung richten sich nach dessen Vorgaben. Eine Zusammen-
+      führung dieser Daten mit anderen Datenquellen nehmen wir nicht vor.
+      Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse
       an Sicherheit und Stabilität der Webseite).
     </p>
 
     <p class="legal-subtitle">6. Cookies und Tracking</p>
     <p>
-      Diese Seite nutzt keine Cookies zu Tracking- oder Werbezwecken. Technisch
-      notwendige Cookies (z. B. für die Sitzungsverwaltung des Rechners) werden nur
-      für die Dauer der Sitzung gespeichert und beim Schließen des Browsers gelöscht.
+      Diese Seite setzt keine Cookies — weder zu Tracking- oder Werbezwecken noch
+      technisch notwendige. Es findet kein Webanalyse-Tracking statt. Ihre Eingaben
+      im Rechner bleiben ausschließlich im Arbeitsspeicher Ihres Browsers und sind
+      nach dem Schließen der Seite verloren; eine Ausnahme gilt nur, wenn Sie das
+      Anfrageformular aktiv absenden (siehe Abschnitt 3).
     </p>
 
     <p class="legal-subtitle">7. Betroffenenrechte</p>
@@ -77,32 +104,77 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
       Sie haben das Recht auf:
     </p>
     <ul>
-      <li>Auskunft über die bei Ihnen gespeicherten personenbezogenen Daten (Art. 15 DSGV)</li>
-      <li>Berichtigung unrichtiger Daten (Art. 16 DSGV)</li>
-      <li>Löschung Ihrer Daten (Art. 17 DSGV)</li>
-      <li>Einschränkung der Verarbeitung (Art. 18 DSGV)</li>
-      <li>Datenübertragbarkeit in einem strukturierten, gängigen Format (Art. 20 DSGV)</li>
-      <li>Widerruf der Einwilligung (Art. 21 DSGV)</li>
-      <li>Beschwerde bei einer Aufsichtsbehörde (Art. 77 DSGV)</li>
+      <li>Auskunft über die bei Ihnen gespeicherten personenbezogenen Daten (Art. 15 DSGVO)</li>
+      <li>Berichtigung unrichtiger Daten (Art. 16 DSGVO)</li>
+      <li>Löschung Ihrer Daten (Art. 17 DSGVO)</li>
+      <li>Einschränkung der Verarbeitung (Art. 18 DSGVO)</li>
+      <li>Datenübertragbarkeit in einem strukturierten, gängigen Format (Art. 20 DSGVO)</li>
+      <li>Widerspruch gegen eine Verarbeitung auf Grundlage berechtigter Interessen (Art. 21 DSGVO)</li>
+      <li>Widerruf einer erteilten Einwilligung mit Wirkung für die Zukunft (Art. 7 Abs. 3 DSGVO)</li>
+      <li>Beschwerde bei einer Aufsichtsbehörde (Art. 77 DSGVO)</li>
     </ul>
 
-    <p class="legal-subtitle">8. Datenschutzbeauftragter</p>
+    <p class="legal-subtitle">8. Kontakt in Datenschutzfragen</p>
     <p>
-      Bei Fragen zum Datenschutz erreichen Sie unseren Datenschutzbeauftragten unter:
-      E-Mail: info@photovoltaikaktuell.de
+      Bei Fragen zum Datenschutz und zur Ausübung Ihrer Rechte erreichen Sie uns
+      unter der im <a href="/impressum/">Impressum</a> genannten Adresse.
     </p>
 
-    <p class="legal-subtitle">9. Änderungen dieser Datenschutzerklärung</p>
+    <p class="legal-subtitle">9. Eingesetzte Dienste und Empfänger</p>
+    <p>
+      Vollständige Übersicht der Dritten, die beim Betrieb dieser Seite Daten
+      erhalten können:
+    </p>
+    <ul>
+      <li>
+        <strong>Vercel Inc.</strong> (Hosting) — verarbeitet technisch notwendige
+        Verbindungsdaten inkl. IP-Adresse jedes Aufrufs.
+      </li>
+      <li>
+        <strong>EU Joint Research Centre / PVGIS</strong> (re.jrc.ec.europa.eu) —
+        erhält ausschließlich die Koordinaten, die aus Ihrer PLZ bzw. Adresse
+        hervorgehen. Der Abruf läuft über unseren eigenen Server, Ihre IP-Adresse
+        wird dabei nicht an PVGIS übermittelt.
+      </li>
+      <li>
+        <strong>OpenStreetMap Foundation / Nominatim</strong> — nur, wenn Sie im
+        Rechner freiwillig Straße und Hausnummer eintragen. Dann wird diese
+        Adresse zur Umrechnung in Koordinaten an Nominatim übermittelt; dabei
+        wird auch Ihre IP-Adresse übertragen. Ohne Adresseingabe findet kein
+        Abruf statt — die Zuordnung Ihrer Postleitzahl erfolgt lokal in Ihrem
+        Browser.
+      </li>
+      <li>
+        <strong>OpenStreetMap Foundation (Kartenkacheln)</strong> — die Karte im
+        Standort-Schritt lädt ihre Kartenbilder von tile.openstreetmap.org.
+        Dabei wird Ihre IP-Adresse an die OpenStreetMap Foundation übertragen.
+        Die Karte erscheint erst, nachdem Sie eine vollständige Postleitzahl
+        eingegeben haben.
+      </li>
+      <li>
+        <strong>Esri (Satellitenansicht)</strong> — nur, wenn Sie in der Karte
+        aktiv auf „Satellitenansicht" umschalten. Dann werden Kartenbilder von
+        server.arcgisonline.com geladen und dabei Ihre IP-Adresse übertragen.
+      </li>
+      <li>
+        <strong>Calendly LLC</strong> — nur, wenn Sie die Terminbuchung aktiv
+        öffnen und den Kalender per Klick laden (siehe Abschnitt 4).
+      </li>
+    </ul>
+    <p>
+      Die Kartensoftware (Leaflet) wird von unserem eigenen Server ausgeliefert;
+      ein Abruf über ein Drittanbieter-CDN findet nicht statt.
+    </p>
+    <p>
+      Schriftarten werden von unserem eigenen Server ausgeliefert. Es findet
+      <strong> keine</strong> Einbindung von Google Fonts und kein Abruf von
+      fonts.googleapis.com oder fonts.gstatic.com statt.
+    </p>
+
+    <p class="legal-subtitle">10. Änderungen dieser Datenschutzerklärung</p>
     <p>
       Wir behalten uns vor, diese Datenschutzerklärung bei Bedarf zu aktualisieren. Die
       jeweils aktuelle Version ist auf dieser Seite abrufbar.
-    </p>
-
-    <p class="legal-subtitle">10. Quellen</p>
-    <p>
-      Diese Datenschutzerklärung wurde mit Hilfe des <a href="https://e-recht24.de">eRecht24</a>-
-      Datenschutzerstellungs-Generators erstellt und den Anforderungen der DSGV sowie des
-      TMG angepasst.
     </p>
   </section>
 </BaseLayout>
@@ -129,5 +201,19 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 
   ul {
     padding-left: 1.3em;
+  }
+
+  .todo-note {
+    margin: 16px 0 24px;
+    padding: 14px 16px;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    background: var(--color-accent-subtle);
+    color: var(--color-text-primary);
+    font-size: 14px;
+  }
+
+  .todo-note code {
+    font-size: 13px;
   }
 </style>

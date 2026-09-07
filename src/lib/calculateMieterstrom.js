@@ -19,7 +19,7 @@
 //    ~40 %, Gesamteinnahmen ~4.900 €/Jahr, Amortisation ~7–8 Jahre.
 //  - Faustregeln: ab 6–8 WE wirtschaftlich sinnvoll (skaliert), typischer
 //    Direktverbrauchsanteil 30–50 % ohne, 60–80 % mit Speicher.
-import { EINSPEISE, ERTRAG_PRO_KWP } from "./calculate.js";
+import { einspeiseStaffel, ERTRAG_PRO_KWP } from "./calculate.js";
 
 // Mieterstromzuschlag nach Anlagengröße (Stufen, Euro/kWh).
 export const ZUSCHLAG_STUFEN = [
@@ -45,19 +45,44 @@ export function calculateMieterstrom({
   direktVerbrauchQuote,
   mieterstromPreis,
   investition,
+  // Laufende Kosten des Mieterstrom-Betriebs je teilnehmender Wohneinheit und
+  // Jahr (Messstellenbetrieb, Abrechnung, Bilanzkreis, Lieferantenpflichten).
+  // Bewusst KEIN vorbelegter Zahlenwert: eine belastbare, quellenbelegte
+  // Spanne dafür liegt hier nicht vor, und ein geschätzter Betrag würde die
+  // zentrale Kennzahl unbelegt verschieben (CLAUDE.md Daten-Regeln). Der
+  // Nutzer trägt den Wert aus seinem Angebot ein; bei 0 weist das Ergebnis
+  // die Amortisation ausdrücklich als "vor Betriebskosten" aus.
+  betriebskostenProWeJahr = 0,
 }) {
   const jahresertrag = Math.round(kwp * ERTRAG_PRO_KWP);
   const teilnehmendeWe = Math.round(we * teilnahmeQuote);
-  const mieterstromKwh = Math.round(jahresertrag * direktVerbrauchQuote);
+
+  // Die Direktverbrauchsquote beschreibt das Potenzial des GESAMTEN Hauses.
+  // Tatsächlich abgenommen wird nur der Anteil der Haushalte, die am
+  // Mieterstrommodell teilnehmen — der Rest ihres Bedarfs bleibt beim
+  // bisherigen Versorger und der Strom wird eingespeist. Vorher floss
+  // teilnahmeQuote gar nicht in die Rechnung ein: der Slider änderte weder
+  // Einnahmen noch Amortisation.
+  const abnahmeQuote = Math.max(0, Math.min(1, teilnahmeQuote));
+  const mieterstromKwh = Math.round(jahresertrag * direktVerbrauchQuote * abnahmeQuote);
   const einspeisungKwh = jahresertrag - mieterstromKwh;
 
   const zuschlag = zuschlagFuer(kwp);
   const erloesMieterstrom = Math.round(mieterstromKwh * mieterstromPreis);
   const erloesZuschlag = Math.round(mieterstromKwh * zuschlag);
-  const erloesEinspeisung = Math.round(einspeisungKwh * EINSPEISE);
+  const erloesEinspeisung = Math.round(einspeisungKwh * einspeiseStaffel(kwp));
 
   const gesamtEinnahmen = Math.round(erloesMieterstrom + erloesZuschlag + erloesEinspeisung);
-  const amortisation = investition > 0 ? Math.round((investition / gesamtEinnahmen) * 10) / 10 : Infinity;
+  const betriebskosten = Math.round(teilnehmendeWe * Math.max(0, betriebskostenProWeJahr));
+  const deckungsbeitrag = gesamtEinnahmen - betriebskosten;
+
+  // Amortisation auf den Deckungsbeitrag, nicht auf den Bruttoerlös: Erlös
+  // ist kein Gewinn. Bei betriebskostenProWeJahr = 0 sind beide identisch —
+  // dann ist die Kennzahl ausdrücklich eine Rechnung VOR Betriebskosten
+  // (siehe `vorBetriebskosten`).
+  const amortisation = deckungsbeitrag > 0
+    ? Math.round((investition / deckungsbeitrag) * 10) / 10
+    : null;
 
   return {
     kwp,
@@ -71,6 +96,9 @@ export function calculateMieterstrom({
     erloesZuschlag,
     erloesEinspeisung,
     gesamtEinnahmen,
+    betriebskosten,
+    deckungsbeitrag,
+    vorBetriebskosten: betriebskosten === 0,
     amortisation,
     wohnungenGenug: we >= 6,
   };

@@ -35,6 +35,10 @@ const breadcrumbLd = {
   </section>
 
   <section class="container">
+    {articles.length === 0 && (
+      <p class="empty">Für diese Kategorie sind noch keine Artikel veröffentlicht.</p>
+    )}
+    {articles.length > 0 && (
     <ul class="article-list">
       {articles.map((a) => (
         <li>
@@ -44,8 +48,8 @@ const breadcrumbLd = {
           </a>
         </li>
       ))}
-      {articles.length === 0 && <p class="empty">Für diese Kategorie sind noch keine Artikel veröffentlicht.</p>}
     </ul>
+    )}
   </section>
 </BaseLayout>
 
