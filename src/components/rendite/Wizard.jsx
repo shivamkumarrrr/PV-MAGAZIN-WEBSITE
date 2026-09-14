@@ -5,6 +5,7 @@ import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { AUSRICHTUNG, NEIGUNG } from "../../lib/calculate.js";
 import { calculateRenditeStandalone, RENDITE_LAUFZEIT } from "../../lib/calculateRendite.js";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 
 const STEPS = ["Anlage", "Verbraucher"];
 
@@ -104,6 +105,24 @@ export default function RenditeWizard() {
             {result.differenzZurAnlage >= 0
               ? `Die PV bringt ${formatEur(result.differenzZurAnlage)} mehr ein als dieselbe Summe zu ${Math.round(result.vergleichszins * 100)} % auf ein Festgeldkonto — und Sie sind unabhängig von steigenden Strompreisen.`
               : `Rein als Geldanlage schneidet die PV mit ${formatEur(Math.abs(result.differenzZurAnlage))} schlechter ab als dieselbe Summe zu ${Math.round(result.vergleichszins * 100)} % auf ein Festgeldkonto. Der Gegenwert liegt dann vor allem in der Unabhängigkeit vom Strompreis und in Ihrer Autarkie.`}
+          </p>
+        </div>
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Gewinn über die Laufzeit im Vergleich
+          </div>
+          <BarCompare
+            label1="Festgeld"
+            val1={Math.round(result.alternativGewinn)}
+            label2="PV-Anlage"
+            val2={Math.round(result.ueberschuss)}
+            unit="€"
+            color1={theme.color.textMuted}
+            color2={theme.color.sky}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Derselbe Betrag zum Vergleichszins angelegt gegenüber dem Überschuss der Anlage nach Abzug der Investition.
           </p>
         </div>
 

@@ -5,6 +5,7 @@ import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { calculateMieterstrom, zuschlagFuer, empfehlungDirektverbrauch } from "../../lib/calculateMieterstrom.js";
 import { ERTRAG_PRO_KWP } from "../../lib/calculate.js";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 
 function euro(v) {
   return v.toLocaleString("de-DE", { maximumFractionDigits: 0 }) + " €";
@@ -100,6 +101,24 @@ export default function MieterstromWizard() {
           {result.wohnungenGenug
             ? `Mieterstrom wird ab ca. 6–8 Wohneinheiten wirtschaftlich sinnvoll, weil sich die Fixkosten für Messkonzept und Abrechnung auf mehr Einheiten verteilen.`
             : `Unter ca. 6 Wohneinheiten übersteigen die Fixkosten für Messkonzept, Abrechnung und Lieferantenpflichten oft die Mehreinnahmen. Die Gemeinschaftliche Gebäudeversorgung (§ 42b EnWG) ist hier oft die schlankere Alternative.`}
+        </div>
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Wohin der Dachstrom fließt
+          </div>
+          <BarCompare
+            label1="An die Mieter"
+            val1={Math.round(result.mieterstromKwh)}
+            label2="Ins Netz"
+            val2={Math.round(result.einspeisungKwh)}
+            unit="kWh/Jahr"
+            color1={theme.color.sky}
+            color2={theme.color.textMuted}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            An die Mieter gelieferter Strom bringt Mieterstrompreis plus Zuschlag, der Rest nur die Einspeisevergütung — deshalb hängt die Wirtschaftlichkeit an der Belegung.
+          </p>
         </div>
 
         <div style={{ background: theme.color.bg, borderRadius: theme.radius.lg, padding: "18px 18px", marginBottom: 16, fontSize: 12.5, color: theme.color.textSecondary, lineHeight: 1.65 }}>

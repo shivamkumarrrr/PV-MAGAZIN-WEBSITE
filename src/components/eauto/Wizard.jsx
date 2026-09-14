@@ -4,6 +4,7 @@ import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { calculateEAuto, empfehlungPVGroesse } from "../../lib/calculateEAuto.js";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 
 function euro(v) {
   return v.toLocaleString("de-DE", { maximumFractionDigits: 0 }) + " €";
@@ -84,6 +85,24 @@ export default function EAutoWizard() {
               <div style={{ fontSize: 11, color: theme.color.textMuted }}>nur Netz ({(result.netzpreis * 100).toLocaleString("de-DE", { maximumFractionDigits: 1 }) + " ct/kWh"})</div>
             </div>
           </div>
+        </div>
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Ladekosten pro Jahr im Vergleich
+          </div>
+          <BarCompare
+            label1="Nur Netzstrom"
+            val1={Math.round(result.kostenNurNetz)}
+            label2="Mit PV-Überschuss"
+            val2={Math.round(result.kostenGemischt)}
+            unit="€/Jahr"
+            color1={theme.color.textMuted}
+            color2={theme.color.sky}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Der Solaranteil ist nicht mit null bewertet, sondern mit dem entgangenen Einspeiseerlös — sonst fiele die Ersparnis zu hoch aus.
+          </p>
         </div>
 
         <div style={{ background: theme.color.bg, borderRadius: theme.radius.lg, padding: "18px 18px", marginBottom: 16, fontSize: 12.5, color: theme.color.textSecondary, lineHeight: 1.65 }}>

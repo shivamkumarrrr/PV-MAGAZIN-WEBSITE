@@ -2,6 +2,7 @@ import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import BalkonIcon from "./BalkonIcon.jsx";
 import { WECHSELRICHTER_GRENZE_W, EIGENVERBRAUCH_ANTEIL } from "../../lib/calculateBalkonkraftwerk.js";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 
 export default function ResultScreen({ result, modulleistung, onRestart }) {
   const leadZusammenfassung = `${modulleistung} Wp · ${result.jahresertrag.toLocaleString("de-DE")} kWh/Jahr · ${result.jahresersparnis.toLocaleString("de-DE")} €/Jahr`;
@@ -88,6 +89,24 @@ export default function ResultScreen({ result, modulleistung, onRestart }) {
           </div>
         </div>
       </div>
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Wohin der Strom geht
+          </div>
+          <BarCompare
+            label1="Selbst genutzt"
+            val1={result.eigenverbrauch}
+            label2="Ins Netz"
+            val2={result.jahresertrag - result.eigenverbrauch}
+            unit="kWh/Jahr"
+            color1={theme.color.sky}
+            color2={theme.color.textMuted}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Nur der selbst genutzte Teil spart Geld. Eingespeister Strom aus einem Steckersolargerät wird in der Regel nicht vergütet.
+          </p>
+        </div>
 
       <div
         style={{
