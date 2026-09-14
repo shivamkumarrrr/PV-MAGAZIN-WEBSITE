@@ -289,10 +289,15 @@ die Werte vergleichen, nicht nur den Code lesen.
   Musterdaten — nicht wieder einfügen, auch nicht als Beispiel.
 - `LEAD_WEBHOOK_URL` (Vercel-Env) ist nicht gesetzt. Solange sie fehlt,
   landen Leads nur im Funktions-Log (`pv-lead`), niemand wird benachrichtigt.
-- `public/og-default.png` (1200×630) fehlt. Bis dahin gibt
-  `BaseLayout.astro` bewusst **kein** `og:image` aus — Schalter
-  `OG_STANDARD_VORHANDEN` umlegen, sobald die Datei da ist.
-- `public/favicon.svg` ist noch das Astro-Standardlogo.
+- ~~`public/og-default.png` und Favicon~~ — erledigt: beide aus der
+  Logo-Bildmarke erzeugt (`favicon.svg` als Vektor-Nachbau der vier
+  Modulfelder, `favicon.ico` dieselbe Marke gerastert, `og-default.png`
+  1200×630 mit Logo, Archivo-Headline und Akzentlinie).
+  `OG_STANDARD_VORHANDEN` steht auf `true`.
+  Achtung bei künftigen Marken-Arbeiten: Die Bildmarke im Logo trägt Gold
+  (#D4950A), nicht das Akzent-Token #FF5200 der Oberfläche. Der Satz weiter
+  oben, #FF5200 stamme aus dem Logo-File, stimmt so nicht — im PNG kommt
+  dieser Wert nicht vor.
 - Keine Bilder im gesamten Projekt außer dem Logo. Artikel und Startseite
   brauchen welche; Quelle ist voraussichtlich der Firmen-NAS.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
