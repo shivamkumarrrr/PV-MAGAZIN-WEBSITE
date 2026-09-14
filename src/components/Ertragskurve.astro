@@ -65,7 +65,6 @@ const nf = new Intl.NumberFormat("de-DE");
     viewBox={`0 0 ${B} ${H}`}
     role="img"
     aria-label={`Jahresgang des Solarertrags einer ${kwp}-kWp-Anlage in Deutschland: von rund ${nf.format(werte[11])} Kilowattstunden im Dezember auf rund ${nf.format(max)} Kilowattstunden im Juli.`}
-    preserveAspectRatio="none"
   >
     <!-- Grundlinie statt vollem Raster: die Kurvenform ist die Aussage,
          nicht das Ablesen einzelner Werte. -->
@@ -75,6 +74,11 @@ const nf = new Intl.NumberFormat("de-DE");
     <path d={linie} class="linie" pathLength="1" />
 
     <circle cx={sommer.x} cy={sommer.y} r="4" class="hoehepunkt" />
+    <!-- Der Höchstwert beschriftet: die Kurve soll ohne Bildunterschrift
+         lesbar sein, sobald sie als Bild irgendwo allein steht. -->
+    <text x={sommer.x} y={sommer.y - 12} class="hoehepunkt-wert" text-anchor="middle">
+      {nf.format(max)} kWh
+    </text>
   </svg>
 
   <div class="monate" aria-hidden="true">
@@ -94,11 +98,23 @@ const nf = new Intl.NumberFormat("de-DE");
     margin: 0;
   }
 
+  /* Feste Proportion statt fester Höhe: mit preserveAspectRatio="none" und
+     einer clamp()-Höhe wurde die Kurve je nach Spaltenbreite gestaucht oder
+     gestreckt — der Jahresgang sah auf jedem Gerät anders aus. */
   svg {
     display: block;
     width: 100%;
-    height: clamp(150px, 24vw, 220px);
+    height: auto;
+    aspect-ratio: 520 / 240;
     overflow: visible;
+  }
+
+  .hoehepunkt-wert {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 600;
+    fill: var(--color-sky);
+    font-variant-numeric: tabular-nums;
   }
 
   .achse {

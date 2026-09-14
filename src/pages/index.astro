@@ -4,6 +4,25 @@ import Ertragskurve from "../components/Ertragskurve.astro";
 import { getCollection } from "astro:content";
 import { categoryLabel } from "../lib/categories.js";
 import { RECHNER } from "../lib/rechner.js";
+import {
+  STROMPREIS,
+  EINSPEISE,
+  KOSTEN_PRO_KWP,
+  ERTRAG_PRO_KWP,
+} from "../lib/calculate.js";
+import {
+  IconRechnerPhotovoltaik,
+  IconRechnerKombi,
+  IconRechnerRendite,
+  IconRechnerSpeicher,
+  IconRechnerBalkonkraftwerk,
+  IconRechnerCo2,
+  IconRechnerGestehungskosten,
+  IconRechnerReinigung,
+  IconRechnerEauto,
+  IconRechnerSteuer,
+  IconRechnerMieterstrom,
+} from "../components/IconsRechner.jsx";
 
 // Gestaltungsansatz: Die Seite argumentiert durchgehend mit belegten Zahlen —
 // also sieht sie aus wie ein Messprotokoll, nicht wie eine Werbeseite. Kein
@@ -13,6 +32,15 @@ import { RECHNER } from "../lib/rechner.js";
 // EIN Signature-Element (CLAUDE.md Design-Regel 11): die Ertragskurve im
 // Hero, gezeichnet aus denselben Monatsanteilen, mit denen der Rechner
 // arbeitet. Alles andere bleibt bewusst ruhig.
+//
+// Tonale Gliederung (neu): Die Seite lief vorher durchgehend in Off-White
+// mit 1-px-Rändern — jeder Abschnitt sah aus wie der davor, nichts trug
+// Gewicht. Jetzt drei Ebenen: helle Arbeitsflächen (Hero, Rechner,
+// Ratgeber), EINE dunkle Platte in Brand-Navy für die Quellen (das ist das
+// inhaltliche Zentrum der Seite und darf wie ein Prüfsiegel wirken) und EIN
+// Akzentfeld in PPC-Orange ganz am Schluss für die Handlung. Das Orange
+// bleibt damit dem Handeln vorbehalten (Design-Regel 2), taucht aber
+// endlich einmal in Flächengröße auf, statt nur als 40-px-Knopf.
 //
 // Bewusst KEIN Eyebrow-Label über jedem Abschnitt — das wiederholte
 // Kleinversalien-Kicker-Muster ist ein bekannter Generierungs-Tell. Die
@@ -24,6 +52,41 @@ const neueste = artikel.slice(0, 4);
 
 const hauptRechner = RECHNER.find((r) => r.slug === "photovoltaik");
 const weitereRechner = RECHNER.filter((r) => r.slug !== "photovoltaik");
+
+// Zeichen je Rechner — dieselbe Zuordnung wie auf /rechner/. Ohne
+// client:-Direktive rendert Astro sie zu statischem SVG, die Seite lädt
+// dafür kein JavaScript. Die Startseite hatte bisher außer der Ertragskurve
+// keinerlei Bildzeichen; die elf Signets liegen längst im Projekt.
+const SIGNET = {
+  photovoltaik: IconRechnerPhotovoltaik,
+  kombi: IconRechnerKombi,
+  rendite: IconRechnerRendite,
+  speicher: IconRechnerSpeicher,
+  balkonkraftwerk: IconRechnerBalkonkraftwerk,
+  co2: IconRechnerCo2,
+  gestehungskosten: IconRechnerGestehungskosten,
+  reinigung: IconRechnerReinigung,
+  eauto: IconRechnerEauto,
+  steuer: IconRechnerSteuer,
+  mieterstrom: IconRechnerMieterstrom,
+};
+const HauptSignet = SIGNET[hauptRechner.slug];
+
+const nf = new Intl.NumberFormat("de-DE");
+const ct = (eur) =>
+  new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
+
+// Rechenbasis-Leiste unter dem Hero. Die vier Werte werden NICHT hier
+// notiert, sondern aus calculate.js importiert — dieselben Konstanten, mit
+// denen der Rechner arbeitet. Eine abgetippte Zahl wäre genau der Fehler,
+// den die Seite dem Wettbewerb vorwirft. Quelle und Stand stehen im
+// Kommentar über der jeweiligen Konstante in calculate.js.
+const basis = [
+  { wert: `${ct(STROMPREIS)} ct`, einheit: "je kWh Haushaltsstrom", beleg: "BDEW, April 2026" },
+  { wert: `${ct(EINSPEISE)} ct`, einheit: "Einspeisung bis 10 kWp", beleg: "Bundesnetzagentur, § 49 EEG" },
+  { wert: `${nf.format(KOSTEN_PRO_KWP)} €`, einheit: "Systemkosten je kWp", beleg: "Fraunhofer ISE, 2026" },
+  { wert: `${nf.format(ERTRAG_PRO_KWP)} kWh`, einheit: "Ertrag je kWp und Jahr", beleg: "Mittelwert Deutschland" },
+];
 
 // Die Quellen sind das eigentliche Unterscheidungsmerkmal gegenüber ADAC,
 // co2online und den Anbieter-Rechnern — deshalb ein eigener Abschnitt statt
@@ -38,8 +101,6 @@ const quellen = [
   { name: "ADAC", traeger: "Ratgeber Photovoltaik", liefert: "Autarkiegrade, Haushaltsverbrauch und Wechselrichter-Austauschkosten" },
   { name: "Umweltbundesamt", traeger: "Emissionsbilanz Strommix", liefert: "CO₂-Faktor je Kilowattstunde Netzstrom" },
 ];
-
-const nf = new Intl.NumberFormat("de-DE");
 ---
 
 <BaseLayout
@@ -50,6 +111,11 @@ const nf = new Intl.NumberFormat("de-DE");
     <div class="hero-inner container">
       <div class="hero-text">
         <h1>Was Ihr Dach wirklich bringt — nachgerechnet, nicht geschätzt</h1>
+        <p class="hero-lead">
+          Elf Rechner auf einer gemeinsamen Datenbasis: Satellitendaten für
+          Ihre Postleitzahl, Vergütungssätze aus dem Gesetz, Kosten aus der
+          Marktstatistik. Jede Zahl mit Quelle und Stand.
+        </p>
         <div class="hero-aktionen">
           <a href="/rechner/photovoltaik/" class="knopf-primaer">Ertrag berechnen</a>
           <a href="/ratgeber/" class="knopf-sekundaer">Zum Ratgeber</a>
@@ -59,6 +125,23 @@ const nf = new Intl.NumberFormat("de-DE");
       <div class="hero-grafik">
         <Ertragskurve kwp={10} />
       </div>
+    </div>
+
+    <!-- Rechenbasis: die vier Konstanten, aus denen sich alles Weitere
+         ergibt. Keine Erfolgs-Kennzahlen ("10.000 Nutzer") — das wäre die
+         Hero-Metrik-Schablone. Hier steht der Input, nicht der Applaus. -->
+    <div class="basis">
+      <dl class="basis-inner container">
+        {basis.map((b) => (
+          <div class="basis-eintrag">
+            <dt class="zahl">{b.wert}</dt>
+            <dd>
+              <span class="basis-einheit">{b.einheit}</span>
+              <span class="basis-beleg">{b.beleg}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
     </div>
   </section>
 
@@ -70,6 +153,7 @@ const nf = new Intl.NumberFormat("de-DE");
 
     <a href={`/rechner/${hauptRechner.slug}/`} class="rechner-haupt">
       <div class="rechner-haupt-text">
+        <span class="rechner-haupt-signet" aria-hidden="true"><HauptSignet size={30} /></span>
         <h3>{hauptRechner.title}</h3>
         <p>{hauptRechner.beschreibung}</p>
         <span class="rechner-haupt-link">Rechner starten →</span>
@@ -91,20 +175,24 @@ const nf = new Intl.NumberFormat("de-DE");
     </a>
 
     <ul class="rechner-liste">
-      {weitereRechner.map((r) => (
-        <li>
-          <a href={`/rechner/${r.slug}/`}>
-            <span class="rechner-name">{r.kurz}</span>
-            <span class="rechner-zweck">{r.beschreibung}</span>
-          </a>
-        </li>
-      ))}
+      {weitereRechner.map((r) => {
+        const Signet = SIGNET[r.slug];
+        return (
+          <li>
+            <a href={`/rechner/${r.slug}/`}>
+              {Signet && <span class="rechner-signet" aria-hidden="true"><Signet size={22} /></span>}
+              <span class="rechner-name">{r.kurz}</span>
+              <span class="rechner-zweck">{r.beschreibung}</span>
+            </a>
+          </li>
+        );
+      })}
     </ul>
   </section>
 
   <section class="quellen">
     <div class="container">
-      <div class="abschnitt-kopf">
+      <div class="abschnitt-kopf quellen-kopf">
         <h2>Woher die Zahlen kommen</h2>
         <p>
           Keine Anbieter-Schätzungen. Jede Konstante in unseren Rechnern ist im
@@ -148,7 +236,33 @@ const nf = new Intl.NumberFormat("de-DE");
       Alle {nf.format(artikel.length)} Artikel ansehen →
     </a>
   </section>
+
+  <!-- Abschluss: das einzige Akzentfeld der Seite. Text in Tintenschwarz
+       statt Weiß — Weiß auf #FF5200 erreicht nur 3,3:1 und wäre auf
+       Fließtextgröße nicht lesbar; Tintenschwarz liegt bei ~7:1. -->
+  <section class="abschluss">
+    <div class="container abschluss-inner">
+      <div>
+        <h2>Rechnen Sie Ihr Dach durch</h2>
+        <p>
+          Vier Schritte, keine Anmeldung. Sie geben Dachfläche, Ausrichtung und
+          Stromverbrauch ein, PVGIS liefert die Einstrahlung für Ihre
+          Postleitzahl, am Ende steht die Amortisation in Jahren.
+        </p>
+      </div>
+      <a href="/rechner/photovoltaik/" class="knopf-dunkel">Ertrag berechnen →</a>
+    </div>
+  </section>
 </BaseLayout>
+
+<style is:global>
+  /* Der Footer setzt global 64 px Abstand nach oben — sinnvoll hinter einem
+     Artikel, aber hier läge ein Streifen Seitenhintergrund zwischen dem
+     Akzentfeld und dem Footer. Nur auf dieser Seite abgeschaltet. */
+  .site-footer {
+    margin-top: 0;
+  }
+</style>
 
 <style>
   /* ── Hero ───────────────────────────────────────────────────────────── */
@@ -159,9 +273,9 @@ const nf = new Intl.NumberFormat("de-DE");
 
   .hero-inner {
     display: grid;
-    gap: clamp(28px, 5vw, 56px);
-    padding-top: clamp(40px, 7vw, 76px);
-    padding-bottom: clamp(36px, 6vw, 64px);
+    gap: clamp(28px, 5vw, 64px);
+    padding-top: clamp(48px, 8vw, 92px);
+    padding-bottom: clamp(40px, 6vw, 72px);
     align-items: center;
   }
 
@@ -169,17 +283,44 @@ const nf = new Intl.NumberFormat("de-DE");
      Spalten gleich breit zu setzen. */
   @media (min-width: 860px) {
     .hero-inner {
-      grid-template-columns: 1.05fr 0.95fr;
+      grid-template-columns: 1.02fr 0.98fr;
     }
   }
 
   .hero h1 {
-    font-size: clamp(2rem, 5vw, 3.25rem);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: clamp(2.25rem, 5.4vw, 3.75rem);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
     text-wrap: balance;
-    margin: 0 0 28px;
-    max-width: 19ch;
+    margin: 0 0 20px;
+    max-width: 17ch;
+  }
+
+  .hero-lead {
+    margin: 0 0 30px;
+    max-width: 46ch;
+    font-size: clamp(1rem, 1.6vw, 1.0625rem);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+  }
+
+  /* Ein Auftritt beim Laden, gestaffelt — nicht drei verstreute Effekte.
+     Ruhezustand ist der fertige Zustand: die Elemente sind ohne CSS-
+     Animation sichtbar, die Animation blendet sie nur ein. */
+  @media (prefers-reduced-motion: no-preference) {
+    .hero h1,
+    .hero-lead,
+    .hero-aktionen {
+      animation: auftritt 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+    .hero-lead { animation-delay: 0.08s; }
+    .hero-aktionen { animation-delay: 0.16s; }
+  }
+
+  @keyframes auftritt {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
   }
 
   .hero-aktionen {
@@ -192,12 +333,13 @@ const nf = new Intl.NumberFormat("de-DE");
   .knopf-sekundaer {
     display: inline-flex;
     align-items: center;
-    padding: 14px 26px;
+    padding: 15px 28px;
     border-radius: var(--radius-pill);
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
-    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s,
+      transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .knopf-primaer {
@@ -209,6 +351,7 @@ const nf = new Intl.NumberFormat("de-DE");
   .knopf-primaer:hover {
     background: var(--color-accent-hover);
     border-color: var(--color-accent-hover);
+    transform: translateY(-1px);
   }
 
   .knopf-sekundaer {
@@ -221,17 +364,90 @@ const nf = new Intl.NumberFormat("de-DE");
     border-color: var(--color-text-primary);
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .knopf-primaer:hover { transform: none; }
+  }
+
+  /* ── Rechenbasis ────────────────────────────────────────────────────── */
+
+  .basis {
+    border-top: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .basis-inner {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    margin: 0;
+  }
+
+  @media (min-width: 820px) {
+    .basis-inner {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  /* Trennlinien statt Karten: vier Werte, die zusammengehören, gehören in
+     eine Zeile und nicht in vier Kästen. */
+  .basis-eintrag {
+    padding: 20px 22px 22px 0;
+    border-left: 1px solid var(--color-border);
+    padding-left: 22px;
+  }
+
+  .basis-eintrag:first-child {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  @media (max-width: 819px) {
+    .basis-eintrag:nth-child(3) {
+      border-left: 0;
+      padding-left: 0;
+    }
+    .basis-eintrag:nth-child(n + 3) {
+      border-top: 1px solid var(--color-border);
+    }
+  }
+
+  .basis-eintrag dt {
+    font-family: var(--font-display);
+    font-size: clamp(1.375rem, 2.6vw, 1.625rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--color-brand-navy);
+    line-height: 1.1;
+  }
+
+  .basis-eintrag dd {
+    margin: 6px 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .basis-einheit {
+    font-size: 13.5px;
+    line-height: 1.35;
+    color: var(--color-text-primary);
+  }
+
+  .basis-beleg {
+    font-size: 12px;
+    color: var(--color-text-muted);
+  }
+
   /* ── Gemeinsamer Abschnittskopf ─────────────────────────────────────── */
 
   .abschnitt-kopf {
-    margin-bottom: 28px;
+    margin-bottom: 32px;
     max-width: 56ch;
   }
 
   .abschnitt-kopf h2 {
-    font-size: var(--schrift-xl);
-    letter-spacing: -0.015em;
-    margin: 0 0 8px;
+    font-size: clamp(1.75rem, 3.4vw, 2.25rem);
+    letter-spacing: -0.025em;
+    margin: 0 0 10px;
   }
 
   .abschnitt-kopf p {
@@ -242,8 +458,8 @@ const nf = new Intl.NumberFormat("de-DE");
 
   .rechner,
   .ratgeber {
-    padding-top: clamp(48px, 7vw, 80px);
-    padding-bottom: clamp(48px, 7vw, 80px);
+    padding-top: clamp(56px, 8vw, 96px);
+    padding-bottom: clamp(56px, 8vw, 96px);
   }
 
   /* ── Rechner ────────────────────────────────────────────────────────── */
@@ -254,14 +470,14 @@ const nf = new Intl.NumberFormat("de-DE");
   .rechner-haupt {
     display: grid;
     gap: 24px;
-    padding: clamp(24px, 3vw, 34px);
+    padding: clamp(26px, 3.2vw, 38px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     background: var(--color-surface);
     text-decoration: none;
     color: inherit;
     margin-bottom: 20px;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.2s;
   }
 
   .rechner-haupt:hover {
@@ -275,16 +491,23 @@ const nf = new Intl.NumberFormat("de-DE");
     }
   }
 
+  .rechner-haupt-signet {
+    display: block;
+    color: var(--color-accent);
+    margin-bottom: 14px;
+  }
+
   .rechner-haupt h3 {
-    font-size: var(--schrift-lg);
+    font-size: var(--schrift-xl);
     margin: 0 0 10px;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
   }
 
   .rechner-haupt-text p {
-    margin: 0 0 16px;
+    margin: 0 0 18px;
     color: var(--color-text-secondary);
-    font-size: 15px;
+    font-size: 15.5px;
+    line-height: 1.6;
     max-width: 44ch;
   }
 
@@ -339,8 +562,12 @@ const nf = new Intl.NumberFormat("de-DE");
     }
   }
 
+  /* Signet in eigener Spalte: es soll den Namen ankündigen, nicht über ihm
+     schweben wie das Icon-über-jeder-Überschrift-Muster. */
   .rechner-liste a {
-    display: block;
+    display: grid;
+    grid-template-columns: 22px 1fr;
+    column-gap: 14px;
     height: 100%;
     padding: 18px 20px;
     background: var(--color-surface);
@@ -349,8 +576,20 @@ const nf = new Intl.NumberFormat("de-DE");
     transition: background-color 0.15s;
   }
 
+  .rechner-signet {
+    grid-row: span 2;
+    display: block;
+    padding-top: 2px;
+    color: var(--color-text-muted);
+    transition: color 0.15s;
+  }
+
   .rechner-liste a:hover {
     background: var(--color-accent-subtle);
+  }
+
+  .rechner-liste a:hover .rechner-signet {
+    color: var(--color-accent);
   }
 
   .rechner-name {
@@ -370,12 +609,27 @@ const nf = new Intl.NumberFormat("de-DE");
 
   /* ── Quellen ────────────────────────────────────────────────────────── */
 
+  /* Die einzige dunkle Platte der Seite. Sie trägt das Argument, mit dem
+     sich dieses Produkt von ADAC- und Anbieter-Rechnern unterscheidet, und
+     gibt der Seite gleichzeitig den tonalen Halt, der ihr in durchgehendem
+     Off-White gefehlt hat. Brand-Navy, nicht Schwarz — Schwarz plus
+     Neon-Akzent ist ein bekannter Generierungs-Tell (Design-Regel 5). */
   .quellen {
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-border);
-    border-bottom: 1px solid var(--color-border);
-    padding-top: clamp(48px, 7vw, 80px);
-    padding-bottom: clamp(48px, 7vw, 80px);
+    background: var(--color-brand-navy);
+    color: #fff;
+    padding-top: clamp(56px, 8vw, 96px);
+    padding-bottom: clamp(56px, 8vw, 96px);
+  }
+
+  .quellen-kopf h2 {
+    color: #fff;
+  }
+
+  /* Heller Text auf dunklem Grund wirkt dünner — 0,05 mehr Zeilenhöhe und
+     eine kräftigere Sekundärfarbe (ca. 7:1 statt 3,1:1 mit #5A6570). */
+  .quellen-kopf p {
+    color: #C9CCD6;
+    line-height: 1.65;
   }
 
   /* Typografische Liste statt Logo-Reihe oder Icon-Text-Pillen: Was eine
@@ -389,39 +643,39 @@ const nf = new Intl.NumberFormat("de-DE");
   @media (min-width: 720px) {
     .quellen-liste {
       grid-template-columns: 1fr 1fr;
-      column-gap: 40px;
+      column-gap: 48px;
     }
   }
 
   .quelle {
     padding: 16px 0;
-    border-top: 1px solid var(--color-border);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
   }
 
   .quelle dt {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 15px;
-    color: var(--color-text-primary);
+    font-size: 15.5px;
+    color: #fff;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
   }
 
   .quelle-traeger {
     font-family: var(--font-body);
     font-weight: 400;
     font-size: 12.5px;
-    color: var(--color-text-secondary);
+    color: #A9AEBC;
   }
 
   .quelle dd {
     margin: 0;
     font-size: 14px;
-    line-height: 1.55;
-    color: var(--color-text-secondary);
+    line-height: 1.6;
+    color: #C9CCD6;
     max-width: 50ch;
   }
 
@@ -433,7 +687,7 @@ const nf = new Intl.NumberFormat("de-DE");
      Titel auf breiten Bildschirmen an der rechten Kante klebten. */
   .artikel-liste {
     list-style: none;
-    margin: 0 0 20px;
+    margin: 0 0 24px;
     padding: 0;
   }
 
@@ -448,7 +702,7 @@ const nf = new Intl.NumberFormat("de-DE");
   .artikel-liste a {
     display: grid;
     gap: 4px 24px;
-    padding: 18px 12px 20px 0;
+    padding: 20px 12px 22px 0;
     text-decoration: none;
     color: inherit;
     transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s;
@@ -463,7 +717,7 @@ const nf = new Intl.NumberFormat("de-DE");
 
     .artikel-kategorie {
       grid-row: span 2;
-      padding-top: 3px;
+      padding-top: 4px;
     }
   }
 
@@ -492,8 +746,9 @@ const nf = new Intl.NumberFormat("de-DE");
   .artikel-titel {
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: var(--schrift-md);
-    line-height: 1.3;
+    font-size: var(--schrift-lg);
+    line-height: 1.25;
+    letter-spacing: -0.015em;
     max-width: 54ch;
   }
 
@@ -519,5 +774,63 @@ const nf = new Intl.NumberFormat("de-DE");
 
   .alle-artikel:hover {
     color: var(--color-accent-hover);
+  }
+
+  /* ── Abschluss ──────────────────────────────────────────────────────── */
+
+  .abschluss {
+    background: var(--color-accent);
+    color: var(--color-text-primary);
+  }
+
+  .abschluss-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    padding-top: clamp(40px, 5.5vw, 64px);
+    padding-bottom: clamp(40px, 5.5vw, 64px);
+  }
+
+  .abschluss h2 {
+    margin: 0 0 8px;
+    font-size: clamp(1.625rem, 3.2vw, 2.125rem);
+    letter-spacing: -0.025em;
+    color: var(--color-text-primary);
+  }
+
+  .abschluss p {
+    margin: 0;
+    max-width: 52ch;
+    font-size: 15.5px;
+    line-height: 1.6;
+    /* Dunkler Ton des Untergrunds statt Grau: Grau auf Farbe wirkt
+       ausgewaschen. #4A1500 auf #FF5200 liegt bei ca. 5,4:1. */
+    color: #4A1500;
+    text-wrap: pretty;
+  }
+
+  .knopf-dunkel {
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    padding: 15px 28px;
+    border-radius: var(--radius-pill);
+    background: var(--color-text-primary);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .knopf-dunkel:hover {
+    background: var(--color-brand-navy);
+    transform: translateY(-1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .knopf-dunkel:hover { transform: none; }
   }
 </style>
