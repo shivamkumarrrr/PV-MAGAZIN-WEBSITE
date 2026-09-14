@@ -4,6 +4,38 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 // Information brauchte aber auch RechnerCta.astro für den Titel der
 // "Passend dazu"-Box. Jetzt eine Quelle der Wahrheit: src/lib/rechner.js.
 import { RECHNER } from "../../lib/rechner.js";
+import {
+  IconRechnerPhotovoltaik,
+  IconRechnerKombi,
+  IconRechnerRendite,
+  IconRechnerSpeicher,
+  IconRechnerBalkonkraftwerk,
+  IconRechnerCo2,
+  IconRechnerGestehungskosten,
+  IconRechnerReinigung,
+  IconRechnerEauto,
+  IconRechnerSteuer,
+  IconRechnerMieterstrom,
+} from "../../components/Icons.jsx";
+
+// Zeichen je Rechner. Bewusst HIER und nicht in src/lib/rechner.js: die
+// Liste ist reine Daten und wird auch von RechnerCta.astro gelesen — sie
+// soll keine React-Komponenten mitschleppen. Ohne client:-Direktive
+// rendert Astro die Zeichen zu statischem SVG, die Seite lädt dafür kein
+// JavaScript.
+const SIGNET = {
+  photovoltaik: IconRechnerPhotovoltaik,
+  kombi: IconRechnerKombi,
+  rendite: IconRechnerRendite,
+  speicher: IconRechnerSpeicher,
+  balkonkraftwerk: IconRechnerBalkonkraftwerk,
+  co2: IconRechnerCo2,
+  gestehungskosten: IconRechnerGestehungskosten,
+  reinigung: IconRechnerReinigung,
+  eauto: IconRechnerEauto,
+  steuer: IconRechnerSteuer,
+  mieterstrom: IconRechnerMieterstrom,
+};
 
 // Alle gelisteten Rechner sind live. Der frühere "status"-Schalter samt
 // "Bald verfügbar"-Karte ist entfallen, weil kein Eintrag ihn mehr nutzte.
@@ -22,6 +54,11 @@ const tools = RECHNER;
   <section class="container tool-grid">
     {tools.map((t) => (
       <a href={`/rechner/${t.slug}/`} class="tool-card">
+        {SIGNET[t.slug] && (
+          <span class="tool-signet">
+            {(() => { const Signet = SIGNET[t.slug]; return <Signet size={30} />; })()}
+          </span>
+        )}
         <h2>{t.title}</h2>
         <p>{t.beschreibung}</p>
         <span class="tool-link">Jetzt rechnen →</span>
@@ -68,6 +105,28 @@ const tools = RECHNER;
 
   a.tool-card:hover {
     border-color: var(--color-accent);
+  }
+
+  /* Das Zeichen trägt Brand-Navy, nicht den Akzent: Orange bleibt dem
+     Abschluss vorbehalten (eine Farbe, ein Zweck). Beim Überfahren der
+     Karte wandert es mit der Rahmenfarbe auf Akzent — eine Bewegung,
+     nicht elf. */
+  .tool-signet {
+    display: block;
+    color: var(--color-brand-navy);
+    margin-bottom: 14px;
+    transition: color 0.15s;
+  }
+
+  a.tool-card:hover .tool-signet {
+    color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tool-signet,
+    a.tool-card {
+      transition: none;
+    }
   }
 
   .tool-card h2 {
