@@ -9,7 +9,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "signets:sync": "node scripts/signets-sync.mjs --from-figma",
+    "signets:check": "node scripts/signets-sync.mjs --from-figma --check"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.5",

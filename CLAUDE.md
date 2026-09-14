@@ -86,6 +86,16 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   die erlaubten Feldnamen stehen in `src/pages/api/lead.ts`
   (`ERLAUBTE_FELDER`). `src/components/calculator/LeadForm.jsx` ist nur noch
   ein dünner Adapter für die PV-Rechner-Felder.
+- `src/components/IconsRechner.jsx` — **erzeugte Datei, nicht von Hand
+  ändern.** Enthält die elf Rechner-Signets der Übersichtskarten. Quelle ist
+  die Figma-Datei "Photovoltaik Aktuell — Rechner-Signets"
+  (figma.com/design/IMQ7LVEoRqfStuXZnGyuCF), übernommen mit
+  `npm run signets:sync` (braucht `FIGMA_TOKEN`) oder
+  `node scripts/signets-sync.mjs --from <verzeichnis>` für lokal exportierte
+  SVGs. `npm run signets:check` meldet nur, ob beide Seiten auseinanderlaufen.
+  Figma Code Connect wäre der offizielle Weg, verlangt aber einen Dev-/Full-Seat
+  auf Organization oder Enterprise — der Account liegt auf Starter.
+  Der `<Svg>`-Wrapper und die 28 übrigen Zeichen bleiben in `Icons.jsx`.
 - `src/components/calculator/ui/Faltblock.jsx` — gemeinsames, zugeklapptes
   `<details>` "So haben wir das berechnet" für Rechner-Ergebnisse. Ohne
   JavaScript aufklappbar, Text steht trotzdem im HTML. Photovoltaik- und
