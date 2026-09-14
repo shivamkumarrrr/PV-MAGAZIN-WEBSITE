@@ -86,6 +86,11 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   die erlaubten Feldnamen stehen in `src/pages/api/lead.ts`
   (`ERLAUBTE_FELDER`). `src/components/calculator/LeadForm.jsx` ist nur noch
   ein dünner Adapter für die PV-Rechner-Felder.
+- `src/components/calculator/ui/Faltblock.jsx` — gemeinsames, zugeklapptes
+  `<details>` "So haben wir das berechnet" für Rechner-Ergebnisse. Ohne
+  JavaScript aufklappbar, Text steht trotzdem im HTML. Photovoltaik- und
+  Gestehungskosten-Rechner haben je einen eigenen, gewachsenen Block; alle
+  anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
 - `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
   `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden.
 
@@ -102,9 +107,15 @@ Accent subtle: #FFE9DD
 Brand-Navy:    #382E4A  (dunkle Headline-Akzente, KEIN Logo-Hintergrund-Chip)
 Sky (2nd):     #2E6F95  (nur für Daten-Elemente, z. B. Ertragskurve)
 Border:        #E1E5E4  (bewusst NICHT #e2e8f0 Tailwind-Slate)
-Display-Font:  'Space Grotesk' (Headlines/Zahlen)
-Body-Font:     system-ui-Stack
+Oberflächen-Font: 'Archivo' (Navigation, Rechner, Headlines, Zahlen)
+Lese-Font:     'Source Serif 4' (nur Artikel-Fließtext)
 ```
+
+Beide Schriften selbst gehostet (`public/fonts/`), nie über
+fonts.googleapis.com. Space Grotesk stand hier bis zum Typografie-Umbau,
+kam aber aus einem früheren Claude-Designdokument und nicht aus einem
+Markenhandbuch — Begründung der Ablösung steht im Kopfkommentar von
+`src/styles/global.css`.
 
 Logo: `src/assets/pv-aktuell-logo-light.png` (transparent, dunkle Wortmarke
 — für die Navbar auf hellem Grund) und `pv-aktuell-logo-dark.png`
@@ -208,9 +219,14 @@ Betrifft in diesem Projekt konkret:
 - FAQ-Antworten müssen inhaltlich im Artikeltext gedeckt sein — der
   sichtbare Block und das JSON-LD kommen aus derselben `faq:`-Quelle im
   Frontmatter, weil Google Übereinstimmung verlangt.
-- Kontextuelle Links auf andere Artikel im Fließtext setzen. Vor September
+- Kontextuelle Links auf andere Artikel im Fließtext setzen. Bis September
   2026 enthielt kein einziger Artikel einen Link auf einen anderen — jede
-  Seite war eine Sackgasse.
+  Seite war eine Sackgasse. Inzwischen hat jeder Artikel mindestens einen
+  ausgehenden Link, Struktur Hub-and-Spoke: "Wie funktioniert eine
+  Photovoltaikanlage" (Grundlagen) und "Kosten & Förderung" sind die Hubs.
+  Bei einem neuen Artikel beide Richtungen setzen — Link vom neuen Artikel
+  zum Hub UND mindestens ein Link aus einem thematisch passenden Bestands-
+  artikel auf den neuen.
 
 ## Stand der Rechner
 
