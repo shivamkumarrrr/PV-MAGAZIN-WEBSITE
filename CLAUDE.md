@@ -86,6 +86,21 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   die erlaubten Feldnamen stehen in `src/pages/api/lead.ts`
   (`ERLAUBTE_FELDER`). `src/components/calculator/LeadForm.jsx` ist nur noch
   ein dünner Adapter für die PV-Rechner-Felder.
+- `src/components/IconsRechner.jsx` — **erzeugte Datei, nicht von Hand
+  ändern.** Enthält die elf Rechner-Signets der Übersichtskarten. Quelle ist
+  die Figma-Datei "Photovoltaik Aktuell — Rechner-Signets"
+  (figma.com/design/IMQ7LVEoRqfStuXZnGyuCF), übernommen mit
+  `npm run signets:sync` (braucht `FIGMA_TOKEN`) oder
+  `node scripts/signets-sync.mjs --from <verzeichnis>` für lokal exportierte
+  SVGs. `npm run signets:check` meldet nur, ob beide Seiten auseinanderlaufen.
+  Figma Code Connect wäre der offizielle Weg, verlangt aber einen Dev-/Full-Seat
+  auf Organization oder Enterprise — der Account liegt auf Starter.
+  Der `<Svg>`-Wrapper und die 28 übrigen Zeichen bleiben in `Icons.jsx`.
+- `src/components/calculator/ui/Faltblock.jsx` — gemeinsames, zugeklapptes
+  `<details>` "So haben wir das berechnet" für Rechner-Ergebnisse. Ohne
+  JavaScript aufklappbar, Text steht trotzdem im HTML. Photovoltaik- und
+  Gestehungskosten-Rechner haben je einen eigenen, gewachsenen Block; alle
+  anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
 - `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
   `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden.
 
@@ -102,9 +117,15 @@ Accent subtle: #FFE9DD
 Brand-Navy:    #382E4A  (dunkle Headline-Akzente, KEIN Logo-Hintergrund-Chip)
 Sky (2nd):     #2E6F95  (nur für Daten-Elemente, z. B. Ertragskurve)
 Border:        #E1E5E4  (bewusst NICHT #e2e8f0 Tailwind-Slate)
-Display-Font:  'Space Grotesk' (Headlines/Zahlen)
-Body-Font:     system-ui-Stack
+Oberflächen-Font: 'Archivo' (Navigation, Rechner, Headlines, Zahlen)
+Lese-Font:     'Source Serif 4' (nur Artikel-Fließtext)
 ```
+
+Beide Schriften selbst gehostet (`public/fonts/`), nie über
+fonts.googleapis.com. Space Grotesk stand hier bis zum Typografie-Umbau,
+kam aber aus einem früheren Claude-Designdokument und nicht aus einem
+Markenhandbuch — Begründung der Ablösung steht im Kopfkommentar von
+`src/styles/global.css`.
 
 Logo: `src/assets/pv-aktuell-logo-light.png` (transparent, dunkle Wortmarke
 — für die Navbar auf hellem Grund) und `pv-aktuell-logo-dark.png`
@@ -208,9 +229,14 @@ Betrifft in diesem Projekt konkret:
 - FAQ-Antworten müssen inhaltlich im Artikeltext gedeckt sein — der
   sichtbare Block und das JSON-LD kommen aus derselben `faq:`-Quelle im
   Frontmatter, weil Google Übereinstimmung verlangt.
-- Kontextuelle Links auf andere Artikel im Fließtext setzen. Vor September
+- Kontextuelle Links auf andere Artikel im Fließtext setzen. Bis September
   2026 enthielt kein einziger Artikel einen Link auf einen anderen — jede
-  Seite war eine Sackgasse.
+  Seite war eine Sackgasse. Inzwischen hat jeder Artikel mindestens einen
+  ausgehenden Link, Struktur Hub-and-Spoke: "Wie funktioniert eine
+  Photovoltaikanlage" (Grundlagen) und "Kosten & Förderung" sind die Hubs.
+  Bei einem neuen Artikel beide Richtungen setzen — Link vom neuen Artikel
+  zum Hub UND mindestens ein Link aus einem thematisch passenden Bestands-
+  artikel auf den neuen.
 
 ## Stand der Rechner
 
@@ -273,10 +299,15 @@ die Werte vergleichen, nicht nur den Code lesen.
   Musterdaten — nicht wieder einfügen, auch nicht als Beispiel.
 - `LEAD_WEBHOOK_URL` (Vercel-Env) ist nicht gesetzt. Solange sie fehlt,
   landen Leads nur im Funktions-Log (`pv-lead`), niemand wird benachrichtigt.
-- `public/og-default.png` (1200×630) fehlt. Bis dahin gibt
-  `BaseLayout.astro` bewusst **kein** `og:image` aus — Schalter
-  `OG_STANDARD_VORHANDEN` umlegen, sobald die Datei da ist.
-- `public/favicon.svg` ist noch das Astro-Standardlogo.
+- ~~`public/og-default.png` und Favicon~~ — erledigt: beide aus der
+  Logo-Bildmarke erzeugt (`favicon.svg` als Vektor-Nachbau der vier
+  Modulfelder, `favicon.ico` dieselbe Marke gerastert, `og-default.png`
+  1200×630 mit Logo, Archivo-Headline und Akzentlinie).
+  `OG_STANDARD_VORHANDEN` steht auf `true`.
+  Achtung bei künftigen Marken-Arbeiten: Die Bildmarke im Logo trägt Gold
+  (#D4950A), nicht das Akzent-Token #FF5200 der Oberfläche. Der Satz weiter
+  oben, #FF5200 stamme aus dem Logo-File, stimmt so nicht — im PNG kommt
+  dieser Wert nicht vor.
 - Keine Bilder im gesamten Projekt außer dem Logo. Artikel und Startseite
   brauchen welche; Quelle ist voraussichtlich der Firmen-NAS.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb

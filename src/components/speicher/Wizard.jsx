@@ -3,7 +3,10 @@ import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
-import { calculateSpeicher, SPEICHER_LEBENSDAUER_JAHRE } from "../../lib/calculateSpeicher.js";
+import Faltblock from "../calculator/ui/Faltblock.jsx";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
+import { calculateSpeicher, SPEICHER_LEBENSDAUER_JAHRE, SPEICHER_WIRKUNGSGRAD } from "../../lib/calculateSpeicher.js";
+import { SPEICHER_KOSTEN_PRO_KWH, STROMPREIS } from "../../lib/calculate.js";
 
 const STEPS = ["Ihre Anlage", "Speicher"];
 
@@ -100,7 +103,7 @@ export default function SpeicherWizard() {
               {formatEur(result.jahresMehrErsparnis)}
             </div>
             <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 2 }}>
-              {result.mehrEigenverbrauch.toLocaleString("de-DE")} kWh × {result.spread.toFixed(3)} € Spread
+              {result.mehrEigenverbrauch.toLocaleString("de-DE")} kWh × {result.spread.toLocaleString("de-DE", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} € Spread
             </div>
           </div>
           <div style={{ flex: "1 1 140px" }}>
@@ -149,6 +152,55 @@ export default function SpeicherWizard() {
             Rechtsverbindlichkeit — ein Angebot ersetzt sie nicht.
           </p>
         </div>
+
+        {/* Der eigentliche Effekt eines Speichers ist der Autarkiegewinn, nicht
+            die Amortisation — beide Balken kommen aus derselben Kennlinie
+            (autarkieSchaetzung), die auch der Haupt-Rechner nutzt. Sky-Farbe
+            bleibt Datenelementen vorbehalten. */}
+        {result.speicherKwh > 0 && (
+          <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+              Autarkiegrad: das ist der eigentliche Effekt
+            </div>
+            <BarCompare
+              label1="Ohne Speicher"
+              val1={Math.round(result.autarkieOhne * 100)}
+              label2="Mit Speicher"
+              val2={Math.round(result.autarkieMit * 100)}
+              unit="%"
+              color1={theme.color.textMuted}
+              color2={theme.color.sky}
+            />
+            <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+              Anteil Ihres Jahresverbrauchs, den Sie selbst decken. Der Speicher hebt diesen Anteil — die
+              Amortisation verkürzt er dadurch nicht, weil er zusätzlich Geld kostet.
+            </p>
+          </div>
+        )}
+
+        <Faltblock
+          zeilen={[
+            { label: "Speicherkosten", wert: `${SPEICHER_KOSTEN_PRO_KWH.toLocaleString("de-DE")} €/kWh nutzbare Kapazität` },
+            { label: "Spread (Strompreis − Einspeisevergütung)", wert: `${(result.spread * 100).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} Ct/kWh` },
+            { label: "Angesetzter Strompreis", wert: `${(STROMPREIS * 100).toFixed(0)} Ct/kWh` },
+            { label: "Round-Trip-Wirkungsgrad (Geräte-Kennzahl)", wert: `${Math.round(SPEICHER_WIRKUNGSGRAD * 100)} %` },
+            { label: "Angesetzte Lebensdauer", wert: `${SPEICHER_LEBENSDAUER_JAHRE} Jahre` },
+          ]}
+        >
+          <p style={{ margin: "0 0 8px" }}>
+            Der Mehr-Eigenverbrauch stammt aus derselben Autarkie-Kennlinie wie der Photovoltaik-Hauptrechner, nicht aus
+            einer eigenen Faustregel — beide Rechner liefern für dieselbe Anlage deshalb denselben Wert. Die Kennlinie
+            orientiert sich an den vom ADAC kommunizierten Autarkiegraden realer Anlagen (30–55 % ohne, bis zu 85 % mit
+            sinnvoll dimensioniertem Speicher) und bildet damit auch die Sättigung ab: Ab einer gewissen Größe findet der
+            Speicher schlicht keinen zusätzlichen Überschuss mehr zum Zwischenspeichern.
+          </p>
+          <p style={{ margin: 0 }}>
+            Amortisation = Speicherinvestition ÷ (Mehr-Eigenverbrauch × Spread). Der Wirkungsgrad wird bewusst nicht
+            zusätzlich abgezogen: In den gemessenen Autarkiegraden stecken die Systemverluste bereits, ein zweiter Abzug
+            wäre eine Doppelzählung. Speicherpreis {SPEICHER_KOSTEN_PRO_KWH} €/kWh nach aktuellen Marktpreisübersichten
+            (LiFePO₄), Lebensdauer nach Fraunhofer ISE.
+          </p>
+        </Faltblock>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
           <LeadForm

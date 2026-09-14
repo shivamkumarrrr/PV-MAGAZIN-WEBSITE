@@ -2,7 +2,7 @@
 // language as the Dachform illustrations: thin rounded strokes, currentColor.
 const base = { fill: "none", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" };
 
-function Svg({ size = 20, children, label }) {
+export function Svg({ size = 20, children, label }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" stroke="currentColor" {...base} role="img" aria-label={label} aria-hidden={label ? undefined : true}>
       {children}

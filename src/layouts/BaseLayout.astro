@@ -16,15 +16,16 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 // Prop akzeptiert, aber von KEINER Seite übergeben — jeder geteilte Link
 // erschien ohne Vorschau.
 //
-// TODO vor Livegang: /og-default.png (1200×630 px) in public/ ablegen und
-// OG_STANDARD_VORHANDEN auf true setzen. Solange die Datei fehlt, wird
-// bewusst KEIN og:image ausgegeben — ein 404-Bild ist schlechter als gar
-// keines, weil Facebook/LinkedIn den kaputten Link cachen.
+// public/og-default.png (1200×630) liegt seit dem Favicon-/OG-Commit vor,
+// erzeugt aus der Logo-Bildmarke und Archivo. Der Schalter bleibt hier
+// stehen: Wird die Datei je entfernt, ihn wieder auf false setzen — ein
+// 404-Bild ist schlechter als gar keines, weil Facebook/LinkedIn den
+// kaputten Link cachen.
 const OG_STANDARD = "/og-default.png";
-const OG_STANDARD_VORHANDEN = false;
+const OG_STANDARD_VORHANDEN = true;
 const ogBild = ogImage ?? (OG_STANDARD_VORHANDEN ? OG_STANDARD : null);
 
-// Space Grotesk wird selbst gehostet (siehe @font-face in src/styles/global.css)
+// Archivo und Source Serif 4 werden selbst gehostet (siehe @font-face in src/styles/global.css)
 // — kein Request an fonts.googleapis.com/fonts.gstatic.com mehr, damit keine
 // Besucher-IP ohne Einwilligung an Google in die USA geht. Unten nur noch ein
 // <link rel="preload"> auf die lokale Datei. Dieser Hinweis steht bewusst im
@@ -41,11 +42,14 @@ const ogBild = ogImage ?? (OG_STANDARD_VORHANDEN ? OG_STANDARD : null);
 
     <link
       rel="preload"
-      href="/fonts/space-grotesk-latin.woff2"
+      href="/fonts/archivo-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
+    <!-- Source Serif 4 bewusst NICHT vorgeladen: es wird nur im
+         Artikel-Fließtext gebraucht, nicht auf Start-, Rechner- oder
+         Übersichtsseiten. Ein Preload dort wäre 122 kB, die niemand liest. -->
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -58,6 +62,17 @@ const ogBild = ogImage ?? (OG_STANDARD_VORHANDEN ? OG_STANDARD : null);
     <meta property="og:site_name" content="Photovoltaik Aktuell" />
     <meta property="og:locale" content="de_DE" />
     {ogBild && <meta property="og:image" content={new URL(ogBild, Astro.site)} />}
+    {/* Maße nur für das Standardbild — Facebook und LinkedIn rendern die
+        Vorschau damit sofort, statt das Bild erst selbst laden zu müssen.
+        Bei einem seitenspezifischen ogImage sind die Maße unbekannt. */}
+    {ogBild === OG_STANDARD && (
+      <>
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:alt" content="Photovoltaik Aktuell — Rechner und Ratgeber zu Photovoltaik" />
+      </>
+    )}
     <meta name="twitter:card" content="summary_large_image" />
   </head>
   <body>

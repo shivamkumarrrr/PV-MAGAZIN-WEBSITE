@@ -5,6 +5,7 @@ import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { AUSRICHTUNG, NEIGUNG, computeKwp } from "../../lib/calculate.js";
 import { compareScenarios, WP_JAHRESVERBRAUCH, EAUTO_JAHRESVERBRAUCH } from "../../lib/calculateKombi.js";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 
 function formatEur(v) {
   if (v == null || isNaN(v)) return "–";
@@ -82,10 +83,10 @@ export default function KombiWizard() {
         <div style={{ background: theme.color.textPrimary, borderRadius: theme.radius.lg, padding: "32px 28px", color: theme.color.white, marginBottom: 20, textAlign: "center" }}>
           <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 2, opacity: 0.6, marginBottom: 6 }}>Ihr Sparpotenzial</div>
           <div style={{ fontFamily: theme.font.display, fontSize: 38, fontWeight: 600, fontVariantNumeric: "tabular-nums" }}>
-            {formatEur(result.basis.netzbezugKosten - aktiv.kostenMitSolar)}
+            {formatEur(aktiv.netzbezugKosten - aktiv.kostenMitSolar)}
           </div>
           <div style={{ fontSize: 14, opacity: 0.75, marginTop: 2 }}>
-            pro Jahr im besten Szenario („{aktiv.label}") · von {formatEur(result.basis.netzbezugKosten)} Netzstromkosten heute
+            pro Jahr im besten Szenario („{aktiv.label}") · gegenüber {formatEur(aktiv.netzbezugKosten)} Netzstromkosten für denselben Verbrauch ohne PV
           </div>
           <div style={{ marginTop: 14, padding: "10px 16px", background: "rgba(255,84,0,0.18)", borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accent }}>
             Autarkie im besten Szenario: <strong>{aktiv.autarkie}%</strong> · Amortisation ca. <strong>{aktiv.amortisation != null ? aktiv.amortisation.toLocaleString("de-DE") + " Jahre" : "n. a."}</strong>
@@ -106,6 +107,24 @@ export default function KombiWizard() {
             <Row label="Amortisation" cells={result.szenarien.map((x) => (x.amortisation != null ? x.amortisation.toLocaleString("de-DE") + " J." : "–"))} />
           </div>
         )}
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Stromkosten pro Jahr im besten Szenario
+          </div>
+          <BarCompare
+            label1="Ohne Solar"
+            val1={Math.round(aktiv.netzbezugKosten)}
+            label2="Mit Solar"
+            val2={Math.round(aktiv.kostenMitSolar)}
+            unit="€/Jahr"
+            color1={theme.color.textMuted}
+            color2={theme.color.sky}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Beide Balken gelten für denselben Verbrauch inklusive der Zusatzverbraucher dieses Szenarios — sonst verglichen sich unterschiedlich große Haushalte.
+          </p>
+        </div>
 
         <div style={{ background: theme.color.bg, borderRadius: theme.radius.lg, padding: "16px", marginBottom: 20, fontSize: 12.5, color: theme.color.textSecondary, lineHeight: 1.65 }}>
           Wärmepumpe (+{WP_JAHRESVERBRAUCH.toLocaleString("de-DE")} kWh/Jahr) und E-Auto (+{EAUTO_JAHRESVERBRAUCH.toLocaleString("de-DE")} kWh/Jahr) erhöhen den Stromverbrauch — dadurch steigen Eigenverbrauch und Autarkie, aber auch die Absatzmenge für die Anlage. Je mehr Strom Sie selbst verbrauchen, desto schneller amortisiert sich die PV. Modellrechnung, keine Rechtsverbindlichkeit.

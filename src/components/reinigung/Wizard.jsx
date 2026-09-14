@@ -4,6 +4,7 @@ import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import OptionGroup from "../calculator/ui/OptionGroup.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 import {
   calculateReinigung,
   UMGEBUNG,
@@ -88,6 +89,24 @@ export default function ReinigungWizard() {
             <div style={{ fontSize: 20, fontWeight: 700, color: theme.color.textPrimary, fontVariantNumeric: "tabular-nums" }}>{euro(result.reinigungKosten)}</div>
             <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 2 }}>{result.flaecheM2} m² Modulfläche</div>
           </div>
+        </div>
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Was die Verschmutzung kostet
+          </div>
+          <BarCompare
+            label1="Aktuell (verschmutzt)"
+            val1={Math.round(result.jahresertrag - result.verlustKwh)}
+            label2="Nach Reinigung"
+            val2={Math.round(result.jahresertrag)}
+            unit="kWh/Jahr"
+            color1={theme.color.textMuted}
+            color2={theme.color.sky}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Geschätzter Jahresertrag mit dem aktuellen Verschmutzungsgrad gegenüber dem Ertrag einer sauberen Anlage.
+          </p>
         </div>
 
         <div style={{ background: theme.color.bg, borderRadius: theme.radius.lg, padding: "18px 18px", marginBottom: 16, fontSize: 12.5, color: theme.color.textSecondary, lineHeight: 1.65 }}>

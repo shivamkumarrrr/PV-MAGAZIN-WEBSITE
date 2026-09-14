@@ -5,6 +5,7 @@ import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import { calculateSteuer, SteuerfreiesKwp } from "../../lib/calculateSteuer.js";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 
 function euro(v) {
   return v.toLocaleString("de-DE", { maximumFractionDigits: 0 }) + " €";
@@ -66,6 +67,24 @@ export default function SteuerWizard() {
               </div>
             </>
           )}
+        </div>
+
+        <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+            Anschaffungspreis vor und nach der Reform
+          </div>
+          <BarCompare
+            label1="Bis 2022 (mit 19 % USt)"
+            val1={Math.round(result.bruttopreisAlt)}
+            label2="Seit 2023 (Nullsteuersatz)"
+            val2={Math.round(result.effektivpreis)}
+            unit="€"
+            color1={theme.color.textMuted}
+            color2={theme.color.sky}
+          />
+          <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+            Der Nullsteuersatz nach § 12 Abs. 3 UStG senkt den Kaufpreis unmittelbar — ohne Vorfinanzierung und ohne Rückerstattungsverfahren.
+          </p>
         </div>
 
         <div style={{ background: theme.color.bg, borderRadius: theme.radius.lg, padding: "18px 18px", marginBottom: 16, fontSize: 12.5, color: theme.color.textSecondary, lineHeight: 1.65 }}>
