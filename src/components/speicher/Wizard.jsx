@@ -4,6 +4,7 @@ import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
 import Faltblock from "../calculator/ui/Faltblock.jsx";
+import BarCompare from "../calculator/ui/BarCompare.jsx";
 import { calculateSpeicher, SPEICHER_LEBENSDAUER_JAHRE, SPEICHER_WIRKUNGSGRAD } from "../../lib/calculateSpeicher.js";
 import { SPEICHER_KOSTEN_PRO_KWH, STROMPREIS } from "../../lib/calculate.js";
 
@@ -151,6 +152,31 @@ export default function SpeicherWizard() {
             Rechtsverbindlichkeit — ein Angebot ersetzt sie nicht.
           </p>
         </div>
+
+        {/* Der eigentliche Effekt eines Speichers ist der Autarkiegewinn, nicht
+            die Amortisation — beide Balken kommen aus derselben Kennlinie
+            (autarkieSchaetzung), die auch der Haupt-Rechner nutzt. Sky-Farbe
+            bleibt Datenelementen vorbehalten. */}
+        {result.speicherKwh > 0 && (
+          <div style={{ background: theme.color.white, borderRadius: theme.radius.lg, border: `1px solid ${theme.color.border}`, padding: "18px 16px", marginBottom: 16 }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: theme.color.textPrimary, marginBottom: 14 }}>
+              Autarkiegrad: das ist der eigentliche Effekt
+            </div>
+            <BarCompare
+              label1="Ohne Speicher"
+              val1={Math.round(result.autarkieOhne * 100)}
+              label2="Mit Speicher"
+              val2={Math.round(result.autarkieMit * 100)}
+              unit="%"
+              color1={theme.color.textMuted}
+              color2={theme.color.sky}
+            />
+            <p style={{ fontSize: 12, color: theme.color.textMuted, margin: 0, lineHeight: 1.6 }}>
+              Anteil Ihres Jahresverbrauchs, den Sie selbst decken. Der Speicher hebt diesen Anteil — die
+              Amortisation verkürzt er dadurch nicht, weil er zusätzlich Geld kostet.
+            </p>
+          </div>
+        )}
 
         <Faltblock
           zeilen={[
