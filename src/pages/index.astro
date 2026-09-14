@@ -4,12 +4,7 @@ import Ertragskurve from "../components/Ertragskurve.astro";
 import { getCollection } from "astro:content";
 import { categoryLabel } from "../lib/categories.js";
 import { RECHNER } from "../lib/rechner.js";
-import {
-  STROMPREIS,
-  EINSPEISE,
-  KOSTEN_PRO_KWP,
-  ERTRAG_PRO_KWP,
-} from "../lib/calculate.js";
+import { STROMPREIS, EINSPEISE } from "../lib/calculate.js";
 import {
   IconRechnerPhotovoltaik,
   IconRechnerKombi,
@@ -76,18 +71,6 @@ const nf = new Intl.NumberFormat("de-DE");
 const ct = (eur) =>
   new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
 
-// Rechenbasis-Leiste unter dem Hero. Die vier Werte werden NICHT hier
-// notiert, sondern aus calculate.js importiert — dieselben Konstanten, mit
-// denen der Rechner arbeitet. Eine abgetippte Zahl wäre genau der Fehler,
-// den die Seite dem Wettbewerb vorwirft. Quelle und Stand stehen im
-// Kommentar über der jeweiligen Konstante in calculate.js.
-const basis = [
-  { wert: `${ct(STROMPREIS)} ct`, einheit: "je kWh Haushaltsstrom", beleg: "BDEW, April 2026" },
-  { wert: `${ct(EINSPEISE)} ct`, einheit: "Einspeisung bis 10 kWp", beleg: "Bundesnetzagentur, § 49 EEG" },
-  { wert: `${nf.format(KOSTEN_PRO_KWP)} €`, einheit: "Systemkosten je kWp", beleg: "Fraunhofer ISE, 2026" },
-  { wert: `${nf.format(ERTRAG_PRO_KWP)} kWh`, einheit: "Ertrag je kWp und Jahr", beleg: "Mittelwert Deutschland" },
-];
-
 // Die Quellen sind das eigentliche Unterscheidungsmerkmal gegenüber ADAC,
 // co2online und den Anbieter-Rechnern — deshalb ein eigener Abschnitt statt
 // einer Fußnote. Jede Zeile nennt, was diese Quelle konkret liefert; eine
@@ -114,7 +97,9 @@ const quellen = [
         <p class="hero-lead">
           Elf Rechner auf einer gemeinsamen Datenbasis: Satellitendaten für
           Ihre Postleitzahl, Vergütungssätze aus dem Gesetz, Kosten aus der
-          Marktstatistik. Jede Zahl mit Quelle und Stand.
+          Marktstatistik. Selbst verbrauchter Strom spart derzeit {ct(STROMPREIS)} ct
+          je Kilowattstunde, eingespeister bringt bei Anlagen bis
+          10 kWp {ct(EINSPEISE)} ct — jede Zahl hier mit Quelle und Stand.
         </p>
         <div class="hero-aktionen">
           <a href="/rechner/photovoltaik/" class="knopf-primaer">Ertrag berechnen</a>
@@ -123,25 +108,10 @@ const quellen = [
       </div>
 
       <div class="hero-grafik">
-        <Ertragskurve kwp={10} />
+        <div class="hero-grafik-card">
+          <Ertragskurve kwp={10} />
+        </div>
       </div>
-    </div>
-
-    <!-- Rechenbasis: die vier Konstanten, aus denen sich alles Weitere
-         ergibt. Keine Erfolgs-Kennzahlen ("10.000 Nutzer") — das wäre die
-         Hero-Metrik-Schablone. Hier steht der Input, nicht der Applaus. -->
-    <div class="basis">
-      <dl class="basis-inner container">
-        {basis.map((b) => (
-          <div class="basis-eintrag">
-            <dt class="zahl">{b.wert}</dt>
-            <dd>
-              <span class="basis-einheit">{b.einheit}</span>
-              <span class="basis-beleg">{b.beleg}</span>
-            </dd>
-          </div>
-        ))}
-      </dl>
     </div>
   </section>
 
@@ -273,9 +243,9 @@ const quellen = [
 
   .hero-inner {
     display: grid;
-    gap: clamp(28px, 5vw, 64px);
-    padding-top: clamp(48px, 8vw, 92px);
-    padding-bottom: clamp(40px, 6vw, 72px);
+    gap: clamp(24px, 5vw, 64px);
+    padding-top: clamp(36px, 8vw, 92px);
+    padding-bottom: clamp(32px, 6vw, 72px);
     align-items: center;
   }
 
@@ -329,6 +299,23 @@ const quellen = [
     gap: 12px;
   }
 
+  /* Die Kurve bekommt eine eigene Fläche statt lose auf dem Seiten-
+     hintergrund zu schweben — sonst liest sie sich als vergessenes
+     Element statt als bewusstes Hero-Bild, und die Bildunterschrift
+     wirkt wie ein zweiter, unverbundener Fließtext. */
+  .hero-grafik-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px 20px;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-grafik-card {
+      animation: auftritt 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+    }
+  }
+
   .knopf-primaer,
   .knopf-sekundaer {
     display: inline-flex;
@@ -366,75 +353,6 @@ const quellen = [
 
   @media (prefers-reduced-motion: reduce) {
     .knopf-primaer:hover { transform: none; }
-  }
-
-  /* ── Rechenbasis ────────────────────────────────────────────────────── */
-
-  .basis {
-    border-top: 1px solid var(--color-border);
-    background: var(--color-surface);
-  }
-
-  .basis-inner {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin: 0;
-  }
-
-  @media (min-width: 820px) {
-    .basis-inner {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  /* Trennlinien statt Karten: vier Werte, die zusammengehören, gehören in
-     eine Zeile und nicht in vier Kästen. */
-  .basis-eintrag {
-    padding: 20px 22px 22px 0;
-    border-left: 1px solid var(--color-border);
-    padding-left: 22px;
-  }
-
-  .basis-eintrag:first-child {
-    border-left: 0;
-    padding-left: 0;
-  }
-
-  @media (max-width: 819px) {
-    .basis-eintrag:nth-child(3) {
-      border-left: 0;
-      padding-left: 0;
-    }
-    .basis-eintrag:nth-child(n + 3) {
-      border-top: 1px solid var(--color-border);
-    }
-  }
-
-  .basis-eintrag dt {
-    font-family: var(--font-display);
-    font-size: clamp(1.375rem, 2.6vw, 1.625rem);
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--color-brand-navy);
-    line-height: 1.1;
-  }
-
-  .basis-eintrag dd {
-    margin: 6px 0 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .basis-einheit {
-    font-size: 13.5px;
-    line-height: 1.35;
-    color: var(--color-text-primary);
-  }
-
-  .basis-beleg {
-    font-size: 12px;
-    color: var(--color-text-muted);
   }
 
   /* ── Gemeinsamer Abschnittskopf ─────────────────────────────────────── */

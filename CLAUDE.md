@@ -103,6 +103,29 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
 - `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
   `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden.
+- `src/pages/ratgeber/[slug].astro` reicht an `ArticleLayout.astro` neben den
+  Frontmatter-Daten zwei abgeleitete Werte durch: die **gerenderten
+  `headings`** (aus `render(entry)`) und die **`lesedauer`** (Wörter aus
+  `entry.body` ÷ 220). Das Layout rendert daraus die Inhaltsangabe (nur
+  h2/h3, nur wenn mehr als eine Überschrift), die Lesezeit-Meta, den
+  Kategorie-Hero und die optionale "Zusammenfassung"-Box
+  (`zusammenfassung` im Frontmatter). Diese Bausteine gehören NICHT in den
+  MDX-Fließtext.
+- `src/components/ArticleHero.astro` — Kategorie-Hero am Artikelanfang, von
+  ArticleLayout automatisch gerendert. Pro Kategorie EINE belegte Kennzahl
+  (Quelle + Stand direkt in der Datei) als SVG-Motiv statt Stockfoto — die
+  Kennzahlen sind bei der jährlichen Datenpflege mitzuziehen. Kein Eingriff
+  im MDX nötig.
+- `src/components/Definition.astro` — Fachbegriff-Einblendung im Fließtext:
+  sichtbares Wort, Erklärung als Hover/Focus-Popover, reines CSS ohne
+  JavaScript. Nutzung im MDX: `<Definition begriff="kWp">Erklärung…
+  </Definition>` (Komponente muss importiert werden).
+- `src/components/RechnerWidget.jsx` — kompakter Mini-Rechner für den
+  Artikeltext. Nutzt `calculate.js`-Konstanten, `Slider`/`Segmented` aus
+  `calculator/ui` und `theme.js`. Einbindung im MDX mit
+  `<RechnerWidget client:load />`. Bewusst OHNE PVGIS/Standort — nur erste
+  Größenordnung mit Bundesdurchschnitt, damit der ausführliche Rechner
+  (`/rechner/photovoltaik/`) der Mehrwert bleibt.
 
 ## Design System
 
@@ -237,6 +260,13 @@ Betrifft in diesem Projekt konkret:
   Bei einem neuen Artikel beide Richtungen setzen — Link vom neuen Artikel
   zum Hub UND mindestens ein Link aus einem thematisch passenden Bestands-
   artikel auf den neuen.
+- Artikelseiten-Aufbau ist automatisiert: Inhaltsangabe und Lesezeit kommen
+  aus den MDX-Headings (`[slug].astro`), der Kategorie-Hero aus
+  `ArticleHero.astro`. Diese drei NICHT von Hand im MDX nachbauen; die
+  "Zusammenfassung"-Box ist optional über das Frontmatter-Feld
+  `zusammenfassung: [Liste kurzer Kernsätze]` aktivierbar. Tabellen und
+  Musterrechnungen gehören wie gehabt in den Fließtext — Vorbild ist der
+  Ausbau von `pv-kosten-und-foerderung-ueberblick.mdx`.
 
 ## Stand der Rechner
 
@@ -280,10 +310,18 @@ Fehler erzeugt:
 2. **Einspeisevergütung immer über `einspeiseStaffel(kwp)`**, nie `EINSPEISE`
    direkt. Der ≤10-kWp-Satz auf jede Anlagengröße anzuwenden überschätzte
    die Einspeiseerlöse bei 30 kWp um rund 9 %.
-3. **Speicher darf die Amortisation nie verkürzen.** Bekannte Restabweichung:
-   bei 2–3 kWh sinkt sie um 0,1 Jahre (7,8 → 7,7). Ursache sind zwei belegte
-   Werte (ADAC-Autarkiekurve, 400 €/kWh) — ohne neue Recherche nicht
-   anfassen.
+3. **Speicher darf die Amortisation nie verkürzen.** Wird derzeit verletzt,
+   die frühere Notiz ("0,1 Jahre bei 2–3 kWh") war zu eng gefasst. Gemessen
+   (Sweep über Dachfläche 20–160 m², Verbrauch 1.500–15.000 kWh, Speicher
+   1–20 kWh, Sept. 2026): 79 Fälle, in denen der Speicher die Amortisation
+   verkürzt, maximal um **0,6 Jahre**. Schwerpunkt sind überdimensionierte
+   Anlagen — 55 der 79 Fälle liegen bei Ertrag ≥ 2× Jahresverbrauch; bei
+   realistischer Auslegung (< 2×) bleibt die Abweichung ≤ 0,2 Jahre.
+   Identisch im `pvrechner`-Quellprojekt reproduzierbar, also kein Fehler
+   dieses Repos, sondern eine Eigenschaft des gemeinsamen Modells. Ursache
+   sind zwei belegte Werte (ADAC-Autarkiekurve, 400 €/kWh) — ohne neue
+   Recherche nicht anfassen. Beim Ändern eines der beiden Werte diesen
+   Sweep erneut fahren und die Zahlen hier mitziehen.
 4. **Speicher- und Hauptrechner müssen denselben Mehr-Eigenverbrauch
    liefern.** Beide leiten ihn aus `autarkieSchaetzung()` ab. Eine eigene
    lineare Faustregel im Speicher-Rechner wich bei 10 kWh um Faktor 1,57 ab.
@@ -308,8 +346,10 @@ die Werte vergleichen, nicht nur den Code lesen.
   (#D4950A), nicht das Akzent-Token #FF5200 der Oberfläche. Der Satz weiter
   oben, #FF5200 stamme aus dem Logo-File, stimmt so nicht — im PNG kommt
   dieser Wert nicht vor.
-- Keine Bilder im gesamten Projekt außer dem Logo. Artikel und Startseite
-  brauchen welche; Quelle ist voraussichtlich der Firmen-NAS.
+- Keine Bilder im gesamten Projekt außer dem Logo. Seit dem
+  TOC/Hero-Ausbau brauchen Artikel-Seiten kein Foto mehr (Kategorie-Hero ist
+  datengetriebenes SVG, siehe `ArticleHero.astro`); die Startseite und
+  ggf. echte Reportage-Bilder warten weiter auf die Firmen-NAS-Quelle.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
   (ADAC, Verbraucherzentrale, co2online). Ausbau wartet auf die
   Themen-Priorisierung durch PPC.
