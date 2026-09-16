@@ -26,8 +26,41 @@ Stand: 14.09.2026.
 | waermepumpe.jpg | alpha innotec | 38067300 | https://www.pexels.com/photo/modern-heat-pump-in-residential-setting-38067300/ |
 | einspeiseverguetung.jpg | (Bestand, Herkunft nicht dokumentiert) | – | – |
 
-Startseiten-Hero (/public/images/startseite.jpg, Zuschnitt 1200x1500):
+Startseiten-Hero (/src/assets/hero-modulflaeche.jpg, 2400x1800, unbeschnitten):
 
 | Datei | Fotograf | Pexels-ID | Seite |
 | --- | --- | --- | --- |
-| startseite.jpg | Janick Bunzel | 16432398 | https://www.pexels.com/photo/16432398/ |
+| hero-modulflaeche.jpg | Cristian Rojas | 8853509 | https://www.pexels.com/photo/close-up-photo-of-a-solar-panel-8853509/ |
+
+Liegt unter src/assets/ statt public/, damit Astro daraus WebP und die
+srcset-Groessen erzeugt (public/ wird unveraendert ausgeliefert).
+
+Ersetzt am 16.09.2026 die vorherige Drohnen-Luftaufnahme
+(/public/images/startseite.jpg, Janick Bunzel, Pexels-ID 16432398). Grund:
+Das Motiv zeigte parkende Autos, Spielgeraete und eine Personengruppe auf
+der Terrasse eines fremden Hauses und las sich damit als Referenzkunde, den
+es nicht gibt (CLAUDE.md: keine erfundenen Aussagen ueber das Unternehmen).
+Die Datei ist geloescht; bei Bedarf ueber die Pexels-ID erneut zu beziehen.
+
+Bild neben "Was ist Photovoltaik?" auf der Startseite
+(/src/assets/montage-team.jpg, 550x367):
+
+| Datei | Fotograf | Quelle/ID | Seite |
+| --- | --- | --- | --- |
+| montage-team.jpg | [BITTE EINTRAGEN] | [BITTE EINTRAGEN] | [BITTE EINTRAGEN] |
+
+OFFEN vor Livegang — zwei Punkte:
+
+1. Herkunft und Lizenz sind nicht dokumentiert. Die Datei kam am 16.09.2026
+   ohne Quellenangabe ins Projekt. Vor der Veroeffentlichung klaeren, woher
+   sie stammt und ob die Lizenz kommerzielle Nutzung erlaubt; sonst ersetzen.
+   Gleiche Lage wie bei einspeiseverguetung.jpg weiter oben.
+2. Aufloesung 550x367 ist fuer die Anzeigebreite von rund 500px knapp und auf
+   Retina-Displays sichtbar weich. Ein Original ab 1100px Breite ersetzt die
+   Datei; dann in src/pages/index.astro die `widths` erhoehen.
+
+Motiv-Hinweis: Das Bild zeigt zwei Monteure auf einem Dach. Es steht bewusst
+ohne Bildunterschrift und ohne Zuschreibung — als "unsere Monteure" oder als
+Referenzanlage gelesen waere es eine erfundene Aussage ueber das Unternehmen
+(§ 5 UWG). Aus genau diesem Grund wurde die frueher genutzte Drohnenaufnahme
+entfernt, siehe Absatz darueber.

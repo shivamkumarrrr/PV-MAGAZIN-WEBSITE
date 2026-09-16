@@ -8,13 +8,20 @@
 // 2. OHNE heroImage (Fallback): SVG-Motiv + Kennzahl wie bisher — kein
 //    externes Bild nötig, passt zum Prüfbericht-Stil.
 //
-// Die heroImage-Dateien in /public/images/heroes/ stammen von Pexels
-// (Lizenz: kommerzielle Nutzung frei, keine Namensnennung nötig) und sind
-// mittig auf 1600x686 zugeschnitten — dasselbe Verhältnis, das der Rahmen
-// unten setzt. Wer eine Datei austauscht, muss dieses Maß einhalten, sonst
-// verzerrt das Bild. Urheber und Pexels-Links stehen in
-// public/images/heroes/BILDNACHWEIS.md; Lizenzlage jährlich prüfen.
+// Die heroImage-Dateien stammen von Pexels (Lizenz: kommerzielle Nutzung
+// frei, keine Namensnennung nötig) und sind mittig auf 1600x686
+// zugeschnitten — dasselbe Verhältnis, das der Rahmen unten setzt. Wer eine
+// Datei austauscht, muss dieses Maß einhalten, sonst verzerrt das Bild.
+// Urheber und Pexels-Links stehen in src/assets/heroes/BILDNACHWEIS.md;
+// Lizenzlage jährlich prüfen.
+//
+// Die Dateien liegen seit September 2026 in `src/assets/heroes/` statt unter
+// `public/`, damit Astro sie in WebP umwandelt und mehrere Breiten erzeugt.
+// Das Frontmatter trägt weiterhin den alten Pfad; `heroBild()` löst ihn über
+// den Dateinamen auf (siehe src/lib/heroBilder.js).
+import { Image } from "astro:assets";
 import { categoryLabel } from "../lib/categories.js";
+import { heroBild } from "../lib/heroBilder.js";
 
 interface Props {
   category: string;
@@ -76,22 +83,24 @@ const HERO = {
 };
 
 const d = HERO[category] ?? HERO.grundlagen;
-const hasImage = Boolean(heroImage);
+const bild = heroBild(heroImage);
+// Ein Pfad im Frontmatter, zu dem keine Datei mehr existiert, darf nicht in
+// ein kaputtes <img> laufen — dann greift der SVG-Fallback darunter.
+const hasImage = Boolean(bild);
 const alt = heroImageAlt ?? `${label}: Solaranlage auf einem typischen deutschen Dach`;
 ---
 
 {hasImage ? (
   <figure class="hero hero--foto">
     <div class="hero-foto-wrap">
-      <img
-        src={heroImage}
+      <Image
+        src={bild}
         alt={alt}
+        widths={[640, 820, 1240, 1600]}
+        sizes="(min-width: 1100px) 820px, 100vw"
         loading="eager"
         decoding="async"
         fetchpriority="high"
-        width="1600"
-        height="686"
-        sizes="(min-width: 1100px) 820px, 100vw"
       />
     </div>
     <div class="hero-metric">
@@ -196,7 +205,7 @@ const alt = heroImageAlt ?? `${label}: Solaranlage auf einem typischen deutschen
   }
 
   /* Das Bild wird NICHT beschnitten: der Rahmen übernimmt exakt das
-     Seitenverhältnis der Dateien in /public/images/heroes (1600x686).
+     Seitenverhältnis der Dateien in src/assets/heroes (1600x686).
      Vorher stand hier 21/9 zusammen mit width/height 1280x640 — zwei
      Verhältnisse, die weder zueinander noch zur Datei passten; object-fit
      cover hat den Rest weggeschnitten und object-position hat den

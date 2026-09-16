@@ -1,10 +1,85 @@
 ---
 import logo from "../assets/pv-aktuell-logo-light.png";
 import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import { rechnerGruppen } from "../lib/rechner.js";
+import { CATEGORIES } from "../lib/categories.js";
+import { heroBild } from "../lib/heroBilder.js";
+import {
+  IconRechnerPhotovoltaik,
+  IconRechnerKombi,
+  IconRechnerRendite,
+  IconRechnerSpeicher,
+  IconRechnerBalkonkraftwerk,
+  IconRechnerCo2,
+  IconRechnerGestehungskosten,
+  IconRechnerReinigung,
+  IconRechnerEauto,
+  IconRechnerSteuer,
+  IconRechnerMieterstrom,
+} from "./IconsRechner.jsx";
 
+// Nav-Panel statt flacher Linkleiste. Vorbild ist die Hauptnavigation von
+// lichtblick.de: Ein Klick auf einen Bereich klappt ein Panel mit den
+// Unterpunkten auf, statt den Besucher erst auf eine Übersichtsseite zu
+// schicken, die nichts weiter tut als weiterzuleiten. Bei elf Rechnern ist
+// das der Unterschied zwischen "irgendwo gibt es sicher einen passenden"
+// und "da ist er".
+//
+// Gebaut auf <details>/<summary>: Das Aufklappen funktioniert ohne
+// JavaScript, die Tastaturbedienung (Enter/Leertaste, Tab durch die Links)
+// kommt vom Browser. Das kleine Skript unten ergänzt nur, was <details>
+// nicht kann — Schließen bei Klick daneben und mit Escape, und dass nie
+// zwei Panels gleichzeitig offen stehen.
 const { pathname } = Astro.url;
 const isRatgeber = pathname.startsWith("/ratgeber");
 const isRechner = pathname.startsWith("/rechner");
+const gruppen = rechnerGruppen();
+
+// Nur Kategorien anbieten, die auch Artikel haben — die Ziele sind die
+// Sprungmarken auf /ratgeber/, und die Übersichtsseite blendet leere
+// Kategorien aus. Ein Link auf eine Marke, die es dort nicht gibt, landet
+// oben auf der Seite statt beim Thema.
+const alleArtikel = await getCollection("articles");
+const themen = CATEGORIES.filter((c) =>
+  alleArtikel.some((a) => a.data.category === c.slug)
+);
+
+// Dieselbe Zuordnung wie auf der Startseite (index.astro) — die elf
+// handgezeichneten Signets sind das einzige eigens für dieses Projekt
+// gezeichnete Bildmaterial (Quelle: Figma, siehe CLAUDE.md), sie gehören
+// auch ins Rechner-Panel, nicht nur auf die Startseite.
+const SIGNET = {
+  photovoltaik: IconRechnerPhotovoltaik,
+  kombi: IconRechnerKombi,
+  rendite: IconRechnerRendite,
+  speicher: IconRechnerSpeicher,
+  balkonkraftwerk: IconRechnerBalkonkraftwerk,
+  co2: IconRechnerCo2,
+  gestehungskosten: IconRechnerGestehungskosten,
+  reinigung: IconRechnerReinigung,
+  eauto: IconRechnerEauto,
+  steuer: IconRechnerSteuer,
+  mieterstrom: IconRechnerMieterstrom,
+};
+
+// Ein Vorschaubild je Thema im Ratgeber-Panel — Muster von lichtblick.de,
+// dessen Mega-Menü jede Kategorie mit einem Foto statt nur Text zeigt.
+// Keine neuen Bilder nötig: Jede der acht Kategorien hat mindestens einen
+// Artikel mit heroImage (src/assets/heroes/, siehe BILDNACHWEIS.md dort),
+// hier steht das Foto des jeweils ersten/repräsentativsten Artikels.
+// Pfade bleiben in der alten Schreibweise; `heroBild()` löst sie auf die
+// optimierten Dateien in src/assets/heroes/ auf.
+const THEMEN_BILD = {
+  grundlagen: "/images/heroes/grundlagen.jpg",
+  "kosten-foerderung": "/images/heroes/kosten.jpg",
+  technik: "/images/heroes/ausrichtung.jpg",
+  speicher: "/images/heroes/speicher.jpg",
+  einspeiseverguetung: "/images/heroes/einspeiseverguetung.jpg",
+  balkonkraftwerk: "/images/heroes/balkonkraftwerk.jpg",
+  oekobilanz: "/images/heroes/oekobilanz.jpg",
+  checklisten: "/images/heroes/checkliste-vor-kauf.jpg",
+};
 ---
 
 <header class="site-header">
@@ -12,17 +87,119 @@ const isRechner = pathname.startsWith("/rechner");
     <a href="/" class="brand" aria-label="Startseite">
       <Image class="logo" src={logo} alt="Photovoltaik Aktuell" height={44} densities={[1, 2, 3]} loading="eager" />
     </a>
+
     <nav class="main-nav" aria-label="Hauptnavigation">
-      <a href="/ratgeber/" class:list={["nav-link", { active: isRatgeber }]}>Ratgeber</a>
-      <a href="/rechner/" class:list={["nav-link", { active: isRechner }]}>Rechner</a>
+      <details class="nav-panel" name="hauptnav">
+        <summary class:list={["nav-link", { active: isRechner }]}>
+          Rechner
+          <svg class="nav-pfeil" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </summary>
+
+        <div class="panel">
+          <div class="container panel-inner">
+            {gruppen.map((g) => (
+              <section class="panel-gruppe">
+                <h2>{g.titel}</h2>
+                <p class="panel-hinweis">{g.hinweis}</p>
+                <ul>
+                  {g.eintraege.map((r) => {
+                    const Signet = SIGNET[r.slug];
+                    return (
+                      <li>
+                        <a href={`/rechner/${r.slug}/`}>
+                          {Signet && <span class="panel-signet" aria-hidden="true"><Signet size={22} /></span>}
+                          {r.kurz}
+                        </a>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+            <p class="panel-fuss">
+              <a href="/rechner/">Alle elf Rechner im Überblick</a>
+            </p>
+          </div>
+        </div>
+      </details>
+
+      <details class="nav-panel" name="hauptnav">
+        <summary class:list={["nav-link", { active: isRatgeber }]}>
+          Ratgeber
+          <svg class="nav-pfeil" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+            <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </summary>
+
+        <div class="panel">
+          <div class="container panel-inner panel-inner-schmal">
+            <section class="panel-gruppe">
+              <h2>Themen</h2>
+              <p class="panel-hinweis">Alle Artikel nach Bereich sortiert.</p>
+              {/* Bildkarten statt reiner Textliste — Muster von lichtblick.de.
+                  alt="" bei den Fotos: Der Kategoriename steht sichtbar direkt
+                  daneben, ein Alt-Text würde ihn nur doppeln. */}
+              <ul class="themen-karten">
+                {themen.map((c) => (
+                  <li>
+                    <a href={`/ratgeber/#${c.slug}`}>
+                      <Image
+                        src={heroBild(THEMEN_BILD[c.slug])}
+                        alt=""
+                        widths={[222, 320, 444]}
+                        sizes="222px"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                      <span>{c.label}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+            <p class="panel-fuss">
+              <a href="/ratgeber/">Zum vollständigen Ratgeber</a>
+            </p>
+          </div>
+        </div>
+      </details>
     </nav>
   </div>
 </header>
+
+<script>
+  // Ergänzt <details> um das, was der Browser nicht mitbringt. Alles
+  // Weitere (Aufklappen, Tastatur, Fokusreihenfolge) macht das Element
+  // selbst — ohne dieses Skript bleibt die Navigation voll bedienbar.
+  const panels = Array.from(document.querySelectorAll<HTMLDetailsElement>(".nav-panel"));
+
+  document.addEventListener("click", (event) => {
+    const ziel = event.target as Node;
+    for (const p of panels) {
+      if (p.open && !p.contains(ziel)) p.open = false;
+    }
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    for (const p of panels) {
+      if (!p.open) continue;
+      p.open = false;
+      p.querySelector("summary")?.focus();
+    }
+  });
+</script>
 
 <style>
   .site-header {
     border-bottom: 1px solid var(--color-border);
     background: var(--color-surface);
+    /* Das Panel hängt unter der Leiste und muss über dem Seiteninhalt
+       liegen — sonst schneidet der Hero es an. */
+    position: relative;
+    z-index: 20;
   }
 
   .header-inner {
@@ -61,19 +238,31 @@ const isRechner = pathname.startsWith("/rechner");
 
   .main-nav {
     display: flex;
-    gap: 8px;
+    gap: 4px;
+  }
+
+  .nav-panel {
+    position: relative;
   }
 
   .nav-link {
     display: inline-flex;
     align-items: center;
-    padding: 8px 16px;
+    gap: 7px;
+    padding: 8px 14px;
     border-radius: var(--radius-pill);
     color: var(--color-text-secondary);
     font-size: 15px;
     font-weight: 600;
     text-decoration: none;
+    cursor: pointer;
+    list-style: none;
     transition: background-color 0.15s, color 0.15s;
+  }
+
+  /* Das Standard-Dreieck von <summary> ersetzt der eigene Pfeil. */
+  .nav-link::-webkit-details-marker {
+    display: none;
   }
 
   .nav-link:hover {
@@ -84,5 +273,204 @@ const isRechner = pathname.startsWith("/rechner");
   .nav-link.active {
     background: var(--color-text-primary);
     color: #fff;
+  }
+
+  .nav-pfeil {
+    flex-shrink: 0;
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-panel[open] > .nav-link .nav-pfeil {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-pfeil {
+      transition: none;
+    }
+  }
+
+  /* Volle Breite statt schwebendem Dropdown-Kästchen: Das Panel ist eine
+     Fortsetzung der Leiste, keine aufgesetzte Karte. Deshalb auch kein
+     Schatten und kein Radius — es hängt am Rand der Kopfzeile (Design-Regel
+     7: Schatten nur für echte Overlays; das hier liest sich als Fläche). */
+  /* `fixed` statt `absolute` in jeder Breite: Absolut positioniert richtet
+     sich das Panel am <details> aus, und das ist nur so breit wie das Wort
+     "Rechner" — auf dem Handy stand das Panel dadurch in einer 104 px
+     schmalen Spalte. Fixed löst es aus diesem Bezug und legt es über die
+     volle Fensterbreite unter die Kopfzeile. */
+  .panel {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 72px;
+    max-height: calc(100vh - 72px);
+    overflow-y: auto;
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .panel-inner {
+    display: grid;
+    gap: 28px 48px;
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  @media (min-width: 720px) {
+    .panel-inner {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      padding-top: 36px;
+      padding-bottom: 32px;
+    }
+
+    .panel-inner-schmal {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .panel-gruppe h2 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-hinweis {
+    margin: 0 0 14px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+
+  .panel-gruppe ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .panel-gruppe a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    margin-left: -10px;
+    border-radius: var(--radius-sm);
+    font-size: 14.5px;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: background-color 0.15s, color 0.15s;
+  }
+
+  .panel-gruppe a:hover {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent-hover);
+  }
+
+  /* Signet vor dem Namen, wie in der "Für die Frage danach"-Liste auf der
+     Startseite — dieselbe Bildsprache in Nav-Panel und Seite. */
+  .panel-signet {
+    display: flex;
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: color 0.15s;
+  }
+
+  .panel-gruppe a:hover .panel-signet {
+    color: var(--color-accent);
+  }
+
+  /* ── Themen-Bildkarten (Ratgeber-Panel) ────────────────────────────── */
+
+  /* Feste Kartenbreite statt 1fr-Spalten: `auto-fill` mit einer Ober- und
+     Untergrenze hält die Karten klein und rechteckig, egal wie breit das
+     Panel ist — der Rest der Zeile bleibt als Luft stehen, statt die
+     Karten in die Breite zu ziehen (Muster: lichtblick.de, dessen
+     Themen-Kacheln ebenfalls deutlich schmaler sind als ihr Raster breit
+     wäre). Eine unscoped Regel weiter oben im File hatte diese Karten
+     vorher auf volle Panel-Breite gezwungen — siehe Git-Historie. */
+  .themen-karten {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(128px, 148px));
+    gap: 22px 16px;
+  }
+
+  .themen-karten a {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    text-decoration: none;
+  }
+
+  .themen-karten a:hover {
+    background: none;
+  }
+
+  .themen-karten img {
+    display: block;
+    width: 100%;
+    /* `height: auto` ist hier PFLICHT, nicht Kosmetik: Die HTML-Attribute
+       width/height auf dem <img> (fürs Layout-Reservieren vor dem Laden)
+       setzen eine konkrete Höhe, die als "nicht auto" zählt — damit
+       ignoriert der Browser aspect-ratio unten und rendert quadratisch
+       (148×148 statt 148×99 gemessen). Erst height:auto gibt die Höhe an
+       aspect-ratio zurück. 3:2 statt 4:3 — näher am Seitenverhältnis der
+       Quelldateien (1600×686 ≈ 2,33:1), sodass object-fit:cover weniger
+       wegschneidet, und deutlich rechteckiger als eine quadratische Kachel. */
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-bg);
+    transition: border-color 0.15s;
+  }
+
+  .themen-karten a:hover img {
+    border-color: var(--color-accent);
+  }
+
+  .themen-karten span {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    transition: color 0.15s;
+  }
+
+  .themen-karten a:hover span {
+    color: var(--color-accent-hover);
+  }
+
+  .panel-fuss {
+    margin: 0;
+    font-size: 14px;
+  }
+
+  @media (min-width: 720px) {
+    .panel-fuss {
+      grid-column: 1 / -1;
+      padding-top: 18px;
+      border-top: 1px solid var(--color-border);
+    }
+  }
+
+  .panel-fuss a {
+    font-weight: 600;
+    color: var(--color-accent-text);
+    text-decoration: none;
+  }
+
+  .panel-fuss a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 </style>
