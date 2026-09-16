@@ -5,6 +5,8 @@ category: "oekobilanz"
 datePublished: 2026-08-12
 dateModified: 2026-08-12
 relatedRechner: "co2"
+heroImage: "/images/heroes/oekobilanz.jpg"
+heroImageAlt: "Solarmodulreihen auf einer grünen Wiese unter blauem Himmel"
 faq:
   - frage: "Verbraucht die Herstellung eines Solarmoduls mehr Energie, als es einspart?"
     antwort: "Nein. Für kristalline Silizium-Module liegt die energetische Amortisationszeit nach Fraunhofer-ISE-Untersuchungen unter deutschen Standortbedingungen bei etwa ein bis zweieinhalb Jahren. Bei 25 bis 30 Jahren Laufzeit produziert die Anlage über 90 Prozent ihrer Betriebszeit einen echten Energie- und CO2-Nettogewinn."
@@ -17,6 +19,7 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
 
 "Die Herstellung von Solarmodulen verbraucht mehr Energie, als sie je
 einsparen" ist eine der langlebigsten Photovoltaik-Falschbehauptungen im
@@ -51,6 +54,18 @@ pro Jahr — über eine 25-jährige Anlagenlaufzeit kumuliert ein Vielfaches
 davon, auch wenn der deutsche Strommix selbst über diesen Zeitraum
 voraussichtlich sauberer wird (was die Einsparung pro kWh in fernerer
 Zukunft tendenziell etwas verringert, nicht erhöht).
+
+<Diagramm
+  titel="Vermiedenes CO2 pro Jahr nach Anlagengröße"
+  einheit="Tonnen CO2-Äquivalent pro Jahr"
+  quelle="Berechnet aus 0,344 kg CO2 je kWh (Umweltbundesamt, Strommix-Jahreswert 2025) und 950 kWh Ertrag je kWp und Jahr (Fraunhofer ISE, bundesweiter Durchschnitt). Der reale Wert schwankt mit Standort, Ausrichtung und künftigem Strommix."
+  werte={[
+    { label: "5 kWp", wert: 1.63, anzeige: "≈ 1,6 t" },
+    { label: "10 kWp", wert: 3.27, anzeige: "≈ 3,3 t", hervor: true },
+    { label: "15 kWp", wert: 4.90, anzeige: "≈ 4,9 t" },
+    { label: "20 kWp", wert: 6.54, anzeige: "≈ 6,5 t" },
+  ]}
+/>
 
 ## Ein greifbarerer Vergleich: Bäume
 
