@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
 // Die Tool-Liste lag früher als lokales Array in dieser Datei — dieselbe
 // Information brauchte aber auch RechnerCta.astro für den Titel der
 // "Passend dazu"-Box. Jetzt eine Quelle der Wahrheit: src/lib/rechner.js.
@@ -46,7 +47,8 @@ const tools = RECHNER;
   title="PV-Rechner — Photovoltaik-Tools | Photovoltaik Aktuell"
   description="Alle Photovoltaik-Rechner von Photovoltaik Aktuell an einem Ort: PV-Rechner mit echten PVGIS-Daten, Speicher, Rendite, Balkonkraftwerk, CO2, Gestehungskosten, Reinigung, E-Auto, Steuer und Mieterstrom."
 >
-  <section class="prose rechner-header">
+  <section class="container rechner-header">
+    <Breadcrumb glieder={[{ name: "Rechner" }]} />
     <h1>Rechner</h1>
     <p>Konkrete Zahlen statt Schätzungen — für Ihr Dach, Ihren Verbrauch, Ihren Standort.</p>
   </section>
@@ -56,7 +58,7 @@ const tools = RECHNER;
       <a href={`/rechner/${t.slug}/`} class="tool-card">
         {SIGNET[t.slug] && (
           <span class="tool-signet">
-            {(() => { const Signet = SIGNET[t.slug]; return <Signet size={30} />; })()}
+            {(() => { const Signet = SIGNET[t.slug]; return <Signet size={40} />; })()}
           </span>
         )}
         <h2>{t.title}</h2>
@@ -106,8 +108,9 @@ const tools = RECHNER;
 </BaseLayout>
 
 <style>
+  /* Linksbündig auf Containerbreite wie das Kachelraster darunter. */
   .rechner-header {
-    padding: 40px 20px 24px;
+    padding-block: 40px 24px;
   }
 
   .rechner-header h1 {

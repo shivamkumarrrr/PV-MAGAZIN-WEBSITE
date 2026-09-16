@@ -6,6 +6,7 @@
 // "der Rechner funktioniert nicht". Die eingesparte Ladezeit ist den toten
 // Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
 import Wizard from "../../components/calculator/Wizard.jsx";
 ---
 
@@ -13,8 +14,8 @@ import Wizard from "../../components/calculator/Wizard.jsx";
   title="Photovoltaik-Rechner — Ertrag & Ersparnis berechnen | Photovoltaik Aktuell"
   description="Berechnen Sie in 4 Schritten Anlagengröße, Jahresertrag, Ersparnis, Autarkiegrad und Amortisation Ihrer Solaranlage — auf Basis echter PVGIS-Satellitendaten für Ihren Standort."
 >
-  <section class="prose rechner-intro">
-    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / Photovoltaik</nav>
+  <section class="container rechner-intro">
+    <Breadcrumb glieder={[{ name: "Rechner", href: "/rechner/" }, { name: "Photovoltaik" }]} />
     <h1>Photovoltaik-Rechner</h1>
     <p>
       Standort, Dach, Verbrauch, Speicher — vier kurze Schritte, dann sehen
@@ -107,20 +108,15 @@ import Wizard from "../../components/calculator/Wizard.jsx";
 </BaseLayout>
 
 <style>
+  /* Containerbreite statt schmaler, zentrierter Lesespalte: Der Rechner
+     darunter steht im `.container` an der linken Seitenkante, ein
+     zentrierter Kopf darüber begann 260px weiter rechts. `padding-block`,
+     nicht die `padding`-Kurzform — sonst fallen die seitlichen 20px des
+     Containers weg. */
   .rechner-intro {
-    padding: 32px 20px 20px;
+    padding-block: 32px 20px;
   }
 
-  .breadcrumb {
-    font-size: 13px;
-    color: var(--color-text-muted);
-    margin-bottom: 10px;
-  }
-
-  .breadcrumb a {
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
 
   .rechner-intro h1 {
     font-size: 28px;

@@ -1,0 +1,110 @@
+---
+// Brotkrumen-Navigation, gemeinsam für Rechner-, Kategorie- und Artikelseiten.
+//
+// Vorher stand sie in dreizehn Dateien einzeln: dieselben vier CSS-Regeln
+// dreizehnmal, mit abweichendem Abstand (10px auf den Rechnerseiten, 16px im
+// Artikel) und einem Hover-Zustand, den nur der Artikel hatte. Die Rechner-
+// seiten hatten außerdem gar keine BreadcrumbList-Auszeichnung — die stand
+// nur auf den Ratgeber-Seiten.
+//
+// Semantik statt Textzeile: <ol> mit <li>, der Trenner kommt aus CSS
+// (::before) und ist damit für Screenreader unsichtbar — vorher stand das
+// "/" als echtes Textzeichen zwischen zwei Links und wurde mitgelesen. Die
+// aktuelle Seite ist kein Link und trägt aria-current="page".
+//
+// Das JSON-LD entsteht aus derselben Liste wie die sichtbare Navigation.
+// Getrennte Quellen laufen auseinander, und Google verlangt, dass
+// strukturierte Daten dem sichtbaren Inhalt entsprechen.
+interface Glied {
+  name: string;
+  /** Ohne href gilt das Glied als aktuelle Seite (letztes Element). */
+  href?: string;
+}
+
+interface Props {
+  glieder: Glied[];
+  /** Startseite als erstes Glied ergänzen. Standard an. */
+  mitStart?: boolean;
+}
+
+const { glieder, mitStart = true } = Astro.props;
+
+const alle: Glied[] = mitStart
+  ? [{ name: "Start", href: "/" }, ...glieder]
+  : [...glieder];
+
+const ld = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: alle.map((g, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: g.name,
+    ...(g.href ? { item: new URL(g.href, Astro.site).toString() } : {}),
+  })),
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(ld)} />
+
+<nav class="brotkrumen" aria-label="Brotkrumen">
+  <ol>
+    {alle.map((g) => (
+      <li>
+        {g.href ? (
+          <a href={g.href}>{g.name}</a>
+        ) : (
+          <span aria-current="page">{g.name}</span>
+        )}
+      </li>
+    ))}
+  </ol>
+</nav>
+
+<style>
+  .brotkrumen {
+    /* Ein einziger Abstandswert für alle Seitentypen — vorher 10px auf den
+       Rechnerseiten und 16px im Artikel, was beim Wechseln sichtbar sprang. */
+    margin-bottom: 12px;
+  }
+
+  .brotkrumen ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 8px;
+    font-size: var(--schrift-xs);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+  }
+
+  /* Trenner als Pseudo-Element statt als Textzeichen im Markup: So liest ein
+     Screenreader "Start, Ratgeber, Technik" statt "Start Schrägstrich
+     Ratgeber Schrägstrich Technik".
+     Bewusst ::after am VORANGEHENDEN Glied, nicht ::before am folgenden: Bei
+     einem langen Artikeltitel bricht die Kette um, und mit ::before stünde
+     der Schrägstrich allein am Anfang der zweiten Zeile. */
+  .brotkrumen li:not(:last-child)::after {
+    content: "/";
+    margin-left: 8px;
+    color: var(--color-border);
+  }
+
+  .brotkrumen a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .brotkrumen a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .brotkrumen [aria-current="page"] {
+    color: var(--color-text-secondary);
+  }
+</style>

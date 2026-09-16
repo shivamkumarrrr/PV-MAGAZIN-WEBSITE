@@ -6,6 +6,7 @@
 // "der Rechner funktioniert nicht". Die eingesparte Ladezeit ist den toten
 // Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
 import Wizard from "../../components/co2/Wizard.jsx";
 ---
 
@@ -13,8 +14,8 @@ import Wizard from "../../components/co2/Wizard.jsx";
   title="CO₂-Einsparungsrechner — Was spart Ihre PV? | Photovoltaik Aktuell"
   description="Wie viel CO₂ spart Ihre Photovoltaik-Anlage gegenüber dem deutschen Strommix? Berechnen Sie kg pro Jahr, über 25 Jahre und im Vergleich zu Auto & Bäumen."
 >
-  <section class="prose rechner-intro">
-    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / CO₂-Einsparung</nav>
+  <section class="container rechner-intro">
+    <Breadcrumb glieder={[{ name: "Rechner", href: "/rechner/" }, { name: "CO₂-Einsparung" }]} />
     <h1>CO₂-Einsparungsrechner</h1>
     <p>
       Jede Kilowattstunde, die Ihre Anlage erzeugt, ersetzt eine Kilowattstunde
@@ -30,20 +31,15 @@ import Wizard from "../../components/co2/Wizard.jsx";
 </BaseLayout>
 
 <style>
+  /* Containerbreite statt schmaler, zentrierter Lesespalte: Der Rechner
+     darunter steht im `.container` an der linken Seitenkante, ein
+     zentrierter Kopf darüber begann 260px weiter rechts. `padding-block`,
+     nicht die `padding`-Kurzform — sonst fallen die seitlichen 20px des
+     Containers weg. */
   .rechner-intro {
-    padding: 32px 20px 20px;
+    padding-block: 32px 20px;
   }
 
-  .breadcrumb {
-    font-size: 13px;
-    color: var(--color-text-muted);
-    margin-bottom: 10px;
-  }
-
-  .breadcrumb a {
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
 
   .rechner-intro h1 {
     font-size: 28px;

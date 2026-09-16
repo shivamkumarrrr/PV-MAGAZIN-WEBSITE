@@ -6,6 +6,7 @@
 // "der Rechner funktioniert nicht". Die eingesparte Ladezeit ist den toten
 // Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
 import Wizard from "../../components/balkonkraftwerk/Wizard.jsx";
 ---
 
@@ -13,8 +14,8 @@ import Wizard from "../../components/balkonkraftwerk/Wizard.jsx";
   title="Balkonkraftwerk-Rechner — Ertrag & Amortisation | Photovoltaik Aktuell"
   description="Berechnen Sie Jahresertrag, Ersparnis und Amortisationszeit für Ihr Steckersolargerät — abgestimmt auf die 800-Watt-Regelung des Solarpakets I."
 >
-  <section class="prose rechner-intro">
-    <nav class="breadcrumb"><a href="/rechner/">Rechner</a> / Balkonkraftwerk</nav>
+  <section class="container rechner-intro">
+    <Breadcrumb glieder={[{ name: "Rechner", href: "/rechner/" }, { name: "Balkonkraftwerk" }]} />
     <h1>Balkonkraftwerk-Rechner</h1>
     <p>
       Zwei kurze Schritte, dann sehen Sie Jahresertrag, Eigenverbrauch,
@@ -32,20 +33,15 @@ import Wizard from "../../components/balkonkraftwerk/Wizard.jsx";
 </BaseLayout>
 
 <style>
+  /* Containerbreite statt schmaler, zentrierter Lesespalte: Der Rechner
+     darunter steht im `.container` an der linken Seitenkante, ein
+     zentrierter Kopf darüber begann 260px weiter rechts. `padding-block`,
+     nicht die `padding`-Kurzform — sonst fallen die seitlichen 20px des
+     Containers weg. */
   .rechner-intro {
-    padding: 32px 20px 20px;
+    padding-block: 32px 20px;
   }
 
-  .breadcrumb {
-    font-size: 13px;
-    color: var(--color-text-muted);
-    margin-bottom: 10px;
-  }
-
-  .breadcrumb a {
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
 
   .rechner-intro h1 {
     font-size: 28px;
