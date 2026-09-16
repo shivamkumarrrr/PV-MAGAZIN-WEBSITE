@@ -102,7 +102,10 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   Gestehungskosten-Rechner haben je einen eigenen, gewachsenen Block; alle
   anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
 - `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
-  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden.
+  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden. Trägt
+  ein FAQ-Eintrag das optionale Feld `gruppe`, gliedert ArticleFaq die
+  Fragen in benannte Blöcke; das FAQPage-JSON-LD bleibt trotzdem eine
+  flache Liste, weil schema.org keine Gruppen kennt.
 - `src/pages/ratgeber/[slug].astro` reicht an `ArticleLayout.astro` neben den
   Frontmatter-Daten zwei abgeleitete Werte durch: die **gerenderten
   `headings`** (aus `render(entry)`) und die **`lesedauer`** (Wörter aus
@@ -111,15 +114,21 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   Kategorie-Hero und die optionale "Zusammenfassung"-Box
   (`zusammenfassung` im Frontmatter). Diese Bausteine gehören NICHT in den
   MDX-Fließtext.
-- `src/components/ArticleHero.astro` — Kategorie-Hero am Artikelanfang, von
-  ArticleLayout automatisch gerendert. Pro Kategorie EINE belegte Kennzahl
-  (Quelle + Stand direkt in der Datei) als SVG-Motiv statt Stockfoto — die
-  Kennzahlen sind bei der jährlichen Datenpflege mitzuziehen. Kein Eingriff
-  im MDX nötig.
+- `src/components/ArticleHero.astro` — Hero am Artikelanfang, von
+  ArticleLayout automatisch gerendert, kein Eingriff im MDX nötig. Zwei
+  Varianten: Liegt `heroImage` im Frontmatter, zeigt der Hero das Foto;
+  ohne Angabe greift als Fallback das datengetriebene SVG-Motiv mit EINER
+  belegten Kennzahl je Kategorie (Quelle + Stand direkt in der Datei) —
+  die Kennzahlen sind bei der jährlichen Datenpflege mitzuziehen. Seit
+  September 2026 haben alle 17 Artikel ein Foto, das SVG ist damit nur
+  noch der Pfad für neue Artikel ohne Bild.
 - `src/components/Definition.astro` — Fachbegriff-Einblendung im Fließtext:
   sichtbares Wort, Erklärung als Hover/Focus-Popover, reines CSS ohne
   JavaScript. Nutzung im MDX: `<Definition begriff="kWp">Erklärung…
   </Definition>` (Komponente muss importiert werden).
+- `src/components/Diagramm.astro` — kleiner Balkenvergleich als Inline-SVG
+  für den Fließtext (Kostenanteile, Vergütungsverlauf). Werte und Quelle
+  kommen als Props aus dem MDX, kein Chart-Paket, kein JavaScript.
 - `src/components/RechnerWidget.jsx` — kompakter Mini-Rechner für den
   Artikeltext. Nutzt `calculate.js`-Konstanten, `Slider`/`Segmented` aus
   `calculator/ui` und `theme.js`. Einbindung im MDX mit
@@ -261,8 +270,10 @@ Betrifft in diesem Projekt konkret:
   zum Hub UND mindestens ein Link aus einem thematisch passenden Bestands-
   artikel auf den neuen.
 - Artikelseiten-Aufbau ist automatisiert: Inhaltsangabe und Lesezeit kommen
-  aus den MDX-Headings (`[slug].astro`), der Kategorie-Hero aus
-  `ArticleHero.astro`. Diese drei NICHT von Hand im MDX nachbauen; die
+  aus den MDX-Headings (`[slug].astro`), der Hero aus
+  `ArticleHero.astro` (Foto über `heroImage`/`heroImageAlt` im
+  Frontmatter, sonst SVG-Fallback). Diese drei NICHT von Hand im MDX
+  nachbauen; die
   "Zusammenfassung"-Box ist optional über das Frontmatter-Feld
   `zusammenfassung: [Liste kurzer Kernsätze]` aktivierbar. Tabellen und
   Musterrechnungen gehören wie gehabt in den Fließtext — Vorbild ist der
@@ -346,10 +357,15 @@ die Werte vergleichen, nicht nur den Code lesen.
   (#D4950A), nicht das Akzent-Token #FF5200 der Oberfläche. Der Satz weiter
   oben, #FF5200 stamme aus dem Logo-File, stimmt so nicht — im PNG kommt
   dieser Wert nicht vor.
-- Keine Bilder im gesamten Projekt außer dem Logo. Seit dem
-  TOC/Hero-Ausbau brauchen Artikel-Seiten kein Foto mehr (Kategorie-Hero ist
-  datengetriebenes SVG, siehe `ArticleHero.astro`); die Startseite und
-  ggf. echte Reportage-Bilder warten weiter auf die Firmen-NAS-Quelle.
+- Bilder: Seit 14.09.2026 liegen Hero-Fotos für alle 17 Artikel unter
+  `public/images/heroes/` plus ein Startseiten-Hero
+  (`public/images/startseite.jpg`). Quelle ist Pexels (Lizenz erlaubt
+  kommerzielle Nutzung ohne Namensnennung); Fotograf, Pexels-ID und
+  Fundstelle je Datei stehen in `public/images/heroes/BILDNACHWEIS.md` —
+  bei neuen Bildern dort mit eintragen, sonst ist die Lizenzlage nicht
+  belegbar. **Offen:** `einspeiseverguetung.jpg` ist ein Bestandsbild ohne
+  dokumentierte Herkunft und muss vor Livegang ersetzt oder belegt werden.
+  Echte Reportage-Bilder aus der Firmen-NAS-Quelle stehen weiter aus.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
   (ADAC, Verbraucherzentrale, co2online). Ausbau wartet auf die
   Themen-Priorisierung durch PPC.
