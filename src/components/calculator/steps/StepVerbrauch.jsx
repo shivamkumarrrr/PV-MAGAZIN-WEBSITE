@@ -14,23 +14,27 @@ function PersonOption({ opt, active, onClick }) {
     <TiltButton
       onClick={onClick}
       style={{
-        padding: "12px 6px",
+        padding: "16px 8px 14px",
         borderRadius: 10,
-        border: active ? `2px solid ${theme.color.accent}` : `1.5px solid ${theme.color.border}`,
+        // Beide Zustände 2px — sonst ruckt die Reihe beim Auswählen.
+        border: `2px solid ${active ? theme.color.accent : theme.color.border}`,
         background: active ? theme.color.accentSubtle : theme.color.white,
         cursor: "pointer",
-        transition: "all 0.15s",
+        transition: "border-color 0.15s, background-color 0.15s",
       }}
     >
-      <div style={{ display: "flex", gap: 1, justifyContent: "center", marginBottom: 6 }}>
+      <div style={{ display: "flex", gap: 2, justifyContent: "center", marginBottom: 9 }}>
         {Array.from({ length: icons }).map((_, i) => (
-          <span key={i} style={{ color: active ? theme.color.accentHover : theme.color.textMuted, display: "flex" }}>
-            <IconPerson size={14} />
+          <span key={i} style={{ color: active ? theme.color.accentHover : theme.color.textSecondary, display: "flex" }}>
+            <IconPerson size={19} />
           </span>
         ))}
       </div>
-      <div style={{ fontSize: 12, fontWeight: 600, color: active ? theme.color.accentHover : theme.color.textPrimary }}>{opt.label}</div>
-      <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 2 }}>{opt.kwh.toLocaleString("de-DE")} kWh/Jahr</div>
+      {/* Zwei Zeilen Platz reserviert: "5+ Personen" bricht in einer
+          122px-Spalte um, die anderen vier nicht — ohne feste Höhe säße die
+          kWh-Zeile dieser einen Karte tiefer als bei den Nachbarn. */}
+      <div style={{ fontSize: 15, fontWeight: active ? 700 : 600, lineHeight: 1.3, minHeight: "2.6em", color: active ? theme.color.accentHover : theme.color.textPrimary }}>{opt.label}</div>
+      <div style={{ fontSize: 12.5, color: active ? theme.color.accentHover : theme.color.textMuted, marginTop: 3 }}>{opt.kwh.toLocaleString("de-DE")} kWh/Jahr</div>
     </TiltButton>
   );
 }
@@ -145,8 +149,10 @@ export default function StepVerbrauch({ haushalt, onHaushaltChange, verbrauch, s
         <>
           {index === 0 && (
             <div>
-              <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 10 }}>Wie viele Personen leben in Ihrem Haushalt?</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(84px, 1fr))", gap: 8 }}>
+              <div style={{ fontSize: 16, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 12, lineHeight: 1.35 }}>Wie viele Personen leben in Ihrem Haushalt?</div>
+              <div style={{ display: "grid", // 104px statt 84: "1.700 kWh/Jahr" braucht bei der größeren Schrift
+                  // rund 80px, mit 84 stand die Zeile auf der Kante.
+                  gridTemplateColumns: "repeat(auto-fit, minmax(104px, 1fr))", gap: 10 }}>
                 {HAUSHALT.map((opt) => (
                   <PersonOption key={opt.label} opt={opt} active={haushalt === opt.label} onClick={() => autoAdvance(() => onHaushaltChange(opt.label))} />
                 ))}
@@ -185,7 +191,7 @@ export default function StepVerbrauch({ haushalt, onHaushaltChange, verbrauch, s
 
           {index === 2 && (
             <div>
-              <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 4 }}>Zusätzliche Verbraucher</div>
+              <div style={{ fontSize: 16, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 6 }}>Zusätzliche Verbraucher</div>
               <div style={{ fontSize: 12, color: theme.color.textMuted, marginBottom: 12 }}>Rechnet den Mehrverbrauch in Ihre Anlage ein — „Geplant" bleibt außen vor.</div>
 
               <VerbraucherCard
@@ -258,7 +264,7 @@ export default function StepVerbrauch({ haushalt, onHaushaltChange, verbrauch, s
 
           {index === 3 && (
             <div>
-              <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 4 }}>Wann nutzen Sie den meisten Strom?</div>
+              <div style={{ fontSize: 16, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 6 }}>Wann nutzen Sie den meisten Strom?</div>
               <div style={{ fontSize: 12, color: theme.color.textMuted, marginBottom: 10 }}>Mehrfachauswahl möglich — mittags verbrauchter Strom erhöht Ihren Eigenverbrauch.</div>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 {TAGESZEITEN.map((t) => {

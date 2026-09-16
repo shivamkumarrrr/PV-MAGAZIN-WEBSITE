@@ -69,6 +69,19 @@ export default function DetailSection({ result, dachform, speicherKwh, tageszeit
         </details>
       )}
 
+      {/* Steht IMMER, auch nach PLZ-Eingabe, wenn der Faltblock darüber
+          ausgeblendet ist: Der Block erklärt die Rechnung, diese Zeile nennt
+          die Herkunft der Konstanten. Beides gehört neben die Zahl — der
+          frühere Quellen-Abschnitt auf der Startseite erreichte niemanden,
+          der direkt im Rechner landete. */}
+      <p style={{ margin: "0 0 20px", fontSize: 12.5, lineHeight: 1.55, color: theme.color.textMuted }}>
+        Strompreis, Einspeisevergütung, Systemkosten und CO₂-Faktor stammen von
+        BDEW, Bundesnetzagentur, Fraunhofer ISE und Umweltbundesamt.{" "}
+        <a href="/methodik/" style={{ color: theme.color.accentText }}>
+          Alle Konstanten mit Quelle, Stand und den Grenzen des Modells
+        </a>
+      </p>
+
       {/* Urgency + Monthly savings */}
       <div style={{ background: theme.color.accentSubtle, border: `1.5px solid ${theme.color.accent}`, borderRadius: theme.radius.lg, padding: "16px 18px", marginBottom: 20, textAlign: "center" }}>
         <div style={{ fontSize: 15, fontWeight: 600, color: theme.color.accentHover, marginBottom: 4 }}>

@@ -19,7 +19,7 @@ export default function Slider({ value, onChange, min, max, step, unit, label })
   return (
     <div style={{ marginBottom: 28 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-        <span style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500 }}>{label}</span>
+        <span style={{ fontSize: 15, color: theme.color.textPrimary, fontWeight: 600 }}>{label}</span>
         {editing ? (
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
             <input
@@ -82,10 +82,18 @@ export default function Slider({ value, onChange, min, max, step, unit, label })
           </button>
         )}
       </div>
+      {/* Die sichtbare Beschriftung steht als <span> in der Kopfzeile, weil
+          rechts daneben der editierbare Wert liegt — ein <label for> würde
+          beim Anklicken den Schieberegler fokussieren statt das Wertfeld.
+          Deshalb trägt der Regler seinen Namen über aria-label, sonst meldet
+          ihn der Screenreader nur als "Schieberegler". aria-valuetext liefert
+          die Einheit mit: "40 m²" statt "40". */}
       <input
         id={`${slug}-range`}
         name={`${slug}-range`}
         type="range"
+        aria-label={label}
+        aria-valuetext={unit ? `${value.toLocaleString("de-DE")} ${unit}` : undefined}
         min={min}
         max={max}
         step={step}

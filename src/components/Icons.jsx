@@ -1,6 +1,11 @@
 // Hand-drawn line-icon set, replacing emoji throughout the app. Same visual
 // language as the Dachform illustrations: thin rounded strokes, currentColor.
-const base = { fill: "none", strokeWidth: 1.6, strokeLinecap: "round", strokeLinejoin: "round" };
+// Strichstärke 1.9 statt 1.6: Bei 18–24px Anzeigegröße wirkten die Zeichen
+// vorher zart bis blass, besonders in der grauen Sekundärfarbe der Rechner-
+// Oberfläche. 1.9 hält die handgezeichnete Anmutung und ist auf einem
+// normalen Display klar sichtbar; ab etwa 2.2 kippt die Optik ins Fette und
+// die Innenräume kleiner Zeichen (Stecker, Batterie) laufen zu.
+const base = { fill: "none", strokeWidth: 1.9, strokeLinecap: "round", strokeLinejoin: "round" };
 
 export function Svg({ size = 20, children, label }) {
   return (

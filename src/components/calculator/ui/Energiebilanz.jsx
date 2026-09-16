@@ -16,6 +16,11 @@ import theme from "../../../theme.js";
 // den Monatscharts schon ihre Grafiken, ein zweites Bildmotiv wäre ein zweites
 // Signature-Element (Design-Regel 11). Alle Werte kommen aus `calculate()` —
 // hier wird nichts nachgerechnet.
+//
+// Dieser Absatz gilt NUR für die Ergebnisseite. In der Live-Vorschau neben dem
+// Wizard steht sehr wohl ein gezeichnetes Haus mit Flusslinien
+// (`Energiefluss.jsx`) — dort ist es das einzige Bildmotiv und ersetzt zwei
+// andere Grafiken, statt neben ihnen zu stehen.
 const NF = new Intl.NumberFormat("de-DE");
 
 function Balken({ titel, summe, segmente }) {

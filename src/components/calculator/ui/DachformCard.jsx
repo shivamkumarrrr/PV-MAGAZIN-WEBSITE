@@ -13,22 +13,23 @@ export default function DachformCard({ item, selected, onSelect }) {
     <TiltButton
       onClick={() => onSelect(item.label)}
       style={{
-        padding: "14px 6px 10px",
+        padding: "16px 8px 13px",
         borderRadius: theme.radius.lg,
-        border: active ? `2px solid ${theme.color.accent}` : `1.5px solid ${theme.color.border}`,
+        // Beide Zustände 2px — sonst springt die Karte beim Auswählen.
+        border: `2px solid ${active ? theme.color.accent : theme.color.border}`,
         background: active ? theme.color.accentSubtle : theme.color.white,
         cursor: "pointer",
         textAlign: "center",
         transition: "border-color 0.15s, background-color 0.15s",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "center", marginBottom: 6 }}>
-        <RoofIcon item={item} active={active} size={60} />
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+        <RoofIcon item={item} active={active} size={64} />
       </div>
-      <div style={{ fontSize: 11, fontWeight: active ? 600 : 400, color: active ? theme.color.accentHover : theme.color.textSecondary }}>
+      <div style={{ fontSize: 13, fontWeight: active ? 700 : 500, lineHeight: 1.3, color: active ? theme.color.accentHover : theme.color.textPrimary }}>
         {item.label}
       </div>
-      <div style={{ fontSize: 9, color: active ? theme.color.accentHover : theme.color.textMuted, marginTop: 1 }}>
+      <div style={{ fontSize: 11, color: active ? theme.color.accentHover : theme.color.textMuted, marginTop: 3 }}>
         ~{Math.round(anzeigeFaktor * 100)}% nutzbar
       </div>
     </TiltButton>

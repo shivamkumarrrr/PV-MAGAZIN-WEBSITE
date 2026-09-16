@@ -8,7 +8,7 @@ export default function StepStandort({
   return (
     <>
       <div style={{ marginBottom: 16 }}>
-        <label htmlFor="plz-input" style={{ display: "block", fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 8 }}>Postleitzahl *</label>
+        <label htmlFor="plz-input" style={{ display: "block", fontSize: 15, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 8 }}>Postleitzahl *</label>
         <div style={{ position: "relative" }}>
           <input
             id="plz-input"
@@ -55,7 +55,7 @@ export default function StepStandort({
         </div>
       </div>
       <div style={{ marginBottom: 16 }}>
-        <label htmlFor="address-input" style={{ display: "block", fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 8 }}>Straße & Hausnummer (optional)</label>
+        <label htmlFor="address-input" style={{ display: "block", fontSize: 15, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 8 }}>Straße & Hausnummer (optional)</label>
         <input
           id="address-input"
           type="text"

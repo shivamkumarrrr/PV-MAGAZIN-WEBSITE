@@ -19,8 +19,17 @@ export default function StepDach({ dachform, setDachform, dach, setDach, ausrich
         <>
           {index === 0 && (
             <div>
-              <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 10 }}>Welche Dachform hat Ihr Haus?</div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 8 }}>
+              <div style={{ fontSize: 16, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 12, lineHeight: 1.35 }}>Welche Dachform hat Ihr Haus?</div>
+              {/* Vier feste Spalten quetschten die Karten auf schmalen Displays auf
+                  gut 70px zusammen — mit der jetzt größeren Beschriftung würde
+                  der Text darin umbrechen oder überlaufen. `auto-fit` mit
+                  Mindestbreite bricht stattdessen sauber auf zwei Reihen um.
+                  112px, nicht 118: Bei 360px Viewport bleiben in der
+                  Wizard-Karte 243px innen. Zwei Spalten brauchen
+                  2x112+10=234 und passen; mit 118 wären es 246 und das
+                  Raster fiel auf EINE Spalte zurück — vier Karten
+                  untereinander statt 2x2. */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(112px, 1fr))", gap: 10 }}>
                 {DACHFORM.map((d) => (
                   <DachformCard key={d.label} item={d} selected={dachform} onSelect={(label) => autoAdvance(() => setDachform(label))} />
                 ))}
@@ -43,12 +52,12 @@ export default function StepDach({ dachform, setDachform, dach, setDach, ausrich
 
           {index === 2 && (
             <div>
-              <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 10 }}>Wohin zeigt die Hauptdachfläche?</div>
+              <div style={{ fontSize: 16, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 12, lineHeight: 1.35 }}>Wohin zeigt die Hauptdachfläche?</div>
               <OptionGroup
                 options={AUSRICHTUNG}
                 selected={ausrichtung}
                 onSelect={(label) => autoAdvance(() => setAusrichtung(label))}
-                minCol={72}
+                minCol={88}
                 renderIcon={(opt, active) => <AusrichtungIcon label={typeof opt === "string" ? opt : opt.label} active={active} />}
               />
               {ausrichtung === "Nord" && (
@@ -61,7 +70,7 @@ export default function StepDach({ dachform, setDachform, dach, setDach, ausrich
 
           {index === 3 && (
             <div>
-              <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 10 }}>Wie ist das Dach geneigt?</div>
+              <div style={{ fontSize: 16, color: theme.color.textPrimary, fontWeight: 600, marginBottom: 12, lineHeight: 1.35 }}>Wie ist das Dach geneigt?</div>
               {/* Live-Vorschau: Das Dach-Icon kippt mit der gewählten Neigung mit —
                   flache Auswahl = fast flach liegend, steile = aufgerichtet. */}
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>

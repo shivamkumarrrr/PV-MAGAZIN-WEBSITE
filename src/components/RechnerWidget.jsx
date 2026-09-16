@@ -2,7 +2,9 @@ import { useMemo, useState } from "react";
 import theme from "../theme.js";
 import Slider from "./calculator/ui/Slider.jsx";
 import Segmented from "./calculator/ui/Segmented.jsx";
-import { HAUSHALT, calculate } from "../lib/calculate.js";
+import Faltblock from "./calculator/ui/Faltblock.jsx";
+import { HAUSHALT, calculate, STROMPREIS, EINSPEISE } from "../lib/calculate.js";
+import { useAnimatedNumber } from "../lib/useAnimatedNumber.js";
 
 // Kompakter Mini-Rechner für den Artikeltext (Muster: zolars Solarrechner
 // direkt im Artikel). KEINE PVGIS-Daten, keine Standortauswahl — bewusst nur
@@ -17,6 +19,47 @@ const NF = new Intl.NumberFormat("de-DE");
 
 const euro = (v) => `${NF.format(Math.round(v))} €`;
 const kWh = (v) => `${NF.format(Math.round(v))} kWh`;
+// Cent-Schreibweise wie auf /methodik/ — zwei Nachkommastellen, weil die
+// EEG-Sätze auf die zweite Stelle festgelegt sind (7,70 ct, nicht 7,7 ct).
+const ct = (eur) =>
+  new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
+
+// Pulsierender Punkt + "Live"-Beschriftung — signalisiert ehrlich, was hier
+// tatsächlich passiert: Das Ergebnis ist kein Snapshot, es rechnet bei jeder
+// Eingabe neu (useMemo oben). Dieselbe Bildsprache wie "Live-Vorschau" in
+// LivePanel.jsx (großer Rechner) — hier nur kompakt neben der Überschrift,
+// weil eine zweite Beschriftungszeile den Kartenkopf gesprengt hätte.
+// aria-hidden auf dem Punkt: er ist Dekoration zu einer Aussage, die der
+// sichtbare Text ("Live") ohnehin trägt.
+function LivePunkt() {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+      <style>{`
+        @keyframes live-puls {
+          0% { transform: scale(0.6); opacity: 0.5; }
+          70%, 100% { transform: scale(2.1); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .live-punkt-ring { animation: none; opacity: 0; }
+        }
+      `}</style>
+      <span style={{ position: "relative", width: 7, height: 7, flexShrink: 0 }} aria-hidden="true">
+        <span
+          className="live-punkt-ring"
+          style={{
+            position: "absolute",
+            inset: -4,
+            borderRadius: "50%",
+            background: theme.color.success,
+            animation: "live-puls 2s ease-out infinite",
+          }}
+        />
+        <span style={{ position: "absolute", inset: 0, borderRadius: "50%", background: theme.color.success }} />
+      </span>
+      <span style={{ fontSize: 12, fontWeight: 600, color: theme.color.textSecondary }}>Live</span>
+    </span>
+  );
+}
 
 // Generische Kennzahl-Kachel; gleiche Bildsprache wie KeyMetrics im Rechner.
 // `grund` ist die Fläche, auf der die Kachel liegt: im Artikel eine weiße
@@ -53,12 +96,22 @@ export default function RechnerWidget({ variante = "artikel" }) {
   const kachelGrund = imHero ? theme.color.bg : theme.color.surface;
   // Verbrauch wird über die Haushaltsgröße gesetzt (wie im großen Rechner,
   // dort frei überschreibbar) — hier reicht die Personenzahl.
-  const [haushalt, setHaushalt] = useState("4 Personen");
+  // Nichts ist vorausgewählt — dieselbe Vorgabe wie im großen Rechner
+  // (September 2026). Vorher standen "4 Personen" und "Mit Speicher" orange
+  // markiert da und die Karte zeigte sofort eine fertige Amortisation für
+  // Angaben, die niemand gemacht hatte.
+  //
+  // Ausnahme wie dort: Der Schieberegler für die Dachfläche startet bei 40 m²,
+  // weil ein Regler ohne Wert keine Position hat. Er zählt nicht als
+  // getroffene Entscheidung.
+  const [haushalt, setHaushalt] = useState(null);
   const [dach, setDach] = useState(40);
-  const [speicher, setSpeicher] = useState(true);
+  const [speicher, setSpeicher] = useState(null);
+
+  const bereit = haushalt !== null && speicher !== null;
 
   const ergebnis = useMemo(() => {
-    const verbrauch = HAUSHALT.find((h) => h.label === haushalt)?.kwh ?? 4000;
+    const verbrauch = HAUSHALT.find((h) => h.label === haushalt)?.kwh ?? 0;
     const speicherKwh = speicher ? Math.round((verbrauch / 1000) * 1.2 * 10) / 10 : 0;
     return calculate(
       dach,
@@ -75,6 +128,16 @@ export default function RechnerWidget({ variante = "artikel" }) {
     );
   }, [haushalt, dach, speicher]);
 
+  // Weiche Zahlen statt hartem Sprung bei jeder Eingabe — dieselbe Technik
+  // wie LivePanel.jsx im großen Rechner (useAnimatedNumber), damit "Live"
+  // oben nicht nur behauptet, sondern auch zu sehen ist. Ohne
+  // Amortisation (Anlage trägt sich nicht) bleibt der Wert 0 und wird gar
+  // nicht gerendert, siehe unten.
+  const animAmortisation = useAnimatedNumber(ergebnis.amortisation ?? 0);
+  const animErsparnis = useAnimatedNumber(ergebnis.jahresErsparnis);
+  const animKwp = useAnimatedNumber(ergebnis.kwp);
+  const animErtrag = useAnimatedNumber(ergebnis.jahresertrag);
+
   return (
     <section
       aria-labelledby="widget-titel"
@@ -86,29 +149,50 @@ export default function RechnerWidget({ variante = "artikel" }) {
         background: imHero ? theme.color.surface : theme.color.bg,
       }}
     >
-      <div style={{ padding: "18px 20px 4px", borderBottom: `1px solid ${theme.color.border}` }}>
-        <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.6px", color: theme.color.accent, marginBottom: 4 }}>
-          Mini-Rechner
-        </div>
-        <div id="widget-titel" style={{ fontSize: 19, fontWeight: 600, color: theme.color.textPrimary }}>
+      {/* Kein Kleinversalien-Label über der Überschrift: Das Muster ist ein
+          bekannter Generierungs-Tell, und "MINI-RECHNER" sagt nichts, was die
+          Karte nicht selbst zeigt. Die Überschrift ist ein echtes <h2>, damit
+          die Karte in der Überschriftennavigation eines Screenreaders
+          auftaucht — vorher war sie dort unsichtbar. */}
+      <div
+        style={{
+          padding: "18px 20px 14px",
+          borderBottom: `1px solid ${theme.color.border}`,
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
+        <h2 id="widget-titel" style={{ margin: 0, fontSize: 19, fontWeight: 600, letterSpacing: "-0.015em", color: theme.color.textPrimary }}>
           Erste Größenordnung für Ihr Dach
-        </div>
+        </h2>
+        <LivePunkt />
       </div>
 
       <div style={{ padding: "18px 20px 6px" }}>
         <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 8 }}>Haushalt</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
+          <div id="haushalt-label" style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 8 }}>Haushalt</div>
+          {/* Fünf Knöpfe, die sich gegenseitig ausschließen, sind eine
+              Auswahlgruppe — ohne role/aria-checked meldet ein Screenreader
+              nur fünf namenlose Schaltflächen ohne erkennbaren Zustand. */}
+          <div role="radiogroup" aria-labelledby="haushalt-label" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 6 }}>
             {HAUSHALT.map((h) => {
               const active = haushalt === h.label;
               return (
                 <button
                   key={h.label}
+                  type="button"
+                  role="radio"
+                  aria-checked={active}
+                  aria-label={`${h.persons === 5 ? "5 oder mehr" : h.persons} ${h.persons === 1 ? "Person" : "Personen"}`}
                   onClick={() => setHaushalt(h.label)}
                   style={{
                     padding: "9px 4px",
                     borderRadius: 10,
-                    border: active ? `2px solid ${theme.color.accent}` : `1.5px solid ${theme.color.border}`,
+                    // Beide Zustände 2px — sonst wächst der Knopf beim
+                    // Auswählen um einen halben Pixel und die Reihe ruckt.
+                    border: `2px solid ${active ? theme.color.accent : theme.color.border}`,
                     background: active ? theme.color.accentSubtle : kachelGrund,
                     cursor: "pointer",
                     transition: "all 0.15s",
@@ -142,26 +226,92 @@ export default function RechnerWidget({ variante = "artikel" }) {
         </div>
       </div>
 
-      <div style={{ padding: "2px 20px 18px" }}>
-        <div style={{ fontSize: 12, color: theme.color.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: 10 }}>
-          Jahreswerte (Bundesdurchschnitt, Süd-30°)
+      {/* Eine Antwort, nicht sechs. Vorher standen hier sechs gleich große
+          Kacheln nebeneinander — die eigentliche Pointe (die Amortisation)
+          war die sechste davon, unakzentuiert, und mit "nur Rechenmodell"
+          entschuldigt. Sechs gleichwertige Zahlen sind eine Tabelle, keine
+          Auskunft. Jetzt trägt ein Satz das Ergebnis, zwei Werte stützen
+          ihn, der Rest liegt eine Klappe tiefer.
+
+          aria-live="polite": Die Zahlen ändern sich beim Schieben, ohne dass
+          der Fokus sie berührt — ohne Live-Region bliebe das für einen
+          Screenreader lautlos. */}
+      <div style={{ padding: "16px 20px 18px" }} aria-live="polite">
+        {!bereit && (
+          <p
+            style={{
+              margin: 0,
+              fontFamily: theme.font.display,
+              fontSize: imHero ? 22 : 20,
+              lineHeight: 1.35,
+              fontWeight: 600,
+              letterSpacing: "-0.015em",
+              color: theme.color.textSecondary,
+              textWrap: "balance",
+            }}
+          >
+            Haushaltsgröße und Speicher wählen — dann steht hier Ihre erste
+            Größenordnung.
+          </p>
+        )}
+
+        {bereit && (
+        <>
+        <p
+          style={{
+            margin: "0 0 14px",
+            fontFamily: theme.font.display,
+            fontSize: imHero ? 26 : 23,
+            lineHeight: 1.25,
+            fontWeight: 600,
+            letterSpacing: "-0.02em",
+            color: theme.color.textPrimary,
+            textWrap: "balance",
+          }}
+        >
+          {ergebnis.amortisation ? (
+            <>
+              Nach rund{" "}
+              <span style={{ color: theme.color.accentText, fontVariantNumeric: "tabular-nums" }}>
+                {NF.format(Math.round(animAmortisation))} Jahren
+              </span>{" "}
+              hat sich die Anlage bezahlt.
+            </>
+          ) : (
+            <>Bei dieser Kombination trägt sich die Anlage rechnerisch nicht.</>
+          )}
+        </p>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
+          <Kennzahl grund={kachelGrund} label="Ersparnis" wert={euro(animErsparnis)} sub="pro Jahr" />
+          <Kennzahl grund={kachelGrund} label="Anlagengröße" wert={`${NF.format(Math.round(animKwp * 10) / 10)} kWp`} sub={`${kWh(animErtrag)} Ertrag im Jahr`} />
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(134px, 1fr))", gap: 8 }}>
-          <Kennzahl grund={kachelGrund} label="Anlage" wert={`${NF.format(ergebnis.kwp)} kWp`} sub="nach nutzbarer Fläche" />
-          <Kennzahl grund={kachelGrund} label="Ertrag" wert={kWh(ergebnis.jahresertrag)} sub="pro Jahr" />
-          <Kennzahl grund={kachelGrund} label="Autarkie" wert={`${ergebnis.autarkie} %`} sub="des Verbrauchs" />
-          <Kennzahl grund={kachelGrund} label="Investition" wert={euro(ergebnis.investition)} sub="brutto = netto" />
-          <Kennzahl grund={kachelGrund} label="Ersparnis" wert={euro(ergebnis.jahresErsparnis)} sub="pro Jahr" akzent />
-          <Kennzahl grund={kachelGrund} label="Amortisation" wert={ergebnis.amortisation ? `${NF.format(ergebnis.amortisation)} J.` : "–"} sub="nur Rechenmodell" />
-        </div>
+
+        <Faltblock
+          titel="Woraus sich das ergibt"
+          zeilen={[
+            { label: "Investition (brutto, Nullsteuersatz)", wert: euro(ergebnis.investition) },
+            { label: "Autarkiegrad", wert: `${ergebnis.autarkie} %` },
+            { label: "Jahresertrag", wert: kWh(ergebnis.jahresertrag) },
+          ]}
+        >
+          Gerechnet mit dem Bundesdurchschnitt für Einstrahlung und einer
+          Süd-Ausrichtung bei 30° Neigung — ohne Ihren Standort. Die
+          Amortisation ist ein Modellwert: Sie unterstellt gleichbleibende
+          Strompreise und keine Reparaturen. Für Ihre Postleitzahl holt der
+          vollständige Rechner die tatsächliche Einstrahlung aus den
+          PVGIS-Satellitendaten der EU-Kommission.
+        </Faltblock>
+        </>
+        )}
       </div>
 
-      {/* Fußzeile: der Knopf und daneben, was hinter dem Knopf wartet. Die drei
-          Angaben standen vorher in einer eigenen Karte weiter unten auf der
-          Startseite — zusammen mit einem zweiten Link auf dieselbe Seite. Hier
-          stehen sie da, wo sie die Entscheidung stützen, statt sie zu
-          wiederholen. Im Artikel bleibt die Fußzeile schlank: dort trägt der
-          umgebende Text die Einordnung. */}
+      {/* Fußzeile: der Knopf und daneben in einem Satz, was er besser macht.
+          Vorher standen hier drei Label-Wert-Paare ("DATENQUELLE / SCHRITTE /
+          ERGEBNIS") — ein Trust-Badge-Streifen in allem außer dem Namen
+          (CLAUDE.md Design-Regel 6), und "SCHRITTE: 4" beruhigt niemanden.
+          Im Artikel bleibt die Fußzeile schlank: dort trägt der umgebende
+          Text die Einordnung. */}
       <div
         style={{
           padding: "2px 20px 18px",
@@ -180,7 +330,8 @@ export default function RechnerWidget({ variante = "artikel" }) {
             padding: "12px 22px",
             borderRadius: theme.radius.pill,
             background: theme.color.accent,
-            color: theme.color.white,
+            // Tintenschwarz auf Orange (5,39:1). Weiß läge bei 3,25:1.
+            color: theme.color.textPrimary,
             fontWeight: 600,
             fontSize: 14,
             textDecoration: "none",
@@ -191,22 +342,35 @@ export default function RechnerWidget({ variante = "artikel" }) {
         </a>
 
         {imHero && (
-          <dl style={{ display: "flex", flexWrap: "wrap", gap: "10px 26px", margin: 0 }}>
-            {[
-              ["Datenquelle", "PVGIS-Satellitendaten"],
-              ["Schritte", "4"],
-              ["Ergebnis", "kWp, Ertrag, Ersparnis, Amortisation"],
-            ].map(([dt, dd]) => (
-              <div key={dt}>
-                <dt style={{ fontSize: 11, fontWeight: 600, color: theme.color.textMuted, textTransform: "uppercase", letterSpacing: "0.4px" }}>
-                  {dt}
-                </dt>
-                <dd style={{ margin: 0, fontSize: 13, fontWeight: 600, color: theme.color.textPrimary }}>{dd}</dd>
-              </div>
-            ))}
-          </dl>
+          <span style={{ fontSize: 13, lineHeight: 1.5, color: theme.color.textSecondary, maxWidth: "34ch" }}>
+            Dann mit der Einstrahlung für Ihre Postleitzahl statt mit dem
+            Bundesdurchschnitt.
+          </span>
         )}
       </div>
+
+      {/* Der Beleg steht neben der Zahl, nicht in einem eigenen Abschnitt
+          weiter unten: Wer gerade ein Ergebnis gelesen hat, fragt sich in
+          genau diesem Moment, woher es kommt. Die vollständige Tabelle samt
+          Grenzen des Modells liegt auf /methodik/ — vorher stand sie als
+          dunkle Vollflächen-Platte an zweiter Stelle der Startseite, vor
+          allem, wofür Besucher eigentlich gekommen waren. */}
+      <p
+        style={{
+          margin: 0,
+          padding: "0 20px 18px",
+          fontSize: 12.5,
+          lineHeight: 1.55,
+          color: theme.color.textMuted,
+        }}
+      >
+        Gerechnet mit {ct(STROMPREIS)} ct je selbst verbrauchter Kilowattstunde
+        (BDEW) und {ct(EINSPEISE)} ct Einspeisevergütung (Bundesnetzagentur,
+        § 49 EEG).{" "}
+        <a href="/methodik/" style={{ color: theme.color.accentText }}>
+          Alle Konstanten mit Quelle und Stand
+        </a>
+      </p>
     </section>
   );
 }

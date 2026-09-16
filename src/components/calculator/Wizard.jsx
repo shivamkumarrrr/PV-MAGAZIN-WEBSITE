@@ -15,20 +15,31 @@ import { IconMapPin, IconRuler, IconSun, IconBolt, IconBattery } from "../Icons.
 
 export default function Wizard() {
   const [step, setStep] = useState(0);
+  // NICHTS ist vorausgewählt (Nutzervorgabe, September 2026). Vorher standen
+  // Satteldach, Süd, mittlere Neigung, 4 Personen und "kein E-Auto" als
+  // orange markierte Auswahl da, bevor der Besucher irgendetwas angeklickt
+  // hatte. Zwei Probleme: Er hält die Vorauswahl leicht für seine eigene
+  // Angabe, und die Live-Vorschau zeigte eine fertige Ersparnis für ein Haus,
+  // das nie jemand beschrieben hat.
+  //
+  // Der Schieberegler für die Dachfläche ist die Ausnahme: Ein Regler ohne
+  // Wert hat keine Position. Er startet bei 60 m², zählt aber nicht als
+  // getroffene Entscheidung (siehe `angabenVollstaendig` unten).
   const [dach, setDach] = useState(60);
-  const [ausrichtung, setAusrichtung] = useState("Süd");
-  const [neigung, setNeigung] = useState("Mittel (25–35°)");
-  const [haushalt, setHaushalt] = useState("4 Personen");
-  const [verbrauch, setVerbrauch] = useState(4000);
+  const [ausrichtung, setAusrichtung] = useState(null);
+  const [neigung, setNeigung] = useState(null);
+  const [haushalt, setHaushalt] = useState(null);
+  const [verbrauch, setVerbrauch] = useState(0);
   const [speicherKwh, setSpeicherKwh] = useState(0);
-  // 3-Zustände: "nein" | "ja" | "geplant" — "geplant" zählt nicht in die Berechnung.
-  const [eauto, setEauto] = useState("nein");
-  const [waermepumpe, setWaermepumpe] = useState("nein");
+  // 3-Zustände: "nein" | "ja" | "geplant" — "geplant" zählt nicht in die
+  // Berechnung. `null` = noch nicht beantwortet und rechnet wie "nein".
+  const [eauto, setEauto] = useState(null);
+  const [waermepumpe, setWaermepumpe] = useState(null);
   const [eautoProfil, setEautoProfil] = useState("Hauptwagen");
   const [tageszeit, setTageszeit] = useState([]);
   const [plz, setPlz] = useState("");
   const [address, setAddress] = useState("");
-  const [dachform, setDachform] = useState("Satteldach");
+  const [dachform, setDachform] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [animDir, setAnimDir] = useState("right");
   const [animKey, setAnimKey] = useState(0);
@@ -87,6 +98,18 @@ export default function Wizard() {
   // abgeleiteten coords) schnell hintereinander wechselten. loadPVGIS() in
   // den Deps sorgt dafür, dass auch ein durch Adress-Geocoding (unten) oder
   // Marker-Drag geänderter coords-Wert nach der Pause automatisch neu lädt.
+  // Die Startseite schickt eine bereits eingegebene PLZ als `?plz=` mit, damit
+  // der Besucher sie nicht zweimal tippt. Bewusst in einem Effekt statt als
+  // useState-Initialwert: Astro rendert diese Insel serverseitig vor, dort gibt
+  // es kein `location` — ein Initialwert aus der URL ergäbe eine
+  // Hydrations-Abweichung zwischen Server- und Client-Markup.
+  useEffect(() => {
+    const ausUrl = new URLSearchParams(window.location.search).get("plz");
+    if (!ausUrl) return;
+    const ziffern = ausUrl.replace(/\D/g, "").slice(0, 5);
+    if (ziffern.length === 5) setPlz(ziffern);
+  }, []);
+
   const pvgisDebounceRef = useRef(null);
   useEffect(() => {
     if (pvgisDebounceRef.current) clearTimeout(pvgisDebounceRef.current);
@@ -165,6 +188,13 @@ export default function Wizard() {
 
   const result = calculate(dach, ausrichtung, neigung, verbrauch, speicherKwh, eauto, waermepumpe, pvgisData, dachform, eautoProfil, tageszeit);
 
+  // Ab wann die Live-Vorschau echte Zahlen zeigen darf. Ohne Dachform greift
+  // computeKwp() auf einen Mittelwert zurück und ohne Verbrauch ist die
+  // Autarkie nicht definiert — beides ergäbe eine plausibel aussehende Zahl
+  // für Angaben, die niemand gemacht hat. Bis dahin steht in der Vorschau,
+  // was noch fehlt.
+  const angabenVollstaendig = Boolean(dachform) && verbrauch > 0;
+
   const steps = [
     {
       title: "Ihr Standort",
@@ -229,11 +259,11 @@ export default function Wizard() {
   ];
 
   const contextItems = [
-    { icon: <IconMapPin size={13} />, label: "Standort", value: displayLocation || "–" },
-    { icon: <IconRuler size={13} />, label: "Dachfläche", value: `${dach} m²` },
-    { icon: <IconSun size={13} />, label: "Anlage", value: `${kwp} kWp` },
-    { icon: <IconBolt size={13} />, label: "Verbrauch", value: `${gesamtVerbrauch.toLocaleString("de-DE")} kWh` },
-    { icon: <IconBattery size={13} />, label: "Speicher", value: speicherKwh > 0 ? `${speicherKwh} kWh` : "–" },
+    { icon: <IconMapPin size={15} />, label: "Standort", value: displayLocation || "–" },
+    { icon: <IconRuler size={15} />, label: "Dachfläche", value: dachform ? `${dach} m²` : "–" },
+    { icon: <IconSun size={15} />, label: "Anlage", value: dachform ? `${kwp} kWp` : "–" },
+    { icon: <IconBolt size={15} />, label: "Verbrauch", value: gesamtVerbrauch > 0 ? `${gesamtVerbrauch.toLocaleString("de-DE")} kWh` : "–" },
+    { icon: <IconBattery size={15} />, label: "Speicher", value: speicherKwh > 0 ? `${speicherKwh} kWh` : "–" },
   ];
 
   if (showResult) {
@@ -267,14 +297,20 @@ export default function Wizard() {
         <div style={{ fontSize: 11, color: theme.color.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px" }}>
           Ersparnis pro Jahr
         </div>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
-          <span style={{ fontSize: 19, fontWeight: 700, color: theme.color.accent, fontVariantNumeric: "tabular-nums" }}>
-            {Math.round(result.jahresErsparnis).toLocaleString("de-DE")} €
-          </span>
-          <span style={{ fontSize: 12, color: theme.color.textSecondary, fontVariantNumeric: "tabular-nums" }}>
-            {Math.round(result.autarkie)} % Autarkie
-          </span>
-        </div>
+        {angabenVollstaendig ? (
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+            <span style={{ fontSize: 19, fontWeight: 700, color: theme.color.accent, fontVariantNumeric: "tabular-nums" }}>
+              {Math.round(result.jahresErsparnis).toLocaleString("de-DE")} €
+            </span>
+            <span style={{ fontSize: 12, color: theme.color.textSecondary, fontVariantNumeric: "tabular-nums" }}>
+              {Math.round(result.autarkie)} % Autarkie
+            </span>
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, color: theme.color.textSecondary }}>
+            Noch keine Angaben
+          </div>
+        )}
       </div>
       <a
         href="#live-vorschau"
@@ -334,9 +370,12 @@ export default function Wizard() {
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               {["Standort", "Dach", "Verbrauch", "Speicher"].map((label, i) => (
                 <div key={label} style={{
-                  fontSize: 10,
-                  color: i <= step ? theme.color.accentHover : theme.color.border,
-                  fontWeight: i === step ? 600 : 400,
+                  fontSize: 12,
+                  // Inaktive Schritte standen in der Randfarbe (#E1E5E4) und
+                  // waren auf Weiß praktisch unlesbar — jetzt die gedämpfte
+                  // Textfarbe, die AA erfüllt.
+                  color: i <= step ? theme.color.accentHover : theme.color.textMuted,
+                  fontWeight: i === step ? 700 : 500,
                   textAlign: "center",
                   flex: 1,
                   transition: "color 0.3s",
@@ -350,8 +389,8 @@ export default function Wizard() {
             <div style={{ fontSize: 11, color: theme.color.accent, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
               Schritt {step + 1} von {steps.length}
             </div>
-            <div style={{ fontSize: 18, fontWeight: 600, color: theme.color.textPrimary }}>{steps[step].title}</div>
-            <div style={{ fontSize: 13, color: theme.color.textMuted }}>{steps[step].sub}</div>
+            <div style={{ fontSize: 21, fontWeight: 700, color: theme.color.textPrimary, lineHeight: 1.25 }}>{steps[step].title}</div>
+            <div style={{ fontSize: 14, color: theme.color.textSecondary, lineHeight: 1.45, marginTop: 2 }}>{steps[step].sub}</div>
           </div>
 
           {/* Step Content */}
@@ -458,7 +497,7 @@ export default function Wizard() {
                 </div>
               ))}
             </div>
-            <LivePanel result={result} speicherKwh={speicherKwh} flashKey={pvgisVersion} />
+            <LivePanel result={result} speicherKwh={speicherKwh} flashKey={pvgisVersion} bereit={angabenVollstaendig} />
           </div>
         </>
       )}

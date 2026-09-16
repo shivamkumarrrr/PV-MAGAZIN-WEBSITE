@@ -17,19 +17,23 @@ export default function OptionGroup({ options, selected, onSelect, minCol = 96, 
             key={label}
             onClick={() => onSelect(label)}
             style={{
-              padding: renderIcon ? "12px 6px 10px" : "10px 8px",
+              padding: renderIcon ? "14px 8px 12px" : "13px 10px",
               borderRadius: 10,
-              border: active ? `2px solid ${theme.color.accent}` : `1.5px solid ${theme.color.border}`,
+              // Beide Zustände 2px: Mit 1.5px inaktiv und 2px aktiv wuchs die
+              // Karte beim Auswählen um einen halben Pixel und das ganze
+              // Raster ruckte kurz. Unterschieden wird über die Farbe.
+              border: `2px solid ${active ? theme.color.accent : theme.color.border}`,
               background: active ? theme.color.accentSubtle : theme.color.white,
-              color: active ? theme.color.accentHover : theme.color.textSecondary,
-              fontWeight: active ? 600 : 400,
-              fontSize: 13,
+              color: active ? theme.color.accentHover : theme.color.textPrimary,
+              fontWeight: active ? 700 : 500,
+              fontSize: 15,
+              lineHeight: 1.3,
               cursor: "pointer",
-              transition: "all 0.15s",
+              transition: "border-color 0.15s, background-color 0.15s, color 0.15s",
             }}
           >
             {renderIcon && (
-              <div style={{ display: "flex", justifyContent: "center", marginBottom: 7 }}>{renderIcon(opt, active)}</div>
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: 9 }}>{renderIcon(opt, active)}</div>
             )}
             {label}
           </TiltButton>
