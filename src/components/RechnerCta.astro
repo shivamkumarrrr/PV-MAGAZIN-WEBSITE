@@ -107,7 +107,10 @@ const titel = rechnerName(zielSlug);
     padding: 12px 22px;
     border-radius: var(--radius-pill);
     background: var(--color-accent);
-    color: #fff;
+    /* Tintenschwarz auf Orange (5,39:1). Hier stand #fff — 3,25:1 und damit
+       unter AA für normalen Text. Dieselbe Paarung nutzt der Mini-Rechner
+       (RechnerWidget.jsx) schon aus demselben Grund. */
+    color: var(--color-text-primary);
     font-weight: 600;
     font-size: 14px;
     text-decoration: none;
@@ -116,5 +119,6 @@ const titel = rechnerName(zielSlug);
 
   .cta-final-button:hover {
     background: var(--color-accent-hover);
+    color: #fff;
   }
 </style>

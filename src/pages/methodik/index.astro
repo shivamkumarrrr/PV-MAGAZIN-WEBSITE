@@ -1,0 +1,581 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import RechnerCta from "../../components/RechnerCta.astro";
+import { QUELLEN } from "../../lib/quellen.js";
+import {
+  STROMPREIS,
+  EINSPEISE,
+  EINSPEISE_10_40,
+  EINSPEISE_40_100,
+  EINSPEISEVERGUETUNG_VOLL,
+  ERTRAG_PRO_KWP,
+  PVGIS_SYSTEM_LOSS,
+  KOSTEN_PRO_KWP,
+  SPEICHER_KOSTEN_PRO_KWH,
+  SPEICHER_KWH_PRO_1000_VERBRAUCH,
+  M2_PRO_KWP,
+  M2_PRO_KWP_FLACHDACH,
+  MODULE_WP,
+  DEGRADATION_PRO_JAHR,
+  WARTUNG_PROZENT_PRO_JAHR,
+  WECHSELRICHTER_AUSTAUSCH_JAHR,
+  WECHSELRICHTER_KOSTEN_MIN,
+  WECHSELRICHTER_KOSTEN_MAX,
+  STROMPREIS_STEIGERUNG_PRO_JAHR,
+  EIGENVERBRAUCH_MAX,
+  CO2_PER_KWH,
+} from "../../lib/calculate.js";
+
+// Diese Seite ist der ausgelagerte Quellen-Abschnitt der Startseite. Dort
+// stand er als dunkle Vollflächen-Platte an zweiter Position — vor allem,
+// was ein Besucher eigentlich sucht, und ohne dass irgendjemand danach
+// gefragt hätte. Hier hat er Platz für die vollständige Tabelle und für die
+// Grenzen des Modells; die Startseite und die Rechner verweisen nur noch mit
+// einer Zeile hierher, direkt neben der Zahl, um die es geht.
+//
+// WICHTIG: Alle Werte werden aus calculate.js IMPORTIERT, nie abgeschrieben.
+// Eine abgeschriebene Tabelle läuft beim ersten Konstanten-Update aus dem
+// Tritt, und dann behauptet ausgerechnet die Methodik-Seite etwas Falsches.
+// Was sich nicht importieren lässt — Quelle, Stand, Prüf-Rhythmus — steht als
+// Kommentar über der jeweiligen Konstante in calculate.js; die Spalten hier
+// sind die Lesefassung davon. Beim Ändern eines Werts beide Stellen ziehen.
+const ct = (eur) =>
+  new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
+const nf = new Intl.NumberFormat("de-DE");
+const pct = (v, stellen = 1) =>
+  new Intl.NumberFormat("de-DE", { minimumFractionDigits: stellen }).format(v * 100);
+
+const konstanten = [
+  {
+    gruppe: "Ertrag",
+    zeilen: [
+      {
+        groesse: "Einstrahlung und Monatserträge",
+        wert: "PVGIS, für Ihre Koordinaten",
+        quelle: "EU Joint Research Centre",
+        stand: "je Abfrage live",
+      },
+      {
+        groesse: "Systemverluste, an PVGIS übergeben",
+        wert: `${PVGIS_SYSTEM_LOSS} %`,
+        quelle: "PVGIS-Standardwert (Kabel, Wechselrichter, Verschmutzung, Temperatur)",
+        stand: "—",
+      },
+      {
+        groesse: "Jahresertrag ohne Standortdaten",
+        wert: `${nf.format(ERTRAG_PRO_KWP)} kWh/kWp`,
+        quelle: "Fraunhofer ISE (≈922 Volllaststunden); Praxisspanne 850–1.150, Mitte gewählt",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Moduldegradation",
+        wert: `${pct(DEGRADATION_PRO_JAHR)} %/Jahr`,
+        quelle: "NREL-Feldstudie, Median; Fraunhofer-ISE-Langzeitmessung liegt niedriger",
+        stand: "Aug 2026",
+      },
+    ],
+  },
+  {
+    gruppe: "Geld",
+    zeilen: [
+      {
+        groesse: "Haushaltsstrompreis",
+        wert: `${ct(STROMPREIS)} ct/kWh`,
+        quelle: "BDEW-Strompreisanalyse, Referenzhaushalt 3.500 kWh/Jahr",
+        stand: "April 2026",
+      },
+      {
+        groesse: "Einspeisevergütung bis 10 kWp",
+        wert: `${ct(EINSPEISE)} ct/kWh`,
+        quelle: "Bundesnetzagentur, § 49 EEG — Teileinspeisung (Überschuss)",
+        stand: "Inbetriebnahme 1.8.2026–31.1.2027",
+      },
+      {
+        groesse: "… Anteil 10–40 kWp",
+        wert: `${ct(EINSPEISE_10_40)} ct/kWh`,
+        quelle: "Bundesnetzagentur, § 49 EEG",
+        stand: "Inbetriebnahme 1.8.2026–31.1.2027",
+      },
+      {
+        groesse: "… Anteil 40–100 kWp",
+        wert: `${ct(EINSPEISE_40_100)} ct/kWh`,
+        quelle: "Bundesnetzagentur, § 49 EEG",
+        stand: "Inbetriebnahme 1.8.2026–31.1.2027",
+      },
+      {
+        groesse: "Volleinspeisung bis 10 kWp",
+        wert: `${ct(EINSPEISEVERGUETUNG_VOLL)} ct/kWh`,
+        quelle: "Bundesnetzagentur, § 21 Abs. 1 / § 53 Abs. 1 EEG — nur nachrichtlich, fließt nicht in die Rechnung ein",
+        stand: "Inbetriebnahme 1.8.2026–31.1.2027",
+      },
+      {
+        groesse: "Systemkosten Anlage",
+        wert: `${nf.format(KOSTEN_PRO_KWP)} €/kWp`,
+        quelle: "Fraunhofer ISE (1.015 €/kWp im Mittel) gegen Anbieterpreise inkl. Marge 1.100–1.500; oberes Ende gewählt",
+        stand: "2026",
+      },
+      {
+        groesse: "Speicherkosten",
+        wert: `${nf.format(SPEICHER_KOSTEN_PRO_KWH)} €/kWh nutzbar`,
+        quelle: "Marktpreisübersichten LiFePO₄, 300–470 €/kWh, Mitte gewählt",
+        stand: "2026",
+      },
+      {
+        groesse: "Betriebskosten",
+        wert: `${pct(WARTUNG_PROZENT_PRO_JAHR, 0)} %/Jahr der Investition`,
+        quelle: "Praxisquellen nennen 1–2 %; unteres Ende gewählt",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Wechselrichter-Austausch",
+        wert: `Jahr ${WECHSELRICHTER_AUSTAUSCH_JAHR}, ${nf.format(WECHSELRICHTER_KOSTEN_MIN)}–${nf.format(WECHSELRICHTER_KOSTEN_MAX)} €`,
+        quelle: "ADAC: Lebensdauer 10–15 Jahre, Austauschkosten gedeckelt auf diese Spanne",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Strompreissteigerung",
+        wert: `${pct(STROMPREIS_STEIGERUNG_PRO_JAHR, 0)} %/Jahr`,
+        quelle: "Eigene, bewusst vorsichtige Annahme — wirkt NUR in der 25-Jahres-Projektion, nicht im angezeigten Jahreswert",
+        stand: "—",
+      },
+    ],
+  },
+  {
+    gruppe: "Dach und Anlage",
+    zeilen: [
+      {
+        groesse: "Modulleistung",
+        wert: `${MODULE_WP} Wp`,
+        quelle: "ADAC, aktuelle Modulgeneration",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Flächenbedarf Schrägdach",
+        wert: `${new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1 }).format(M2_PRO_KWP)} m²/kWp`,
+        quelle: "ADAC-Planungsfläche inkl. Abstand und Montagerahmen (reine Panelfläche wäre 4,4)",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Flächenbedarf Flachdach, aufgeständert",
+        wert: `${M2_PRO_KWP_FLACHDACH} m²/kWp`,
+        quelle: "Mehrere PV-Ratgeber übereinstimmend 10–14 m²/kWp wegen Reihenabstand; Mitte gewählt",
+        stand: "Aug 2026",
+      },
+    ],
+  },
+  {
+    gruppe: "Eigenverbrauch und Speicher",
+    zeilen: [
+      {
+        groesse: "Autarkie ohne Speicher",
+        wert: "30–55 %",
+        quelle: "ADAC — direkt als Ober- und Untergrenze der Kennlinie verwendet, nicht selbst geschätzt",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Autarkie mit Speicher, Obergrenze",
+        wert: `${pct(EIGENVERBRAUCH_MAX, 0)} %`,
+        quelle: "ADAC; HTW Berlin weist ausdrücklich darauf hin, dass 100 % nicht erreichbar sind",
+        stand: "Aug 2026",
+      },
+      {
+        groesse: "Vorschlag Speichergröße",
+        wert: `${new Intl.NumberFormat("de-DE", { minimumFractionDigits: 1 }).format(SPEICHER_KWH_PRO_1000_VERBRAUCH)} kWh je 1.000 kWh Jahresverbrauch`,
+        quelle: "HTW Berlin, Unabhängigkeitsrechner-FAQ — Vorbelegung im Rechner, frei änderbar",
+        stand: "—",
+      },
+    ],
+  },
+  {
+    gruppe: "CO₂",
+    zeilen: [
+      {
+        groesse: "Emissionsfaktor Netzstrom",
+        wert: `${nf.format(Math.round(CO2_PER_KWH * 1000))} g/kWh`,
+        quelle: "Umweltbundesamt, Emissionsbilanz Strommix",
+        stand: "Jahreswert 2025",
+      },
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Methodik — womit unsere PV-Rechner rechnen | Photovoltaik Aktuell"
+  description="Jede Konstante unserer Photovoltaik-Rechner mit Wert, Quelle und Stand: Strompreis, Einspeisevergütung, Systemkosten, Autarkiegrade, CO₂-Faktor — dazu die Grenzen des Modells."
+>
+  <section class="container methodik-kopf">
+    <Breadcrumb glieder={[{ name: "Methodik" }]} />
+    <h1>Wie wir rechnen</h1>
+    <p class="methodik-lead">
+      Unsere elf Rechner geben Größenordnungen aus, keine Angebote. Damit Sie
+      einschätzen können, wie belastbar eine Zahl ist, steht hier jede
+      Konstante mit Wert, Quelle und Stand — und darunter, was das Modell
+      nicht kann.
+    </p>
+    <p class="methodik-lead">
+      Heute rechnen wir mit <strong>{ct(STROMPREIS)} ct</strong> je selbst
+      verbrauchter Kilowattstunde und <strong>{ct(EINSPEISE)} ct</strong>
+      {" "}Vergütung für eingespeisten Strom aus Anlagen bis 10&nbsp;kWp.
+    </p>
+  </section>
+
+  <section class="container methodik-text">
+    <h2>Woher der Ertrag kommt</h2>
+    <p>
+      Sobald Sie eine Postleitzahl eingeben, holt der Photovoltaik-Rechner die
+      Einstrahlung und die zwölf Monatserträge für diese Koordinaten aus
+      PVGIS, der Datenbank des EU Joint Research Centre. Das ist kein
+      deutschlandweiter Mittelwert, sondern die gemessene Einstrahlung an
+      Ihrem Standort. Tragen Sie zusätzlich eine Straße ein, wird der
+      Kartenpunkt darauf verschoben; Sie können ihn auch von Hand ziehen.
+    </p>
+    <p>
+      Ohne Postleitzahl rechnen wir mit {nf.format(ERTRAG_PRO_KWP)} kWh je kWp
+      und Jahr. Das ist die Mitte der Praxisspanne von 850 bis 1.150
+      kWh/kWp — brauchbar für eine erste Größenordnung, aber eben nicht Ihr
+      Dach. Der Unterschied zwischen Flensburg und Freiburg liegt bei rund
+      einem Fünftel des Jahresertrags.
+    </p>
+    <p>
+      Die übrigen zehn Rechner fragen keinen Standort ab und arbeiten mit
+      diesem Durchschnittswert. Sie teilen sich alle Konstanten mit dem
+      Photovoltaik-Rechner, statt eigene Annahmen mitzubringen.
+    </p>
+  </section>
+
+  <section class="container methodik-text">
+    <h2>Autarkiegrad ist nicht Eigenverbrauchsquote</h2>
+    <p>
+      Die beiden Prozentwerte werden häufig verwechselt, auch in
+      Anbieter-Rechnern. Sie beziehen sich auf verschiedene Größen und
+      bewegen sich mit der Anlagengröße in entgegengesetzte Richtungen.
+    </p>
+    <ul>
+      <li>
+        <strong>Autarkiegrad</strong> — Anteil Ihres Verbrauchs, den die
+        Anlage deckt. Steigt, je größer die Anlage im Verhältnis zum
+        Verbrauch ist.
+      </li>
+      <li>
+        <strong>Eigenverbrauchsquote</strong> — Anteil des erzeugten Stroms,
+        den Sie selbst nutzen. Sinkt, je größer die Anlage wird, weil mehr
+        Überschuss anfällt.
+      </li>
+    </ul>
+    <p>
+      Eine Anlage kann gleichzeitig 65 % Autarkie und 45 %
+      Eigenverbrauchsquote haben. Der Ergebnis-Screen zeigt deshalb beide
+      Balken übereinander, mit demselben orangen Mittelstück: dem
+      selbst genutzten Solarstrom.
+    </p>
+  </section>
+
+  <section class="container methodik-tabelle">
+    <h2>Die Konstanten</h2>
+    <p>
+      Jeder Wert unten steht so auch im Quellcode, mit Quelle, Stand und
+      Prüf-Rhythmus im Kommentar darüber. Diese Seite liest die Werte direkt
+      aus derselben Datei — sie kann gegenüber der Rechnung nicht veralten.
+    </p>
+
+    {konstanten.map((g) => (
+      <>
+        <h3>{g.gruppe}</h3>
+        <div class="tabelle-rahmen">
+          <table>
+            <colgroup>
+              <col class="spalte-groesse" />
+              <col class="spalte-zahl" />
+              <col class="spalte-quelle" />
+              <col class="spalte-datum" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">Größe</th>
+                <th scope="col">Wert</th>
+                <th scope="col">Quelle und Begründung</th>
+                <th scope="col">Stand</th>
+              </tr>
+            </thead>
+            <tbody>
+              {g.zeilen.map((z) => (
+                <tr>
+                  <th scope="row">{z.groesse}</th>
+                  <td class="spalte-wert">{z.wert}</td>
+                  <td>{z.quelle}</td>
+                  <td>{z.stand}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    ))}
+  </section>
+
+  <section class="container methodik-text">
+    <h2>Was das Modell nicht kann</h2>
+    <p>
+      Fünf Einschränkungen, die wir kennen und nicht wegrunden. Wer eine Zahl
+      von uns weiterverwendet, sollte sie kennen.
+    </p>
+
+    <h3>Kein Lastgang, sondern eine Kennlinie</h3>
+    <p>
+      Wie viel Solarstrom Sie tatsächlich selbst verbrauchen, hängt davon ab,
+      wann im Tagesverlauf Sie ihn brauchen. Eine saubere Antwort darauf
+      verlangt ein viertelstündliches Lastprofil. Wir rechnen stattdessen mit
+      einer Kennlinie aus vier Stützpunkten, deren Ober- und Untergrenzen die
+      offiziell kommunizierten ADAC-Spannen sind, verschoben um Ihre Angabe
+      zur Tageszeit. Das trägt für eine Größenordnung. Für die Auslegung einer
+      konkreten Anlage ersetzt es keine Fachplanung.
+    </p>
+
+    <h3>Der Speicher kann die Amortisation rechnerisch verkürzen</h3>
+    <p>
+      In einem Teil der Fälle amortisiert sich eine Anlage mit Speicher in
+      unserem Modell minimal schneller als dieselbe Anlage ohne. Das ist
+      betriebswirtschaftlich unplausibel — ein Speicher kostet zusätzlich
+      Geld und spart nur die Differenz zwischen Strompreis und
+      Einspeisevergütung. Wir haben es gemessen: über Dachflächen von 20 bis
+      160 m², Jahresverbräuche von 1.500 bis 15.000 kWh und Speicher von 1 bis
+      20 kWh tritt der Effekt in 79 Kombinationen auf, maximal mit 0,6 Jahren.
+      Der Schwerpunkt liegt bei stark überdimensionierten Anlagen, deren
+      Ertrag mindestens doppelt so hoch ist wie der Jahresverbrauch; bei
+      üblicher Auslegung bleibt die Abweichung unter 0,2 Jahren. Ursache sind
+      zwei belegte Werte, die sich an dieser Stelle ungünstig überlagern (die
+      ADAC-Autarkiekurve und der Speicherpreis). Wir lassen sie stehen, statt
+      das Ergebnis passend zu korrigieren.
+    </p>
+
+    <h3>Speicherpreise: Markt statt Modellinput</h3>
+    <p>
+      Wir rechnen mit {nf.format(SPEICHER_KOSTEN_PRO_KWH)} €/kWh nutzbarer
+      Kapazität, der Mitte aktueller Marktpreisübersichten. Das
+      Fraunhofer-ISE-Modell für Stromgestehungskosten setzt eine deutlich
+      weitere Spanne an. Wir haben uns bewusst für den Marktpreis entschieden,
+      weil unsere Rechner eine Kaufentscheidung begleiten und keine
+      Systemstudie sind.
+    </p>
+
+    <h3>Die Strompreissteigerung wirkt nur in der Langfristrechnung</h3>
+    <p>
+      {pct(STROMPREIS_STEIGERUNG_PRO_JAHR, 0)} % pro Jahr sind eine Annahme,
+      keine Quelle. Sie fließt ausschließlich in die 25-Jahres-Projektion ein.
+      Der prominent angezeigte Jahreswert rechnet mit dem heutigen
+      Strompreis — steigende Preise erhöhen ihn nicht künstlich.
+    </p>
+
+    <h3>Die EEG-Reform 2027 ist nicht eingerechnet</h3>
+    <p>
+      Der Regierungsentwurf (Stand Juli 2026) sieht vor, die feste
+      20-jährige Einspeisevergütung ab 2027 schrittweise durch eine
+      befristete Übergangszahlung zu ersetzen. Beschlossen ist das nicht.
+      Unsere Rechner unterstellen die heute geltende Regelung: Der bei
+      Inbetriebnahme gültige Satz gilt 20 Jahre lang fest.
+    </p>
+  </section>
+
+  <section class="container methodik-text">
+    <h2>Die Quellen</h2>
+    <p>
+      Verlinkt ist jeweils die Themenseite der Organisation, nicht die
+      Einzelausgabe einer Studie — Studienreihen bekommen jährlich eine neue
+      Adresse. Welche Ausgabe für einen Wert gilt, steht oben in der Spalte
+      „Stand“.
+    </p>
+    <dl class="quellen-liste">
+      {QUELLEN.map((q) => (
+        <div class="quelle">
+          <dt>
+            <a href={q.url} rel="noopener nofollow" target="_blank">{q.name}</a>
+            <span class="quelle-traeger">{q.traeger}</span>
+          </dt>
+          <dd>{q.liefert}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="container methodik-text">
+    <h2>Wann wir nachziehen</h2>
+    <ul>
+      <li>
+        <strong>Einspeisevergütung</strong> — zu jeder halbjährlichen
+        EEG-Degression, Stichtage 1. Februar und 1. August, sowie nach jeder
+        Gesetzesänderung.
+      </li>
+      <li>
+        <strong>Strompreis</strong> — jährlich mit der neuen
+        BDEW-Strompreisanalyse.
+      </li>
+      <li>
+        <strong>CO₂-Faktor</strong> — mit jedem neuen Jahreswert des
+        Umweltbundesamts.
+      </li>
+      <li>
+        <strong>System- und Speicherkosten</strong> — wenn sich die Marktlage
+        erkennbar verschiebt, mindestens jährlich.
+      </li>
+    </ul>
+    <p class="methodik-schluss">
+      Ein Wert, der Ihnen falsch vorkommt, ist eine nützliche Rückmeldung:
+      Jede Zahl auf dieser Seite hat eine nachprüfbare Herkunft, also lässt
+      sich ein Streit darüber entscheiden.
+    </p>
+
+    {/* Wer bis hierher gelesen hat, prüft die Grundlage — der nächste
+        Schritt ist, sie auf das eigene Dach anzuwenden. */}
+    <RechnerCta
+      variant="final"
+      text="Alle Konstanten oben, angewendet auf Ihr Dach: Ertrag, Ersparnis und Amortisation mit der Einstrahlung für Ihre Postleitzahl."
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  /* Alles auf Containerbreite, damit Fließtext, Überschriften und Tabellen
+     an DERSELBEN linken Kante beginnen. Vorher lief der Text in der
+     zentrierten `.prose`-Spalte (Kante 410px), die Tabellen in einem
+     920px-Block (Kante 280px) — zwei verschiedene Kanten auf einer Seite.
+     Die Lesebreite geht dadurch nicht verloren: Sie sitzt jetzt an den
+     Textelementen selbst, nicht am Abschnitt. */
+  .methodik-kopf {
+    padding-block: 8px 0;
+  }
+
+  .methodik-text,
+  .methodik-tabelle,
+  .methodik-kopf {
+    max-width: var(--max-width-wide);
+  }
+
+  .methodik-text :global(h2),
+  .methodik-tabelle :global(h2),
+  .methodik-kopf :global(h1) {
+    max-width: 24ch;
+  }
+
+  .methodik-text :global(p),
+  .methodik-text :global(ul),
+  .methodik-tabelle :global(p) {
+    max-width: 68ch;
+  }
+
+  .methodik-lead {
+    color: var(--color-text-secondary);
+    line-height: 1.65;
+  }
+
+  .methodik-lead strong {
+    color: var(--color-text-primary);
+  }
+
+  /* Die Tabellen brauchen mehr Breite als der Lesetext: vier Spalten, von
+     denen eine ganze Sätze trägt. Auf schmalen Displays scrollt der Rahmen
+     seitwärts, statt die Seite zu sprengen. */
+  /* Die Tabelle darf die volle Containerbreite nutzen — vier Spalten, von
+     denen eine ganze Sätze trägt. Ein eigener 920px-Deckel stand hier und
+     erzeugte die dritte Kante auf der Seite. */
+  .tabelle-rahmen {
+    max-width: 980px;
+  }
+
+  .tabelle-rahmen {
+    overflow-x: auto;
+    border-top: 1px solid var(--color-border);
+    margin: 14px 0 28px;
+  }
+
+  .methodik-tabelle table {
+    width: 100%;
+    min-width: 640px;
+    border-collapse: collapse;
+    font-size: var(--schrift-sm);
+    /* Feste Spaltenbreiten: ohne sie misst jede der fünf Gruppen-Tabellen
+       ihre Spalten selbst aus, und die Wert-Spalte sitzt in jeder Gruppe an
+       einer anderen Stelle. */
+    table-layout: fixed;
+  }
+
+  .methodik-tabelle col.spalte-groesse { width: 26%; }
+  .methodik-tabelle col.spalte-zahl { width: 15%; }
+  .methodik-tabelle col.spalte-quelle { width: 42%; }
+  .methodik-tabelle col.spalte-datum { width: 17%; }
+
+  .methodik-tabelle th,
+  .methodik-tabelle td {
+    text-align: left;
+    vertical-align: top;
+    padding: 11px 16px 11px 0;
+    border-bottom: 1px solid var(--color-border);
+    font-weight: 400;
+    line-height: 1.5;
+  }
+
+  .methodik-tabelle thead th {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--schrift-xs);
+    letter-spacing: 0.02em;
+    color: var(--color-text-muted);
+    padding-bottom: 8px;
+  }
+
+  .methodik-tabelle tbody th {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    padding-right: 24px;
+  }
+
+  .methodik-tabelle td {
+    color: var(--color-text-secondary);
+  }
+
+  .spalte-wert {
+    color: var(--color-text-primary) !important;
+    font-weight: 600;
+    padding-right: 24px !important;
+  }
+
+  /* Typografische Liste statt Logo-Reihe: Was eine Quelle liefert, ist
+     überprüfbar — ein Logo ist nur eine Behauptung. */
+  .quellen-liste {
+    margin: 18px 0 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .quelle {
+    border-top: 1px solid var(--color-border);
+    padding: 14px 0;
+  }
+
+  .quelle dt {
+    font-family: var(--font-display);
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .quelle-traeger {
+    font-weight: 400;
+    font-size: var(--schrift-sm);
+    color: var(--color-text-muted);
+  }
+
+  .quelle dd {
+    margin: 4px 0 0;
+    color: var(--color-text-secondary);
+    font-size: var(--schrift-sm);
+    line-height: 1.55;
+  }
+
+  .methodik-schluss {
+    color: var(--color-text-secondary);
+  }
+</style>
