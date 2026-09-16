@@ -2,6 +2,9 @@
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { CATEGORIES, categoryLabel } from "../../../lib/categories.js";
+import Breadcrumb from "../../../components/Breadcrumb.astro";
+import RechnerCta from "../../../components/RechnerCta.astro";
+import ArtikelKarte from "../../../components/ArtikelKarte.astro";
 
 export async function getStaticPaths() {
   return CATEGORIES.map((c) => ({ params: { kategorie: c.slug } }));
@@ -13,24 +16,15 @@ const articles = (await getCollection("articles", (a) => a.data.category === kat
   (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
 );
 
-const breadcrumbLd = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Ratgeber", item: new URL("/ratgeber/", Astro.site).toString() },
-    { "@type": "ListItem", position: 2, name: label, item: new URL(`/ratgeber/${kategorie}/`, Astro.site).toString() },
-  ],
-};
 ---
 
 <BaseLayout
   title={`${label} | Photovoltaik-Ratgeber | Photovoltaik Aktuell`}
   description={`Alle Ratgeber-Artikel zum Thema ${label} rund um Photovoltaik.`}
 >
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 
-  <section class="prose cat-header">
-    <nav class="breadcrumb"><a href="/ratgeber/">Ratgeber</a> / {label}</nav>
+  <section class="container cat-header">
+    <Breadcrumb glieder={[{ name: "Ratgeber", href: "/ratgeber/" }, { name: label }]} />
     <h1>{label}</h1>
   </section>
 
@@ -39,74 +33,59 @@ const breadcrumbLd = {
       <p class="empty">Für diese Kategorie sind noch keine Artikel veröffentlicht.</p>
     )}
     {articles.length > 0 && (
-    <ul class="article-list">
-      {articles.map((a) => (
+    <ul class="artikel-raster">
+      {articles.map((a, i) => (
         <li>
-          <a href={`/ratgeber/${a.id}/`}>
-            <h2>{a.data.title}</h2>
-            <p>{a.data.description}</p>
-          </a>
+          <ArtikelKarte artikel={a} vorrang={i < 3} />
         </li>
       ))}
     </ul>
     )}
+
+    <RechnerCta
+      variant="final"
+      text="Die Zahlen aus diesen Artikeln für Ihr eigenes Dach — mit der Einstrahlung für Ihre Postleitzahl statt mit dem Bundesdurchschnitt."
+    />
   </section>
 </BaseLayout>
 
 <style>
+  /* Linksbündig auf Containerbreite, nicht zentriert in einer schmalen
+     Lesespalte: Der Kopf steht über einem linksbündigen Kartenraster, und
+     eine zentrierte Überschrift darüber liest sich als Fehlausrichtung. */
   .cat-header {
-    padding: 40px 20px 24px;
+    /* `padding-block`, nicht die `padding`-Kurzform: Die Kurzform würde die
+       seitlichen 20px von `.container` auf 0 setzen, und der Kopf stünde
+       22px weiter links als das Kartenraster darunter. */
+    padding-block: 40px 24px;
   }
 
-  .breadcrumb {
-    font-size: 13px;
-    color: var(--color-text-muted);
-    margin-bottom: 10px;
-  }
-
-  .breadcrumb a {
-    color: var(--color-text-muted);
-    text-decoration: none;
-  }
 
   .cat-header h1 {
     font-size: 28px;
   }
 
-  .article-list {
+  /* Dasselbe Raster wie auf /ratgeber/ — die Karte selbst liegt in
+     ArtikelKarte.astro, damit Übersicht und Kategorieseite nicht wieder
+     auseinanderlaufen. */
+  .artikel-raster {
     list-style: none;
     margin: 0;
     padding: 0 0 56px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .artikel-raster li {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
   }
 
-  .article-list a {
-    display: block;
-    padding: 20px 22px;
-    background: var(--color-surface);
-    text-decoration: none;
-    color: inherit;
-  }
-
-  .article-list a:hover {
-    background: var(--color-accent-subtle);
-  }
-
-  .article-list h2 {
-    font-size: 17px;
-    margin: 0 0 4px;
-  }
-
-  .article-list p {
-    margin: 0;
-    font-size: 14px;
-    color: var(--color-text-secondary);
+  @media (max-width: 520px) {
+    .artikel-raster {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
   }
 
   .empty {

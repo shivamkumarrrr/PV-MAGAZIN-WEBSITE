@@ -1,0 +1,249 @@
+---
+import { Image } from "astro:assets";
+import { categoryLabel } from "../lib/categories.js";
+import { heroBild } from "../lib/heroBilder.js";
+import { lesedauerMinuten } from "../lib/lesedauer.js";
+
+// Eine Ratgeber-Karte. Gemeinsam genutzt von der Übersicht (`/ratgeber/`) und
+// den Kategorieseiten, damit beide nicht auseinanderlaufen — vorher stand das
+// Markup in beiden Dateien doppelt.
+//
+// Vorgeschichte, damit sie nicht zum dritten Mal geschrieben wird: Zuerst
+// standen hier 17 gleich große weiße Karten ohne Gruppierung — flach und
+// beliebig. Dann typografische Zeilen mit 108px-Vorschaubildern: die
+// Gruppierung stimmte, aber die Fotos waren als Briefmarken unlesbar, ihre
+// Oberkanten sprangen mit der Titellänge, und rechts blieb die halbe Seite
+// leer. Jetzt Karten MIT der Gruppierung: das Foto trägt in 16:9 über die
+// volle Kartenbreite, die Gruppen bleiben.
+//
+// Ausrichtung ist hier kein Detail, sondern der eigentliche Auftrag: gleiche
+// Bildhöhe über `aspect-ratio`, gleiche Kartenhöhe über das Raster, und die
+// Fußzeile per `margin-top: auto` am unteren Rand — sonst sitzt sie bei
+// kurzen Texten weiter oben als nebenan.
+interface Props {
+  artikel: any;
+  /** Kategorie-Kennzeichnung zeigen. Auf der Übersicht überflüssig (die
+      Gruppenüberschrift sagt es schon), auf Kategorieseiten ebenso — daher
+      Standard aus. */
+  mitKategorie?: boolean;
+  /** Erste Karte über dem Falz: Bild sofort laden statt lazy. */
+  vorrang?: boolean;
+  /** "quer" legt Bild und Text nebeneinander. Gedacht für Kategorien mit nur
+      EINEM Artikel: Eine einzelne hochformatige Karte neben zwei leeren
+      Rasterspalten sieht aus, als fehle etwas. */
+  ausrichtung?: "hoch" | "quer";
+}
+const { artikel, mitKategorie = false, vorrang = false, ausrichtung = "hoch" } = Astro.props;
+
+const bild = heroBild(artikel.data.heroImage);
+const minuten = lesedauerMinuten(artikel.body);
+---
+
+<article class:list={["karte", { "karte--quer": ausrichtung === "quer" }]}>
+  <a href={`/ratgeber/${artikel.id}/`}>
+    {bild ? (
+      <Image
+        class="karte-bild"
+        src={bild}
+        alt={artikel.data.heroImageAlt ?? ""}
+        widths={[320, 480, 640, 960]}
+        sizes={ausrichtung === "quer"
+          ? "(min-width: 1180px) 420px, (min-width: 720px) 40vw, 100vw"
+          : "(min-width: 1060px) 33vw, (min-width: 640px) 50vw, 100vw"}
+        loading={vorrang ? "eager" : "lazy"}
+        decoding="async"
+      />
+    ) : (
+      /* Ohne Foto bleibt die Fläche trotzdem stehen — sonst rutscht in einer
+         Reihe eine Karte hoch und das Raster wirkt kaputt. */
+      <span class="karte-bild karte-bild--leer" aria-hidden="true" />
+    )}
+
+    <div class="karte-inhalt">
+      {mitKategorie && (
+        <span class="karte-kategorie">{categoryLabel(artikel.data.category)}</span>
+      )}
+      <h3>{artikel.data.title}</h3>
+      <p>{artikel.data.description}</p>
+      <span class="karte-fuss">
+        <span class="karte-dauer">{minuten} Min. Lesezeit</span>
+        <span class="karte-pfeil" aria-hidden="true">Lesen →</span>
+      </span>
+    </div>
+  </a>
+</article>
+
+<style>
+  /* `width: 100%` ist Pflicht, nicht Kosmetik: Die Karte ist Flex-Kind des
+     <li> im Raster. Ohne die Angabe misst sie sich an ihrem Inhalt statt an
+     der Spalte — im drei­spaltigen Raster fällt das nicht auf (der Inhalt ist
+     breiter als die Spalte), bei einer einzelnen Querkarte über die volle
+     Breite schrumpft sie sichtbar auf Inhaltsbreite zusammen. */
+  .karte {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Die ganze Karte ist der Link — ein zusätzlicher „Zum Artikel“-Knopf in
+     jeder Karte wären siebzehn gleiche Knöpfe untereinander und damit genau
+     die Kartenmonotonie aus Design-Regel 7. Die Fußzeile übernimmt den
+     Abschluss: Lesezeit als echte Information plus Textaffordanz. */
+  .karte > a {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    /* Schneidet das Bild an den oberen Kartenecken ab, damit die Rundung
+       durchläuft und das Foto keinen eigenen Radius braucht. */
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.18s ease, transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .karte > a:hover {
+    border-color: var(--color-text-primary);
+    transform: translateY(-2px);
+  }
+
+  .karte-bild {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    background: var(--color-bg);
+    /* Der feine Rand trennt helle Bildkanten (Himmel, Schnee) von der weißen
+       Karte, ohne einen zweiten Rahmen zu zeichnen. */
+    border-bottom: 1px solid var(--color-border);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .karte-bild--leer {
+    aspect-ratio: 16 / 9;
+  }
+
+  .karte > a:hover .karte-bild {
+    transform: scale(1.025);
+  }
+
+  .karte-inhalt {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 16px 18px 18px;
+  }
+
+  .karte-kategorie {
+    font-size: var(--schrift-xs);
+    font-weight: 500;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+  }
+
+  .karte h3 {
+    font-size: 17px;
+    line-height: 1.32;
+    font-weight: 600;
+    margin: 0 0 7px;
+    text-wrap: balance;
+  }
+
+  .karte > a:hover h3 {
+    color: var(--color-accent-hover);
+  }
+
+  /* Drei Zeilen gekappt: Die Beschreibungen sind zwischen 90 und 200 Zeichen
+     lang: ungekappt stünde neben einer dreizeiligen Karte eine sechszeilige,
+     und die Fußzeilen einer Reihe lägen auf verschiedenen Höhen. */
+  .karte p {
+    margin: 0 0 16px;
+    font-size: var(--schrift-sm);
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    text-wrap: pretty;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .karte-fuss {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    /* Drückt die Fußzeile an den unteren Rand — der Grund, warum die Karten
+       einer Reihe unten bündig abschließen. */
+    margin-top: auto;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-border);
+    font-size: var(--schrift-xs);
+    color: var(--color-text-muted);
+  }
+
+  .karte-pfeil {
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .karte > a:hover .karte-pfeil {
+    color: var(--color-accent-hover);
+  }
+
+  /* Querformat: Bild links, Text rechts. Unter 720px fällt die Karte auf das
+     normale Hochformat zurück — nebeneinander bliebe für beides zu wenig
+     Platz. */
+  @media (min-width: 720px) {
+    .karte--quer > a {
+      flex-direction: row;
+    }
+
+    .karte--quer .karte-bild {
+      width: 40%;
+      max-width: 420px;
+      flex-shrink: 0;
+      aspect-ratio: auto;
+      /* Streckt das Foto auf die Höhe des Textes statt auf ein festes
+         Verhältnis — sonst klafft unter dem Bild eine weiße Lücke. */
+      align-self: stretch;
+      height: auto;
+      min-height: 100%;
+      border-bottom: none;
+      border-right: 1px solid var(--color-border);
+    }
+
+    .karte--quer .karte-inhalt {
+      padding: 22px 26px 20px;
+      justify-content: center;
+    }
+
+    .karte--quer h3 {
+      font-size: 19px;
+    }
+
+    .karte--quer p {
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      max-width: 62ch;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .karte > a,
+    .karte-bild {
+      transition: none;
+    }
+    .karte > a:hover {
+      transform: none;
+    }
+    .karte > a:hover .karte-bild {
+      transform: none;
+    }
+  }
+</style>

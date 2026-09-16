@@ -2,6 +2,9 @@
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { CATEGORIES } from "../../lib/categories.js";
+import ArtikelKarte from "../../components/ArtikelKarte.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import RechnerCta from "../../components/RechnerCta.astro";
 
 // Vorher: 17 gleich große weiße Karten in einem 3-Spalten-Raster. Das ist das
 // Muster, das jede KI-generierte Übersichtsseite produziert — und es half hier
@@ -9,11 +12,19 @@ import { CATEGORIES } from "../../lib/categories.js";
 // hatten keine Entsprechung in der Liste darunter, und die Beschreibungen
 // waren auf drei schmale Spalten zerhackt.
 //
-// Jetzt ein echtes Register: nach Kategorie gruppiert, als typografische
-// Zeilen. Die Gruppierung ist keine Dekoration, sie bildet die Struktur ab,
-// die es ohnehin gibt (das `category`-Feld im Frontmatter) — und beantwortet
-// die Frage, die jemand auf einer Übersichtsseite hat: "Was gibt es zu
-// meinem Thema?"
+// Die Antwort darauf war zuerst ein Register aus typografischen Zeilen mit
+// 108px-Vorschaubildern. Die Gruppierung stimmte und bleibt — sie bildet die
+// Struktur ab, die es ohnehin gibt (das `category`-Feld im Frontmatter), und
+// beantwortet die Frage, die jemand auf einer Übersichtsseite hat: "Was gibt
+// es zu meinem Thema?"
+//
+// Die Zeilen selbst haben nicht getragen: Die Fotos waren in Briefmarkengröße
+// nicht zu erkennen, ihre Oberkante sprang mit der Länge des Titels, und
+// rechts blieb bei 1440px die halbe Seite leer. Seit September 2026 stehen in
+// jeder Gruppe Karten (`ArtikelKarte.astro`) mit dem Foto in 16:9 über die
+// volle Kartenbreite. Das ist NICHT die Rückkehr zur flachen Kartenwand von
+// davor: Die Karten stehen weiterhin unter ihrer Kategorie, nicht in einem
+// einzigen Raster aus siebzehn gleichwertigen Kacheln.
 const artikel = await getCollection("articles");
 
 const gruppen = CATEGORIES.map((c) => ({
@@ -23,13 +34,6 @@ const gruppen = CATEGORIES.map((c) => ({
     .sort((a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()),
 })).filter((g) => g.artikel.length > 0);
 
-const breadcrumbLd = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Ratgeber", item: new URL("/ratgeber/", Astro.site).toString() },
-  ],
-};
 
 const nf = new Intl.NumberFormat("de-DE");
 ---
@@ -38,16 +42,26 @@ const nf = new Intl.NumberFormat("de-DE");
   title="Photovoltaik-Ratgeber | Photovoltaik Aktuell"
   description="Alle Artikel zu Photovoltaik: Kosten & Förderung, Technik, Speicher, Einspeisevergütung, Balkonkraftwerk, Ökobilanz und Checklisten — nach Kategorie sortiert."
 >
-  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
 
   <div class="container">
     <header class="kopf">
+      <Breadcrumb glieder={[{ name: "Ratgeber" }]} />
       <h1>Ratgeber</h1>
       <p>
         {nf.format(artikel.length)} Artikel, nach Thema sortiert. Jede Zahl im
         Text mit Quelle — von den Grundlagen bis zur Checkliste vor dem Kauf.
       </p>
     </header>
+
+    {/* Empfehlung statt Pflicht: Die Sprungmarken bleiben voll nutzbar, wer
+        gezielt sucht, muss hier nicht vorbei. Aber Grundlagen steht als
+        Kategorie ohnehin zuerst (CATEGORIES.js) — dieser Hinweis macht die
+        Reihenfolge explizit, statt sie nur zufällig zu treffen (Vorgabe
+        Patrick/PPC: Einsteiger sollen wissen, wo sie anfangen). */}
+    <a href="/ratgeber/wie-funktioniert-eine-photovoltaikanlage/" class="einstieg">
+      <span class="einstieg-label">Neu beim Thema?</span>
+      <span class="einstieg-titel">Erst die Grundlagen: Wie funktioniert eine Photovoltaikanlage? →</span>
+    </a>
 
     <nav class="sprung" aria-label="Zu einer Kategorie springen">
       {gruppen.map((g) => (
@@ -57,7 +71,7 @@ const nf = new Intl.NumberFormat("de-DE");
       ))}
     </nav>
 
-    {gruppen.map((g) => (
+    {gruppen.map((g, gi) => (
       <section class="gruppe" id={g.slug}>
         <div class="gruppe-kopf">
           <h2>{g.label}</h2>
@@ -66,24 +80,40 @@ const nf = new Intl.NumberFormat("de-DE");
           </a>
         </div>
 
-        <ul class="eintraege">
-          {g.artikel.map((a) => (
+        {/* Vier der acht Kategorien haben genau einen Artikel. Im
+            Drei-Spalten-Raster stünde dort eine schmale Karte neben zwei
+            leeren Spalten — das liest sich als Fehler, nicht als Absicht.
+            Ein Artikel bekommt deshalb eine Querkarte über die volle Breite,
+            zwei teilen sich die Breite zur Hälfte, ab drei greift das
+            Raster. */}
+        <ul class:list={["artikel-raster", `artikel-raster--${Math.min(g.artikel.length, 3)}`]}>
+          {g.artikel.map((a, i) => (
             <li>
-              <a href={`/ratgeber/${a.id}/`}>
-                <h3>{a.data.title}</h3>
-                <p>{a.data.description}</p>
-              </a>
+              <ArtikelKarte
+                artikel={a}
+                vorrang={gi === 0 && i < 3}
+                ausrichtung={g.artikel.length === 1 ? "quer" : "hoch"}
+              />
             </li>
           ))}
         </ul>
       </section>
     ))}
+
+    {/* Die Übersicht hatte bis September 2026 keinen einzigen Weg zum
+        Rechner — siebzehn Artikel, alle mit CTA, aber die Seite, die sie
+        auflistet, endete im Nichts. Dieselbe Abschluss-Box wie am
+        Artikelende, damit niemand eine zweite Form lernen muss. */}
+    <RechnerCta
+      variant="final"
+      text="Statt weiterzulesen: Ertrag, Ersparnis und Amortisation für Ihr eigenes Dach — mit der Einstrahlung für Ihre Postleitzahl."
+    />
   </div>
 </BaseLayout>
 
 <style>
   .kopf {
-    max-width: 44ch;
+    max-width: 58ch;
     padding: clamp(40px, 6vw, 68px) 0 clamp(24px, 3vw, 32px);
   }
 
@@ -97,6 +127,44 @@ const nf = new Intl.NumberFormat("de-DE");
     color: var(--color-text-secondary);
     font-size: var(--schrift-md);
     text-wrap: pretty;
+  }
+
+  /* Ein Block, keine Pille — Design-Regel 6 verbietet wiederholte
+     Icon-Text-Pillen als Trust-Badge-Muster, nicht einen einzelnen
+     hervorgehobenen Hinweis. Akzent-Subtle als Fläche macht ihn von den
+     Sprungmarken darunter unterscheidbar, ohne eine neue Farbe
+     einzuführen. Bewusst KEIN Kleinversalien-Label über dem Titel — das
+     ist derselbe Eyebrow-Tell, der an anderer Stelle im Projekt schon
+     einmal entfernt wurde (siehe index.astro). ".einstieg-label" trägt
+     normalen Satz, keine Versalien. */
+  .einstieg {
+    display: block;
+    margin-bottom: 20px;
+    padding: 16px 20px;
+    border-radius: var(--radius-md);
+    background: var(--color-accent-subtle);
+    text-decoration: none;
+  }
+
+  .einstieg-label {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+
+  .einstieg-titel {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-accent-hover);
+  }
+
+  .einstieg:hover .einstieg-titel {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   /* Sprungmarken statt Filter-Chips: die Chips führten vorher auf eigene
@@ -171,61 +239,43 @@ const nf = new Intl.NumberFormat("de-DE");
     color: var(--color-accent-hover);
   }
 
-  /* Zeilen statt Karten. Der Titel trägt, die Beschreibung erklärt — beide
-     linksbündig auf derselben Achse, damit die Augen beim Überfliegen nicht
-     zwischen drei Spalten springen müssen. */
-  .eintraege {
+  /* Drei Spalten auf dem Desktop, zwei auf dem Tablet, eine auf dem Handy.
+     `auto-fill` mit fester Mindestbreite statt fester Spaltenzahl: In den
+     Gruppen stehen zwischen einem und fünf Artikeln, und eine einzelne Karte
+     soll nicht über die volle Seitenbreite laufen — `minmax(280px, 1fr)`
+     hält sie auf Spaltenbreite. */
+  .artikel-raster {
     list-style: none;
-    margin: 0;
+    margin: 20px 0 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
   }
 
-  .eintraege li {
-    border-top: 1px solid var(--color-border);
+  /* Ohne das strecken sich die <li> nicht auf Reihenhöhe, und die Karte darin
+     kann nicht `height: 100%` einnehmen — dann steht die Fußzeile jeder Karte
+     auf einer anderen Höhe, also genau der Fehler, den dieses Raster beheben
+     soll. */
+  .artikel-raster li {
+    display: flex;
   }
 
-  /* Beim Überfahren rückt die Zeile leicht ein. Über `transform` statt
-     `padding-left`: letzteres löst bei jedem Frame ein neues Layout aus und
-     ruckelt in einer langen Liste sichtbar. */
-  .eintraege a {
-    display: block;
-    padding: 18px 16px 20px 0;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s;
+  .artikel-raster--1 {
+    grid-template-columns: 1fr;
   }
 
-  .eintraege a:hover {
-    background: var(--color-surface);
-    transform: translateX(10px);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .eintraege a {
-      transition: background-color 0.15s;
-    }
-    .eintraege a:hover {
-      transform: none;
+  @media (min-width: 720px) {
+    .artikel-raster--2 {
+      grid-template-columns: repeat(2, 1fr);
     }
   }
 
-  .eintraege h3 {
-    font-size: var(--schrift-md);
-    font-weight: 600;
-    margin: 0 0 5px;
-    max-width: 54ch;
+  @media (max-width: 520px) {
+    .artikel-raster {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
   }
 
-  .eintraege a:hover h3 {
-    color: var(--color-accent-hover);
-  }
-
-  .eintraege p {
-    margin: 0;
-    font-size: var(--schrift-sm);
-    line-height: 1.55;
-    color: var(--color-text-secondary);
-    max-width: 68ch;
-    text-wrap: pretty;
-  }
 </style>

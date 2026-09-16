@@ -1,6 +1,6 @@
 ---
 import { getCollection } from "astro:content";
-import { categoryLabel } from "../lib/categories.js";
+import ArtikelKarte from "./ArtikelKarte.astro";
 
 // Automatische Querverlinkung am Artikelende.
 //
@@ -17,7 +17,11 @@ interface Props {
   relatedRechner: string;
   anzahl?: number;
 }
-const { aktuellerSlug, kategorie, relatedRechner, anzahl = 3 } = Astro.props;
+// Vier statt drei Vorschläge: Die Karten stehen in einem Zweierraster, und
+// drei ließen unten eine einzelne Karte allein stehen. Der vierte Link ist
+// zudem ein Link mehr im Themencluster — bis September 2026 hatte kein
+// Artikel überhaupt einen ausgehenden Link (siehe CLAUDE.md).
+const { aktuellerSlug, kategorie, relatedRechner, anzahl = 4 } = Astro.props;
 
 const alle = (await getCollection("articles"))
   .filter((a) => a.id !== aktuellerSlug)
@@ -36,13 +40,10 @@ const vorschlaege = [...new Map(gewichtet.map((a) => [a.id, a])).values()].slice
 {vorschlaege.length > 0 && (
   <nav class="verwandte" aria-labelledby="verwandte-heading">
     <h2 id="verwandte-heading">Weiterlesen</h2>
-    <ul>
+    <ul class="verwandte-raster">
       {vorschlaege.map((a) => (
         <li>
-          <a href={`/ratgeber/${a.id}/`}>
-            <span class="verwandte-cat">{categoryLabel(a.data.category)}</span>
-            <span class="verwandte-titel">{a.data.title}</span>
-          </a>
+          <ArtikelKarte artikel={a} mitKategorie />
         </li>
       ))}
     </ul>
@@ -59,43 +60,29 @@ const vorschlaege = [...new Map(gewichtet.map((a) => [a.id, a])).values()].slice
     margin-bottom: 0.6em;
   }
 
-  .verwandte ul {
+  /* Dieselbe Karte wie auf /ratgeber/, der Startseite und den
+     Kategorieseiten (ArtikelKarte.astro) — vorher waren das hier reine
+     Textzeilen ohne Bild, also eine fünfte Darstellungsform für dieselbe
+     Sache. Zwei Spalten statt drei: Die Artikelspalte ist 620px breit, drei
+     Karten darin wären 190px schmal. */
+  .verwandte-raster {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .verwandte-raster li {
     display: flex;
-    flex-direction: column;
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
   }
 
-  .verwandte a {
-    display: block;
-    padding: 14px 18px;
-    background: var(--color-surface);
-    text-decoration: none;
-    color: var(--color-text-primary);
+  @media (max-width: 560px) {
+    .verwandte-raster {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
   }
 
-  .verwandte a:hover {
-    background: var(--color-accent-subtle);
-  }
-
-  .verwandte-cat {
-    display: block;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--color-text-muted);
-    margin-bottom: 3px;
-  }
-
-  .verwandte-titel {
-    font-weight: 500;
-    font-size: 15px;
-  }
 </style>
