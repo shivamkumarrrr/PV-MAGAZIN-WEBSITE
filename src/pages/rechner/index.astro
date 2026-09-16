@@ -65,6 +65,44 @@ const tools = RECHNER;
       </a>
     ))}
   </section>
+
+  <section class="prose methodik">
+    <h2>Womit gerechnet wird</h2>
+    <p>
+      Alle Rechner folgen derselben Regel: Kennzahlen kommen aus öffentlichen
+      Quellen, werden nie geschönt, und jede Annahme wird auf der Seite
+      ausgewiesen. Die wichtigsten Grundlagen:
+    </p>
+    <ul class="methodik-liste">
+      <li>
+        <strong>Ertrag:</strong> PVGIS-Satellitendaten des EU Joint Research
+        Centre für Ihren Standort; ohne Standort der Bundesdurchschnitt
+        von ca. 950 kWh/kWp je Jahr (Fraunhofer ISE).
+      </li>
+      <li>
+        <strong>Preise:</strong> Fraunhofer-ISE- und Branchen-Marktpreisübersicht
+        für Anlage und Speicher; inkl. Nullsteuersatz, d.h. brutto = netto.
+      </li>
+      <li>
+        <strong>Strompreis:</strong> BDEW-Haushaltsdurchschnitt von 0,37 €/kWh;
+        Vergütung nach § 49 EEG (Stand Bundesnetzagentur).
+      </li>
+      <li>
+        <strong>Speicherdimensionierung:</strong> HTW-Berlin-Faustregel von
+        1–1,2 kWh je 1.000 kWh Jahresverbrauch.
+      </li>
+      <li>
+        <strong>Pflege:</strong> Die Datenprüfung läuft im selben Rhythmus wie
+        die jährliche Aktualisierung der Artikel — die Annahmen sind in
+        <tt>src/lib/calculate.js</tt> dokumentiert und zentral gepflegt.
+      </li>
+    </ul>
+    <p class="methodik-hinweis">
+      Ein Rechnergebnist ist eine Größenordnung für Ihre Planung, kein
+      Angebot. Angebote für die konkrete Dachkonstruktion liefert ein
+      Installateur.
+    </p>
+  </section>
 </BaseLayout>
 
 <style>
@@ -144,5 +182,58 @@ const tools = RECHNER;
   .tool-link {
     font-weight: 600;
     font-size: 14px;
+  }
+
+  .methodik {
+    max-width: 820px;
+    padding: 8px 20px 64px;
+  }
+
+  .methodik h2 {
+    font-size: 24px;
+    margin-bottom: 0.5em;
+  }
+
+  .methodik p {
+    color: var(--color-text-secondary);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .methodik-liste {
+    margin: 18px 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .methodik-liste li {
+    padding: 14px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .methodik-liste strong {
+    color: var(--color-text-primary);
+  }
+
+  .methodik-liste tt {
+    font-size: 12.5px;
+    background: var(--color-sky-subtle);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--color-brand-navy);
+  }
+
+  .methodik-hinweis {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    font-style: italic;
   }
 </style>

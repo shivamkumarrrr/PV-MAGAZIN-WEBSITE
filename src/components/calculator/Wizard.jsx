@@ -257,8 +257,47 @@ export default function Wizard() {
     );
   }
 
+  // Mitlaufende Ergebniszeile für schmale Bildschirme. Zeigt genau die zwei
+  // Zahlen, die sich mit jeder Eingabe ändern und über die Entscheidung
+  // tragen — mehr passt nicht auf 360px, ohne dass die Leiste zum zweiten
+  // Panel wird.
+  const mobileBar = (
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 11, color: theme.color.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px" }}>
+          Ersparnis pro Jahr
+        </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <span style={{ fontSize: 19, fontWeight: 700, color: theme.color.accent, fontVariantNumeric: "tabular-nums" }}>
+            {Math.round(result.jahresErsparnis).toLocaleString("de-DE")} €
+          </span>
+          <span style={{ fontSize: 12, color: theme.color.textSecondary, fontVariantNumeric: "tabular-nums" }}>
+            {Math.round(result.autarkie)} % Autarkie
+          </span>
+        </div>
+      </div>
+      <a
+        href="#live-vorschau"
+        style={{
+          flexShrink: 0,
+          padding: "9px 14px",
+          borderRadius: theme.radius.pill,
+          border: `1px solid ${theme.color.border}`,
+          color: theme.color.textPrimary,
+          fontSize: 13,
+          fontWeight: 600,
+          textDecoration: "none",
+          whiteSpace: "nowrap",
+        }}
+      >
+        Vorschau
+      </a>
+    </div>
+  );
+
   return (
     <Layout
+      mobileBar={mobileBar}
       main={(
         <div style={{
           background: theme.color.white,

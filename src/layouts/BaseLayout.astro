@@ -4,12 +4,14 @@ import Footer from "../components/Footer.astro";
 import "../styles/global.css";
 
 interface Props {
+  /** Optionale Seitenklasse am <body>, z. B. für den Artikel-Hintergrund. */
+  bodyClass?: string;
   title: string;
   description: string;
   ogImage?: string;
 }
 
-const { title, description, ogImage } = Astro.props;
+const { title, description, ogImage, bodyClass } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 
 // Standard-Vorschaubild für Social Shares. Vorher wurde `ogImage` zwar als
@@ -75,7 +77,7 @@ const ogBild = ogImage ?? (OG_STANDARD_VORHANDEN ? OG_STANDARD : null);
     )}
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body>
+  <body class={bodyClass}>
     <Header />
     <main>
       <slot />

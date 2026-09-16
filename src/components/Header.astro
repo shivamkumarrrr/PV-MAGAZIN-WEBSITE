@@ -10,7 +10,7 @@ const isRechner = pathname.startsWith("/rechner");
 <header class="site-header">
   <div class="container header-inner">
     <a href="/" class="brand" aria-label="Startseite">
-      <Image src={logo} alt="Photovoltaik Aktuell" height={32} densities={[1, 2, 3]} loading="eager" />
+      <Image class="logo" src={logo} alt="Photovoltaik Aktuell" height={44} densities={[1, 2, 3]} loading="eager" />
     </a>
     <nav class="main-nav" aria-label="Hauptnavigation">
       <a href="/ratgeber/" class:list={["nav-link", { active: isRatgeber }]}>Ratgeber</a>
@@ -35,6 +35,28 @@ const isRechner = pathname.startsWith("/rechner");
   .brand {
     display: flex;
     align-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Die Wortmarke lief mit 32 px Höhe in einer 72 px hohen Leiste — sie stand
+     darin wie eine Fußnote. 44 px füllt die Leiste, ohne sie zu sprengen
+     (14 px Luft nach oben und unten). Unter 520 px tritt sie wieder zurück,
+     sonst bleibt für "Ratgeber" und "Rechner" kein Platz.
+
+     `max-width: none` und `flex-shrink: 0` sind nötig, nicht kosmetisch: die
+     globale Regel `img { max-width: 100% }` staucht das Bild sonst im Flex-
+     Container auf die verfügbare Breite, während die Höhe steht — die
+     Wortmarke wird dabei schmalgezogen. */
+  .logo {
+    height: 44px;
+    width: auto;
+    max-width: none;
+  }
+
+  @media (max-width: 520px) {
+    .logo {
+      height: 34px;
+    }
   }
 
   .main-nav {

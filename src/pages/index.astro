@@ -1,9 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Ertragskurve from "../components/Ertragskurve.astro";
 import { getCollection } from "astro:content";
 import { categoryLabel } from "../lib/categories.js";
 import { RECHNER } from "../lib/rechner.js";
+import RechnerWidget from "../components/RechnerWidget.jsx";
 import { STROMPREIS, EINSPEISE } from "../lib/calculate.js";
 import {
   IconRechnerPhotovoltaik,
@@ -24,9 +24,13 @@ import {
 // Verlaufsbanner, keine Sonnen-Symbole, keine lachende Familie auf dem Dach;
 // das sind die Reflexe, die jede zweite Solar-Landingpage bedient.
 //
-// EIN Signature-Element (CLAUDE.md Design-Regel 11): die Ertragskurve im
-// Hero, gezeichnet aus denselben Monatsanteilen, mit denen der Rechner
-// arbeitet. Alles andere bleibt bewusst ruhig.
+// EIN Signature-Element (CLAUDE.md Design-Regel 11): das Hero-Bild — eine
+// ruhige Nahaufnahme einer Modulfläche im Streiflicht. Bewusst kein
+// Gebäude mit lesbarem Firmenschild und keine Menschen: beides würde sich
+// als Referenzkunde lesen, den es nicht gibt. Vorher stand hier die
+// Ertragskurve; die Komponente bleibt im Projekt
+// (src/components/Ertragskurve.astro), ist aber nicht mehr eingebunden.
+// Alles andere bleibt bewusst ruhig.
 //
 // Tonale Gliederung (neu): Die Seite lief vorher durchgehend in Off-White
 // mit 1-px-Rändern — jeder Abschnitt sah aus wie der davor, nichts trug
@@ -45,13 +49,14 @@ const artikel = (await getCollection("articles")).sort(
 );
 const neueste = artikel.slice(0, 4);
 
-const hauptRechner = RECHNER.find((r) => r.slug === "photovoltaik");
+// Der Photovoltaik-Rechner steht auf dieser Seite nicht mehr als Karte: Er
+// ist oben als Mini-Rechner bereits benutzbar, eine zweite Karte mit
+// demselben Ziel wäre dieselbe Einladung zum zweiten Mal.
 const weitereRechner = RECHNER.filter((r) => r.slug !== "photovoltaik");
 
 // Zeichen je Rechner — dieselbe Zuordnung wie auf /rechner/. Ohne
 // client:-Direktive rendert Astro sie zu statischem SVG, die Seite lädt
-// dafür kein JavaScript. Die Startseite hatte bisher außer der Ertragskurve
-// keinerlei Bildzeichen; die elf Signets liegen längst im Projekt.
+// dafür kein JavaScript. Die elf Signets liegen längst im Projekt.
 const SIGNET = {
   photovoltaik: IconRechnerPhotovoltaik,
   kombi: IconRechnerKombi,
@@ -65,7 +70,6 @@ const SIGNET = {
   steuer: IconRechnerSteuer,
   mieterstrom: IconRechnerMieterstrom,
 };
-const HauptSignet = SIGNET[hauptRechner.slug];
 
 const nf = new Intl.NumberFormat("de-DE");
 const ct = (eur) =>
@@ -108,41 +112,44 @@ const quellen = [
       </div>
 
       <div class="hero-grafik">
-        <div class="hero-grafik-card">
-          <Ertragskurve kwp={10} />
-        </div>
+        <figure class="hero-bild">
+          <img
+            src="/images/startseite.jpg"
+            alt="Luftaufnahme eines Wohnhauses mit Solarmodulen auf dem Flachdach, umgeben von Gärten"
+            width="1200"
+            height="1500"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+            sizes="(min-width: 860px) 46vw, 100vw"
+          />
+        </figure>
       </div>
     </div>
   </section>
 
+  <!-- Der Mini-Rechner liegt auf der Kante zwischen Hero und Rechner-Band,
+       statt als weitere Kachel weiter unten zu warten: Wer auf der Startseite
+       landet, hat nach zwei Sekunden eine eigene Zahl vor sich, ohne Klick und
+       ohne Standortabfrage. Muster von lichtblick.de (Tarifrechner auf der
+       Bandkante) und zolar (Rechner vor dem Erklärtext). `client:load`, weil
+       die Karte der aktive Inhalt der Stelle ist und nicht Randdekor. -->
+  <div class="hero-rechner">
+    <div class="container">
+      <div class="hero-rechner-karte">
+        <RechnerWidget client:load variante="hero" />
+      </div>
+    </div>
+  </div>
+
   <section class="rechner container">
     <div class="abschnitt-kopf">
-      <h2>Rechner</h2>
-      <p>Konkrete Zahlen für Ihr Dach, Ihren Verbrauch, Ihren Standort.</p>
+      <h2>Zehn weitere Rechner</h2>
+      <p>
+        Speicher, Rendite, Steuer, Mieterstrom — jeder mit eigener
+        Fragestellung, alle auf derselben Datenbasis wie oben.
+      </p>
     </div>
-
-    <a href={`/rechner/${hauptRechner.slug}/`} class="rechner-haupt">
-      <div class="rechner-haupt-text">
-        <span class="rechner-haupt-signet" aria-hidden="true"><HauptSignet size={30} /></span>
-        <h3>{hauptRechner.title}</h3>
-        <p>{hauptRechner.beschreibung}</p>
-        <span class="rechner-haupt-link">Rechner starten →</span>
-      </div>
-      <dl class="rechner-haupt-fakten">
-        <div>
-          <dt>Datenquelle</dt>
-          <dd>PVGIS-Satellitendaten</dd>
-        </div>
-        <div>
-          <dt>Schritte</dt>
-          <dd>4</dd>
-        </div>
-        <div>
-          <dt>Ergebnis</dt>
-          <dd>kWp, Ertrag, Ersparnis, Amortisation</dd>
-        </div>
-      </dl>
-    </a>
 
     <ul class="rechner-liste">
       {weitereRechner.map((r) => {
@@ -184,7 +191,8 @@ const quellen = [
     </div>
   </section>
 
-  <section class="ratgeber container">
+  <section class="ratgeber">
+    <div class="container">
     <div class="abschnitt-kopf">
       <h2>Neu im Ratgeber</h2>
       <p>Von den Grundlagen bis zur Checkliste vor dem Kauf.</p>
@@ -205,6 +213,7 @@ const quellen = [
     <a href="/ratgeber/" class="alle-artikel">
       Alle {nf.format(artikel.length)} Artikel ansehen →
     </a>
+    </div>
   </section>
 
   <!-- Abschluss: das einzige Akzentfeld der Seite. Text in Tintenschwarz
@@ -299,19 +308,46 @@ const quellen = [
     gap: 12px;
   }
 
-  /* Die Kurve bekommt eine eigene Fläche statt lose auf dem Seiten-
-     hintergrund zu schweben — sonst liest sie sich als vergessenes
-     Element statt als bewusstes Hero-Bild, und die Bildunterschrift
-     wirkt wie ein zweiter, unverbundener Fließtext. */
-  .hero-grafik-card {
-    background: var(--color-surface);
+  /* Das Bild sitzt randlos in derselben 1-px-Fläche wie die Cards der
+     Seite — kein Schatten, kein Verlauf darüber (Design-Regeln 4 und 7).
+     Es füllt die Höhe der Textspalte: eine kleinere, mittig schwebende
+     Kachel ließ rechts neben der Überschrift eine tote Fläche stehen.
+     Am Handy liegt es über dem Text und wird flacher beschnitten, damit
+     es nicht den halben ersten Bildschirm einnimmt. */
+  .hero-bild {
+    margin: 0;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: 24px 22px 20px;
+    overflow: hidden;
+    background: var(--color-surface);
+    aspect-ratio: 4 / 3;
+  }
+
+  .hero-bild img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Hochformatige Datei: am Handy den Bildausschnitt auf das Haus
+       ziehen, sonst füllt der Garten den flacheren Rahmen. */
+    object-position: 50% 46%;
+  }
+
+  @media (min-width: 860px) {
+    .hero-bild img {
+      object-position: 50% 50%;
+    }
+  }
+
+  @media (min-width: 860px) {
+    .hero-bild {
+      aspect-ratio: 1200 / 1500;
+      max-height: 560px;
+    }
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .hero-grafik-card {
+    .hero-bild {
       animation: auftritt 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
     }
   }
@@ -380,83 +416,39 @@ const quellen = [
     padding-bottom: clamp(56px, 8vw, 96px);
   }
 
-  /* ── Rechner ────────────────────────────────────────────────────────── */
+  /* ── Mini-Rechner auf der Hero-Kante ────────────────────────────────── */
 
-  /* Der Hauptrechner bekommt bewusst eine andere Form als die übrigen zehn:
-     eine Reihe identischer Kacheln würde verschweigen, dass genau einer
-     davon mit echten Standortdaten arbeitet. */
-  .rechner-haupt {
-    display: grid;
-    gap: 24px;
-    padding: clamp(26px, 3.2vw, 38px);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    background: var(--color-surface);
-    text-decoration: none;
-    color: inherit;
-    margin-bottom: 20px;
-    transition: border-color 0.15s, box-shadow 0.2s;
+  /* Die Karte hängt über die Trennlinie des Hero-Bandes, wie der
+     Tarifrechner auf lichtblick.de. Am Handy wird nicht gezogen: dort
+     steht die Karte einfach unter dem Hero, sonst klebt sie am Bild.
+     Die Karte läuft über die volle Inhaltsbreite: ihre rechte Kante liegt
+     damit auf derselben Linie wie die Rechner-Karte darunter und wie der
+     Abschluss-Block. Vorher endete sie 240 px früher und stand an der
+     rechten Seite auf keiner Kante der Seite. */
+  .hero-rechner {
+    position: relative;
+    z-index: 1;
+    padding-top: 28px;
   }
 
-  .rechner-haupt:hover {
-    border-color: var(--color-accent);
-  }
-
-  @media (min-width: 760px) {
-    .rechner-haupt {
-      grid-template-columns: 1.2fr 1fr;
-      align-items: start;
+  @media (min-width: 860px) {
+    .hero-rechner {
+      margin-top: clamp(-56px, -4vw, -28px);
+      padding-top: 0;
     }
   }
 
-  .rechner-haupt-signet {
-    display: block;
-    color: var(--color-accent);
-    margin-bottom: 14px;
+  /* Ein heller Streifen im Wechsel mit dem Seitengrund — beide
+     Wettbewerber gliedern lange Seiten so, statt über weitere
+     Kartenrahmen (LichtBlick: #FFFFFF und #F0F0F0 im Wechsel, je 64 px
+     Luft). Keine neue Farbe, kein Verlauf. */
+  .ratgeber {
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
   }
 
-  .rechner-haupt h3 {
-    font-size: var(--schrift-xl);
-    margin: 0 0 10px;
-    letter-spacing: -0.02em;
-  }
-
-  .rechner-haupt-text p {
-    margin: 0 0 18px;
-    color: var(--color-text-secondary);
-    font-size: 15.5px;
-    line-height: 1.6;
-    max-width: 44ch;
-  }
-
-  .rechner-haupt-link {
-    font-weight: 600;
-    font-size: 15px;
-    color: var(--color-accent);
-  }
-
-  .rechner-haupt-fakten {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin: 0;
-    padding-top: 4px;
-  }
-
-  .rechner-haupt-fakten dt {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--color-text-secondary);
-    margin-bottom: 2px;
-  }
-
-  .rechner-haupt-fakten dd {
-    margin: 0;
-    font-family: var(--font-display);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--color-text-primary);
-  }
+  /* ── Rechner ────────────────────────────────────────────────────────── */
 
   .rechner-liste {
     list-style: none;
