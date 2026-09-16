@@ -1,0 +1,249 @@
+---
+// Hero-Band am Artikelanfang.
+//
+// Zwei Modi:
+// 1. MIT heroImage (Pfad relativ zu /public): Zeigt das Foto ungeschnitten
+//    im Originalseitenverhältnis (1600x686), darunter das Kennzahl-Band mit
+//    Kategorie-Label als Eyebrow und der Quelle aus dem Hero-Datenfeld.
+// 2. OHNE heroImage (Fallback): SVG-Motiv + Kennzahl wie bisher — kein
+//    externes Bild nötig, passt zum Prüfbericht-Stil.
+//
+// Die heroImage-Dateien in /public/images/heroes/ stammen von Pexels
+// (Lizenz: kommerzielle Nutzung frei, keine Namensnennung nötig) und sind
+// mittig auf 1600x686 zugeschnitten — dasselbe Verhältnis, das der Rahmen
+// unten setzt. Wer eine Datei austauscht, muss dieses Maß einhalten, sonst
+// verzerrt das Bild. Urheber und Pexels-Links stehen in
+// public/images/heroes/BILDNACHWEIS.md; Lizenzlage jährlich prüfen.
+import { categoryLabel } from "../lib/categories.js";
+
+interface Props {
+  category: string;
+  heroImage?: string;
+  heroImageAlt?: string;
+}
+const { category, heroImage, heroImageAlt } = Astro.props;
+const label = categoryLabel(category);
+
+const HERO = {
+  grundlagen: {
+    wert: "≈ 950",
+    einheit: "kWh pro kWp und Jahr",
+    quelle: 'Bundesweiter Durchschnitt — Fraunhofer ISE, „Aktuelle Fakten zur Photovoltaik in Deutschland" (2026)',
+    icon: "M2.5 22h39M12 5v3M6.2 7.2l1.9 1.9M22 3v3M16 7l1.9-1.9M12 14.5v2.8M7.4 11.4l1.9 1.9M34.6 12.4l1.9-1.9M27.5 16.5h9M29.5 14.8l1.5-1.4 2.5.9",
+  },
+  "kosten-foerderung": {
+    wert: "1.000–1.300 €",
+    einheit: "Systemkosten pro kWp inkl. Montage (brutto = netto, Nullsteuersatz)",
+    quelle: "Fraunhofer-ISE-Marktpreisübersicht 2026, Anbieterbereich inkl. Marge",
+    icon: "M11 3h2v18h-2zM18.5 8.5a6.5 6.5 0 0 1 0 7M5.5 8.5a6.5 6.5 0 0 0 0 7",
+  },
+  technik: {
+    wert: "≈ 4,7 m²",
+    einheit: "Dachfläche pro kWp inkl. Modulabstand (420-Wp-Module)",
+    quelle: 'ADAC, „Photovoltaik" — Planungsfläche je Modul',
+    icon: "M4.5 19.5h35M4.5 20.5V8l8-4v16M12.5 4.5l8 4v12M20.5 8.5l8-4v16M28.5 4.5l8 4v12",
+  },
+  speicher: {
+    wert: "1–1,2 kWh",
+    einheit: "nutzbare Speicherkapazität je 1.000 kWh Jahresverbrauch",
+    quelle: "HTW Berlin, Unabhängigkeitsrechner — Dimensionierungs-Faustregel",
+    icon: "M8.5 3.5h27a4 4 0 0 1 4 4v29a4 4 0 0 1-4 4h-27a4 4 0 0 1-4-4V7.5a4 4 0 0 1 4-4ZM14 9h3M14 15h3M14 21h3M14 30h3",
+  },
+  einspeiseverguetung: {
+    wert: "7,70 Ct",
+    einheit: "Teileinspeisung je kWh, Anlagen bis 10 kWp (EEG)",
+    quelle: "Bundesnetzagentur / § 49 EEG 2023, Stand 1.8.2026",
+    icon: "M22 12a10 10 0 1 1-10-10M21.5 3v5h-5",
+  },
+  balkonkraftwerk: {
+    wert: "≈ 700–800 kWh",
+    einheit: "Jahresertrag eines 800-Wp-Steckersolargeräts (Ø DE)",
+    quelle: "HTW Berlin, Ertragserwartungen Steckersolar 2026",
+    icon: "M6 19.5h22l6.5-14h-22zM13.5 15h16M17.5 5.5A3 3 0 0 0 15 8.2M24.5 5.5a3 3 0 0 1 2.5 2.7",
+  },
+  oekobilanz: {
+    wert: "≈ 344 g",
+    einheit: "CO₂ je produzierter kWh im deutschen Strommix (2025)",
+    quelle: 'Umweltbundesamt, „CO₂-Emissionen pro Kilowattstunde Strom"',
+    icon: "M22 3c-13 1.5-20 10-20 21 13-1.5 20-10 20-21ZM22 3c1.5 6 1 11-3 15-4 3.5-9 3.5-13 2",
+  },
+  checklisten: {
+    wert: "8–13 Jahre",
+    einheit: "realistische Amortisationsspanne für private PV-Anlagen",
+    quelle: "Rechner-Annahmen auf Basis ADAC- und Branchenbeispielen (2026)",
+    icon: "M5 4h14v16a4 4 0 0 1-4 4h-6a4 4 0 0 1-4-4zM9 4V3h6v1M11.5 15.5l2 2 4-4.4",
+  },
+};
+
+const d = HERO[category] ?? HERO.grundlagen;
+const hasImage = Boolean(heroImage);
+const alt = heroImageAlt ?? `${label}: Solaranlage auf einem typischen deutschen Dach`;
+---
+
+{hasImage ? (
+  <figure class="hero hero--foto">
+    <div class="hero-foto-wrap">
+      <img
+        src={heroImage}
+        alt={alt}
+        loading="eager"
+        decoding="async"
+        fetchpriority="high"
+        width="1600"
+        height="686"
+        sizes="(min-width: 1100px) 820px, 100vw"
+      />
+    </div>
+    <div class="hero-metric">
+      <span class="hero-eyebrow">{label}</span>
+      <div class="hero-text">
+        <span class="hero-wert">{d.wert}</span>
+        <span class="hero-einheit">{d.einheit}</span>
+      </div>
+    </div>
+    <figcaption class="hero-quelle">{d.quelle}</figcaption>
+  </figure>
+) : (
+  <figure class="hero hero--svg">
+    <div class="hero-main">
+      <svg class="hero-icon" viewBox="0 0 44 44" role="img" aria-hidden="true">
+        <path d={d.icon} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+      <div class="hero-text">
+        <span class="hero-eyebrow">{label}</span>
+        <span class="hero-wert">{d.wert}</span>
+        <span class="hero-einheit">{d.einheit}</span>
+      </div>
+    </div>
+    <figcaption class="hero-quelle">{d.quelle}</figcaption>
+  </figure>
+)}
+
+<style>
+  .hero {
+    margin: 0 0 36px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+  }
+
+  /* SVG-Modus: Sky-Subtle-Gradient wie bisher */
+  .hero--svg {
+    background:
+      radial-gradient(circle at 88% 18%, rgba(255, 82, 0, 0.10), transparent 42%),
+      var(--color-sky-subtle);
+  }
+
+  .hero-main {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    padding: 24px 26px 18px;
+  }
+
+  .hero-icon {
+    flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    color: var(--color-brand-navy);
+  }
+
+  .hero-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .hero-eyebrow {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--color-text-muted);
+    margin-bottom: 2px;
+  }
+
+  .hero-wert {
+    font-size: 30px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--color-brand-navy);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .hero-einheit {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  .hero-quelle {
+    padding: 8px 26px 10px;
+    border-top: 1px solid rgba(46, 111, 149, 0.18);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  /* Foto-Modus: volle Breite, 21:9-Ausschnitt mit Overlay-Gradient.
+     Unter dem Bild bleibt das Prüfbericht-Kennzahl-Band (wie im SVG-Modus:
+     Eyebrow, Kennzahl, Einheit) plus Quellenzeile — das unterscheidet uns
+     von LichtBlick (Bild ohne Kennzahl). */
+  .hero--foto {
+    background: var(--color-surface);
+  }
+
+  /* Das Bild wird NICHT beschnitten: der Rahmen übernimmt exakt das
+     Seitenverhältnis der Dateien in /public/images/heroes (1600x686).
+     Vorher stand hier 21/9 zusammen mit width/height 1280x640 — zwei
+     Verhältnisse, die weder zueinander noch zur Datei passten; object-fit
+     cover hat den Rest weggeschnitten und object-position hat den
+     Ausschnitt zusätzlich nach oben verschoben. */
+  .hero-foto-wrap {
+    width: 100%;
+    aspect-ratio: 1600 / 686;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .hero-foto-wrap img {
+    width: 100%;
+    height: auto;
+    object-fit: fill;
+    display: block;
+  }
+
+  .hero-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px 26px 16px;
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* Ab Tablet tritt das Hero-Band aus der Lesespalte heraus (Muster
+     LichtBlick: Bild breiter als der Text, Text bleibt schmal lesbar).
+     Der Ausbruch ist auf den Seitenabstand der .prose-Spalte begrenzt,
+     darum entsteht nie horizontales Scrollen. */
+  @media (min-width: 760px) {
+    .hero--foto {
+      margin-inline: -28px;
+      width: calc(100% + 56px);
+    }
+  }
+
+  @media (min-width: 1060px) {
+    .hero--foto {
+      margin-inline: -56px;
+      width: calc(100% + 112px);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero--svg {
+      background-image: none;
+    }
+  }
+</style>
