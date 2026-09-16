@@ -67,11 +67,21 @@
   --color-surface: #FFFFFF;
   --color-text-primary: #141B22;
   --color-text-secondary: #5A6570;
-  --color-text-muted: #8A9099;
+  /* Gemessen, nicht geschätzt: #8A9099 lag auf Weiß bei 3,02:1 und auf dem
+     Seitengrund bei 2,9:1 — unter der AA-Grenze von 4,5:1, und zwar genau
+     dort, wo es eingesetzt wurde (12-px-Kategorielabels, 11-px-Kachel-
+     beschriftungen). #6B7179 erreicht 4,96:1 auf Weiß und 4,65:1 auf
+     #F6F8F7. Der Ton bleibt derselbe kühle Graublau-Stich. */
+  --color-text-muted: #6B7179;
 
   --color-accent: #FF5200;
   --color-accent-hover: #D64700;
   --color-accent-subtle: #FFE9DD;
+  /* Orange als TEXT auf hellem Grund: #FF5200 erreicht nur 3,05:1, auch
+     #D64700 bleibt mit 4,43:1 knapp darunter. #C04300 liegt bei 5,23:1 auf
+     Weiß und 4,90:1 auf dem Seitengrund. Nur für Textlinks — Flächen
+     (Knöpfe, Hover-Grund) tragen weiter das reine Akzent-Orange. */
+  --color-accent-text: #C04300;
 
   --color-brand-navy: #382E4A;
   --color-sky: #2E6F95;
@@ -147,7 +157,7 @@ table, .zahl, [data-zahl] {
 }
 
 a {
-  color: var(--color-accent);
+  color: var(--color-accent-text);
 }
 
 /* Sichtbarer Tastatur-Fokus. Die Rechner-Komponenten sind vollständig mit

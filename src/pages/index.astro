@@ -1,10 +1,21 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { categoryLabel } from "../lib/categories.js";
-import { RECHNER } from "../lib/rechner.js";
-import RechnerWidget from "../components/RechnerWidget.jsx";
-import { STROMPREIS, EINSPEISE } from "../lib/calculate.js";
+import { Image } from "astro:assets";
+import heroBild from "../assets/hero-modulflaeche.jpg";
+// Bild neben "Was ist Photovoltaik?". EINE Stelle zum Austauschen: Datei nach
+// src/assets/ legen, hier importieren, Alt-Text unten anpassen, Fotograf und
+// Fundstelle in src/assets/heroes/BILDNACHWEIS.md eintragen.
+//
+// ACHTUNG Auflösung: Die Datei ist 550x367px. Das reicht für die Anzeige-
+// breite von rund 500px bei einfacher Pixeldichte, auf Retina-Displays wird
+// das Bild sichtbar weich. Die `widths` unten enden deshalb bei 550 — größere
+// Werte würde Astro ohnehin nicht hochrechnen. Sobald ein größeres Original
+// vorliegt (mindestens 1100px breit), Datei ersetzen und `widths` erhöhen.
+import erklaertBild from "../assets/montage-team.jpg";
+import ArtikelKarte from "../components/ArtikelKarte.astro";
+import { rechnerGruppen } from "../lib/rechner.js";
+import Definition from "../components/Definition.astro";
 import {
   IconRechnerPhotovoltaik,
   IconRechnerKombi,
@@ -18,6 +29,8 @@ import {
   IconRechnerSteuer,
   IconRechnerMieterstrom,
 } from "../components/IconsRechner.jsx";
+import RechnerWidget from "../components/RechnerWidget.jsx";
+import { STROMPREIS, EINSPEISE } from "../lib/calculate.js";
 
 // Gestaltungsansatz: Die Seite argumentiert durchgehend mit belegten Zahlen —
 // also sieht sie aus wie ein Messprotokoll, nicht wie eine Werbeseite. Kein
@@ -25,38 +38,48 @@ import {
 // das sind die Reflexe, die jede zweite Solar-Landingpage bedient.
 //
 // EIN Signature-Element (CLAUDE.md Design-Regel 11): das Hero-Bild — eine
-// ruhige Nahaufnahme einer Modulfläche im Streiflicht. Bewusst kein
-// Gebäude mit lesbarem Firmenschild und keine Menschen: beides würde sich
-// als Referenzkunde lesen, den es nicht gibt. Vorher stand hier die
-// Ertragskurve; die Komponente bleibt im Projekt
-// (src/components/Ertragskurve.astro), ist aber nicht mehr eingebunden.
-// Alles andere bleibt bewusst ruhig.
+// Nahaufnahme einer Modulfläche im Streiflicht. Bewusst kein Gebäude mit
+// lesbarem Firmenschild und keine Menschen: beides würde sich als
+// Referenzkunde lesen, den es nicht gibt.
 //
-// Tonale Gliederung (neu): Die Seite lief vorher durchgehend in Off-White
-// mit 1-px-Rändern — jeder Abschnitt sah aus wie der davor, nichts trug
-// Gewicht. Jetzt drei Ebenen: helle Arbeitsflächen (Hero, Rechner,
-// Ratgeber), EINE dunkle Platte in Brand-Navy für die Quellen (das ist das
-// inhaltliche Zentrum der Seite und darf wie ein Prüfsiegel wirken) und EIN
-// Akzentfeld in PPC-Orange ganz am Schluss für die Handlung. Das Orange
-// bleibt damit dem Handeln vorbehalten (Design-Regel 2), taucht aber
-// endlich einmal in Flächengröße auf, statt nur als 40-px-Knopf.
+// Tonale Gliederung: durchgehend helle Arbeitsflächen. Bis September 2026
+// trug die Seite an zweiter Position eine dunkle Vollflächen-Platte in
+// Brand-Navy mit sieben Quellenangaben. Der Inhalt war richtig, die Stelle
+// falsch: Wer gerade eine Zahl gelesen hat, will wissen, was sie für ihn
+// bedeutet, nicht ein Literaturverzeichnis. Der Beleg steht jetzt als eine
+// Zeile unter dem Mini-Rechner — neben der Zahl, um die es geht —, die
+// vollständige Tabelle samt Grenzen des Modells auf /methodik/.
 //
-// Bewusst KEIN Eyebrow-Label über jedem Abschnitt — das wiederholte
+// Der Ablauf der Seite folgt einer Frage nach der anderen: Was bringt mein
+// Dach? (PLZ-Feld + Mini-Rechner, der seinen Beleg gleich mitbringt) → Was
+// soll ich als Nächstes lesen? (Ratgeber) → Und wenn meine Frage eine andere
+// war? (weitere Rechner). Vorher endete die Seite mit
+// einem vollflächig orangen Band, das denselben Link zum dritten Mal
+// anbot — dieselbe Einladung lauter zu wiederholen überzeugt niemanden,
+// und ein Vollflächen-Akzent am Seitenende ist ein bekannter
+// Generierungs-Tell. Der Einstieg steht jetzt einmal, ganz oben, und
+// verlangt eine konkrete Angabe statt eines Klicks.
+//
+// Bewusst KEIN Eyebrow-Label über einer Überschrift — das
 // Kleinversalien-Kicker-Muster ist ein bekannter Generierungs-Tell. Die
 // Überschriften tragen sich selbst.
 const artikel = (await getCollection("articles")).sort(
   (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
 );
-const neueste = artikel.slice(0, 4);
+const neueste = artikel.slice(0, 3);
 
-// Der Photovoltaik-Rechner steht auf dieser Seite nicht mehr als Karte: Er
-// ist oben als Mini-Rechner bereits benutzbar, eine zweite Karte mit
-// demselben Ziel wäre dieselbe Einladung zum zweiten Mal.
-const weitereRechner = RECHNER.filter((r) => r.slug !== "photovoltaik");
+// Der Photovoltaik-Rechner selbst steht hier nicht mehr in der Liste: Er ist
+// oben als Mini-Rechner bereits benutzbar, ein zweiter Eintrag mit demselben
+// Ziel wäre dieselbe Einladung zum zweiten Mal. Die Gruppierung kommt aus
+// src/lib/rechner.js und ist dieselbe, die das Nav-Panel im Header trägt —
+// wer sie einmal gelernt hat, findet sich an beiden Stellen zurecht.
+const gruppen = rechnerGruppen();
 
-// Zeichen je Rechner — dieselbe Zuordnung wie auf /rechner/. Ohne
-// client:-Direktive rendert Astro sie zu statischem SVG, die Seite lädt
-// dafür kein JavaScript. Die elf Signets liegen längst im Projekt.
+// Die elf handgezeichneten Signets (Quelle: Figma, siehe CLAUDE.md und
+// scripts/signets-sync.mjs) sind das einzige eigens für dieses Projekt
+// gezeichnete Bildmaterial — sie gehören an die Rechner-Liste, nicht ins
+// Archiv. Ohne client:-Direktive rendert Astro sie zu statischem SVG, die
+// Seite lädt dafür kein JavaScript.
 const SIGNET = {
   photovoltaik: IconRechnerPhotovoltaik,
   kombi: IconRechnerKombi,
@@ -75,53 +98,106 @@ const nf = new Intl.NumberFormat("de-DE");
 const ct = (eur) =>
   new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
 
-// Die Quellen sind das eigentliche Unterscheidungsmerkmal gegenüber ADAC,
-// co2online und den Anbieter-Rechnern — deshalb ein eigener Abschnitt statt
-// einer Fußnote. Jede Zeile nennt, was diese Quelle konkret liefert; eine
-// reine Logo-Reihe wäre eine Behauptung, das hier ist überprüfbar.
-const quellen = [
-  { name: "PVGIS", traeger: "EU Joint Research Centre", liefert: "Sonneneinstrahlung und Monatserträge für die exakten Koordinaten Ihrer Adresse" },
-  { name: "BDEW", traeger: "Bundesverband der Energie- und Wasserwirtschaft", liefert: "Haushaltsstrompreis und saisonales Lastprofil" },
-  { name: "Bundesnetzagentur", traeger: "§ 49 EEG", liefert: "Einspeisevergütung samt Staffelung über 10 kWp und Mieterstromzuschlag" },
-  { name: "Fraunhofer ISE", traeger: "Institut für Solare Energiesysteme", liefert: "Systemkosten je kWp, Volllaststunden und Stromgestehungskosten" },
-  { name: "HTW Berlin", traeger: "Stromspeicher-Inspektion", liefert: "Speicher-Dimensionierung und gemessene Systemwirkungsgrade" },
-  { name: "ADAC", traeger: "Ratgeber Photovoltaik", liefert: "Autarkiegrade, Haushaltsverbrauch und Wechselrichter-Austauschkosten" },
-  { name: "Umweltbundesamt", traeger: "Emissionsbilanz Strommix", liefert: "CO₂-Faktor je Kilowattstunde Netzstrom" },
+
+// "Was ist Photovoltaik?" — Einstiegsblock für Leser, die noch vor der
+// Grundsatzfrage stehen (Vorgabe von Patrick/PPC: Die Seite soll Einsteiger
+// mitnehmen, nicht nur Leute bedienen, die schon rechnen wollen). Muster von
+// lichtblick.de: eine aufklappbare FAQ direkt auf der Startseite, vor dem
+// ersten Vertiefungslink in den Ratgeber. Antworten stehen als reiner Text,
+// weil dieselben Daten unten das FAQPage-JSON-LD speisen — Google verlangt
+// Übereinstimmung zwischen sichtbarem Text und Strukturdaten (wie bei
+// ArticleFaq.astro/ArticleLayout.astro). Jede Zahl stammt aus den bereits
+// belegten Konstanten in calculate.js, nichts davon ist neu recherchiert.
+const wasIstPv = [
+  {
+    frage: "Was ist Photovoltaik überhaupt?",
+    antwort:
+      "Photovoltaik wandelt Sonnenlicht direkt in elektrischen Strom um — nicht zu verwechseln mit Solarthermie, die Sonnenwärme für Heizung und Warmwasser nutzt. In den Solarzellen eines Moduls erzeugt einfallendes Licht eine Spannung; eine Anlage auf dem Dach liefert damit Gleichstrom, den ein Wechselrichter in Haushaltsstrom umwandelt.",
+  },
+  {
+    frage: "Was bedeutet kWp, und wie viel Strom liefert das?",
+    antwort:
+      "kWp (Kilowattpeak) ist die installierte Modulleistung unter Normbedingungen — die Größenangabe der Anlage, nicht der tatsächliche Ertrag. Als bundesweite Faustregel liefert ein Kilowattpeak im Schnitt rund 950 Kilowattstunden Strom im Jahr (Fraunhofer ISE); ein heute übliches 420-Wp-Modul braucht dafür etwa 1,85 m² Dachfläche.",
+  },
+  {
+    frage: "Eigenverbrauch, Einspeisung, Autarkie — was ist der Unterschied?",
+    antwort: `Eigenverbrauch ist der Anteil des erzeugten Solarstroms, den Sie selbst nutzen, statt ihn einzuspeisen. Autarkie ist etwas anderes: der Anteil Ihres gesamten Strombedarfs, den die Anlage deckt — eine kleine Anlage kann praktisch alles selbst verbrauchen und trotzdem nur einen Bruchteil des Bedarfs decken. Aktuell spart selbst verbrauchter Strom rund ${ct(STROMPREIS)} ct/kWh, eingespeister bringt bei Anlagen bis 10 kWp ${ct(EINSPEISE)} ct/kWh.`,
+  },
+  {
+    frage: "Brauche ich einen Batteriespeicher?",
+    antwort:
+      "Ohne Speicher erreicht eine gut ausgelegte Anlage laut ADAC-Richtwerten einen Autarkiegrad von etwa 30–55 % — den Rest liefert weiter das Netz, weil abends und nachts kein Solarstrom anfällt. Ein Speicher kann das erhöhen, bis zu einer praktischen Obergrenze von rund 85 % (HTW Berlin). Ob sich die Anschaffung lohnt, hängt von Verbrauch, Anlagengröße und Speicherpreis ab — das rechnet der Speicherrechner für Ihre eigenen Werte durch.",
+  },
+  {
+    frage: "Wie lange dauert es, bis sich eine Anlage bezahlt macht?",
+    antwort:
+      "Das hängt von Anlagengröße, Standort, Verbrauch und den aktuellen System- und Strompreisen ab — eine pauschale Angabe ohne diese Werte wäre unseriös. Unser Rechner nutzt echte PVGIS-Satellitendaten für Ihre Postleitzahl und die aktuellen gesetzlichen Vergütungssätze, um die Amortisation für Ihr konkretes Dach zu berechnen.",
+  },
 ];
+
+const wasIstPvLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: wasIstPv.map((f) => ({
+    "@type": "Question",
+    name: f.frage,
+    acceptedAnswer: { "@type": "Answer", text: f.antwort },
+  })),
+};
 ---
 
 <BaseLayout
   title="Photovoltaik-Ratgeber & PV-Rechner | Photovoltaik Aktuell"
   description="Unabhängiger Ratgeber zu Photovoltaik-Kosten, Förderung, Speicher und Einspeisevergütung — plus PV-Rechner mit echten PVGIS-Satellitendaten für Ihren Standort."
 >
+  <script type="application/ld+json" set:html={JSON.stringify(wasIstPvLd)} />
+
   <section class="hero">
     <div class="hero-inner container">
       <div class="hero-text">
         <h1>Was Ihr Dach wirklich bringt — nachgerechnet, nicht geschätzt</h1>
         <p class="hero-lead">
-          Elf Rechner auf einer gemeinsamen Datenbasis: Satellitendaten für
-          Ihre Postleitzahl, Vergütungssätze aus dem Gesetz, Kosten aus der
-          Marktstatistik. Selbst verbrauchter Strom spart derzeit {ct(STROMPREIS)} ct
-          je Kilowattstunde, eingespeister bringt bei Anlagen bis
-          10 kWp {ct(EINSPEISE)} ct — jede Zahl hier mit Quelle und Stand.
+          Postleitzahl eingeben — wir holen die Sonneneinstrahlung für genau
+          diese Koordinaten aus den Satellitendaten der EU-Kommission. Jede
+          Zahl mit Quelle und Stand.
         </p>
-        <div class="hero-aktionen">
-          <a href="/rechner/photovoltaik/" class="knopf-primaer">Ertrag berechnen</a>
-          <a href="/ratgeber/" class="knopf-sekundaer">Zum Ratgeber</a>
-        </div>
+
+        <!-- Der Einstieg ist die Postleitzahl, nicht ein Knopf: Sie ist die
+             erste Angabe, die der Rechner ohnehin braucht, und sie kostet
+             fünf Ziffern statt eines Sprungs ins Ungewisse. Muster von
+             lichtblick.de, wo der Tarifrechner mit dem Ortsfeld beginnt.
+             Bewusst ein echtes <form method="get">: Ohne JavaScript
+             funktioniert es genauso, der Wizard liest die PLZ auf der
+             Zielseite aus `?plz=` (siehe Wizard.jsx). -->
+        <form class="hero-start" action="/rechner/photovoltaik/" method="get">
+          <div class="hero-feld">
+            <label for="hero-plz">Postleitzahl</label>
+            <input
+              id="hero-plz"
+              name="plz"
+              type="text"
+              inputmode="numeric"
+              autocomplete="postal-code"
+              pattern="[0-9]{5}"
+              maxlength="5"
+              required
+              placeholder="10115"
+            />
+          </div>
+          <button type="submit" class="knopf-primaer">Ertrag berechnen</button>
+        </form>
       </div>
 
       <div class="hero-grafik">
         <figure class="hero-bild">
-          <img
-            src="/images/startseite.jpg"
-            alt="Luftaufnahme eines Wohnhauses mit Solarmodulen auf dem Flachdach, umgeben von Gärten"
-            width="1200"
-            height="1500"
+          <Image
+            src={heroBild}
+            alt="Streiflicht über einer zusammenhängenden Fläche von Solarmodulen, die Zellstruktur der einzelnen Module ist erkennbar"
+            widths={[640, 960, 1280, 1800]}
+            sizes="(min-width: 860px) 46vw, 100vw"
             loading="eager"
             decoding="async"
             fetchpriority="high"
-            sizes="(min-width: 860px) 46vw, 100vw"
           />
         </figure>
       </div>
@@ -142,52 +218,68 @@ const quellen = [
     </div>
   </div>
 
-  <section class="rechner container">
+  <!-- Einstiegsblock für Leser, die noch nicht rechnen, sondern erst
+       verstehen wollen (Vorgabe Patrick/PPC). Muster von lichtblick.de:
+       eine aufklappbare FAQ direkt auf der Startseite. Bewusst zwischen dem
+       Quellenband und dem Ratgeber — wer den Zahlen gerade vertraut hat,
+       bekommt hier die Grundlagen dazu, bevor er zu den Artikeln weiterzieht
+       oder zurück zum Rechner springt. -->
+  <section class="pv-erklaert container">
+    <div class="pv-erklaert-spalten">
+    <div class="pv-erklaert-text">
     <div class="abschnitt-kopf">
-      <h2>Zehn weitere Rechner</h2>
+      <h2>Was ist Photovoltaik?</h2>
       <p>
-        Speicher, Rendite, Steuer, Mieterstrom — jeder mit eigener
-        Fragestellung, alle auf derselben Datenbasis wie oben.
+        Fünf Fragen, die vor dem Rechnen stehen — mit denselben Zahlen wie
+        oben, nicht mit Anbieter-Schätzungen.
       </p>
     </div>
 
-    <ul class="rechner-liste">
-      {weitereRechner.map((r) => {
-        const Signet = SIGNET[r.slug];
-        return (
-          <li>
-            <a href={`/rechner/${r.slug}/`}>
-              {Signet && <span class="rechner-signet" aria-hidden="true"><Signet size={22} /></span>}
-              <span class="rechner-name">{r.kurz}</span>
-              <span class="rechner-zweck">{r.beschreibung}</span>
-            </a>
-          </li>
-        );
-      })}
-    </ul>
-  </section>
+    <p class="pv-erklaert-intro">
+      Kurz gesagt: Solarmodule wandeln Sonnenlicht in Strom, ein
+      Wechselrichter macht daraus nutzbaren Haushaltsstrom, und was Sie nicht
+      selbst verbrauchen, geht gegen Vergütung ins Netz. Die <Definition begriff="Anlagengröße">
+        In kWp (Kilowattpeak) — der installierten Modulleistung unter
+        Normbedingungen, nicht der tatsächlichen Stromerzeugung.
+      </Definition> bestimmt, wie viel davon zusammenkommt; wie viel Sie <Definition begriff="selbst nutzen">
+        Der Eigenverbrauch — nicht zu verwechseln mit der Autarkie, siehe
+        zweite Frage unten.
+      </Definition>, hängt von Ihrem Verbrauchsprofil ab.
+    </p>
 
-  <section class="quellen">
-    <div class="container">
-      <div class="abschnitt-kopf quellen-kopf">
-        <h2>Woher die Zahlen kommen</h2>
-        <p>
-          Keine Anbieter-Schätzungen. Jede Konstante in unseren Rechnern ist im
-          Quellcode mit Quelle, Stand und Prüf-Rhythmus hinterlegt.
-        </p>
-      </div>
+    <div class="pv-erklaert-liste">
+      {wasIstPv.map((f) => (
+        <details class="pv-erklaert-item">
+          <summary>{f.frage}</summary>
+          <p>{f.antwort}</p>
+        </details>
+      ))}
+    </div>
 
-      <dl class="quellen-liste">
-        {quellen.map((q) => (
-          <div class="quelle">
-            <dt>
-              {q.name}
-              <span class="quelle-traeger">{q.traeger}</span>
-            </dt>
-            <dd>{q.liefert}</dd>
-          </div>
-        ))}
-      </dl>
+    <a href="/ratgeber/wie-funktioniert-eine-photovoltaikanlage/" class="pv-erklaert-mehr">
+      Ausführlich erklärt: Wie funktioniert eine Photovoltaikanlage? →
+    </a>
+    </div>
+
+    {/* Bild rechts neben dem Frageblock. Es füllt nicht nur Platz: Ohne es
+        stand eine 568px schmale Textspalte allein auf einer 1140px breiten
+        Fläche, und die rechte Seitenhälfte war auf voller Abschnittshöhe
+        leer.
+
+        Ohne Bildunterschrift und ohne jede Zuschreibung — das Foto darf
+        nicht als "unsere Monteure" oder als Referenzanlage lesbar werden,
+        beides gibt es nicht (§ 5 UWG, siehe CLAUDE.md). Der Alt-Text
+        beschreibt deshalb nur, was zu sehen ist, und behauptet nichts. */}
+    <figure class="pv-erklaert-bild">
+      <Image
+        src={erklaertBild}
+        alt="Zwei Monteure befestigen Solarmodule auf einem Ziegeldach"
+        widths={[400, 550]}
+        sizes="(min-width: 1000px) min(44vw, 550px), 100vw"
+        loading="lazy"
+        decoding="async"
+      />
+    </figure>
     </div>
   </section>
 
@@ -198,14 +290,16 @@ const quellen = [
       <p>Von den Grundlagen bis zur Checkliste vor dem Kauf.</p>
     </div>
 
-    <ul class="artikel-liste">
+    {/* Dieselbe Karte wie auf /ratgeber/ (ArtikelKarte.astro) statt einer
+        eigenen Zeilenliste mit 108px-Vorschau. Zwei Gründe: Die Briefmarken
+        zeigten vom Foto nichts, und eine zweite Listenform für dieselbe Sache
+        heißt, dass jede Änderung an Ratgeber-Karten hier vergessen wird.
+        Drei statt vier Artikel — vier ergäben in einem Dreierraster eine
+        zweite Reihe mit einer einzelnen Karte. */}
+    <ul class="artikel-raster">
       {neueste.map((a) => (
         <li>
-          <a href={`/ratgeber/${a.id}/`}>
-            <span class="artikel-kategorie">{categoryLabel(a.data.category)}</span>
-            <span class="artikel-titel">{a.data.title}</span>
-            <span class="artikel-beschreibung">{a.data.description}</span>
-          </a>
+          <ArtikelKarte artikel={a} mitKategorie />
         </li>
       ))}
     </ul>
@@ -216,45 +310,122 @@ const quellen = [
     </div>
   </section>
 
-  <!-- Abschluss: das einzige Akzentfeld der Seite. Text in Tintenschwarz
-       statt Weiß — Weiß auf #FF5200 erreicht nur 3,3:1 und wäre auf
-       Fließtextgröße nicht lesbar; Tintenschwarz liegt bei ~7:1. -->
-  <section class="abschluss">
-    <div class="container abschluss-inner">
-      <div>
-        <h2>Rechnen Sie Ihr Dach durch</h2>
-        <p>
-          Vier Schritte, keine Anmeldung. Sie geben Dachfläche, Ausrichtung und
-          Stromverbrauch ein, PVGIS liefert die Einstrahlung für Ihre
-          Postleitzahl, am Ende steht die Amortisation in Jahren.
-        </p>
-      </div>
-      <a href="/rechner/photovoltaik/" class="knopf-dunkel">Ertrag berechnen →</a>
+  <!-- Die übrigen Rechner stehen hier als Register, nicht als Kartenwand:
+       gruppiert nach der Frage, die jemand im Kopf hat, und erst NACH dem
+       Quellenband. Wer gerade seine erste Zahl bekommen hat, bekommt nicht
+       sofort zehn gleichwertige Alternativen vorgehalten. Dieselbe
+       Gruppierung trägt das Nav-Panel im Header (src/lib/rechner.js). -->
+  <section class="weitere container">
+    <div class="abschnitt-kopf">
+      <h2>Für die Frage danach</h2>
+      <p>
+        Zehn weitere Rechner auf derselben Datenbasis — jeder beantwortet
+        genau eine Frage, keiner verlangt eine Anmeldung.
+      </p>
+    </div>
+
+    <div class="weitere-gruppen">
+      {gruppen.map((g) => (
+        <section class="weitere-gruppe">
+          <h3>{g.titel}</h3>
+          <ul>
+            {g.eintraege.filter((r) => r.slug !== "photovoltaik").map((r) => {
+              const Signet = SIGNET[r.slug];
+              return (
+                <li>
+                  <a href={`/rechner/${r.slug}/`}>
+                    {Signet && <span class="rechner-signet" aria-hidden="true"><Signet size={26} /></span>}
+                    <span class="rechner-name">{r.kurz}</span>
+                    <span class="rechner-zweck">{r.beschreibung}</span>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ))}
     </div>
   </section>
-</BaseLayout>
 
-<style is:global>
-  /* Der Footer setzt global 64 px Abstand nach oben — sinnvoll hinter einem
-     Artikel, aber hier läge ein Streifen Seitenhintergrund zwischen dem
-     Akzentfeld und dem Footer. Nur auf dieser Seite abgeschaltet. */
-  .site-footer {
-    margin-top: 0;
-  }
-</style>
+  {/* Abschluss der Seite. Bewusst KEIN vollflächig oranges Band mit demselben
+      Link wie oben — genau das stand hier bis August 2026 und wurde entfernt
+      (Vollflächen-Akzent am Seitenende ist ein bekannter Generierungs-Tell,
+      und dieselbe Einladung ein drittes Mal lauter zu wiederholen überzeugt
+      niemanden). Stattdessen zwei verschiedene nächste Schritte für zwei
+      verschiedene Absichten, auf dem normalen Seitengrund mit 1px-Rand.
+      Die vier Schritte sind nicht geschätzt, sondern die tatsächlichen
+      Schritte des Wizards — wer weiß, was auf ihn zukommt, klickt eher. */}
+  <section class="abschluss container">
+    <div class="abschluss-karte">
+      <div class="abschluss-haupt">
+        <h2>Vier Angaben, dann steht die Zahl</h2>
+        <p>
+          Postleitzahl, Dachfläche, Stromverbrauch, Speicher — mehr fragt der
+          ausführliche Rechner nicht. Ergebnis ohne Anmeldung, ohne
+          E-Mail-Adresse.
+        </p>
+        <a href="/rechner/photovoltaik/" class="abschluss-knopf">
+          Ertrag für mein Dach berechnen →
+        </a>
+      </div>
+      <div class="abschluss-neben">
+        <p class="abschluss-neben-titel">Lieber erst verstehen?</p>
+        <p class="abschluss-neben-text">
+          Die Grundlagen erklären Module, Wechselrichter und Speicher am
+          tatsächlichen Stromweg durchs Haus.
+        </p>
+        <a href="/ratgeber/wie-funktioniert-eine-photovoltaikanlage/" class="abschluss-link">
+          Wie funktioniert eine Photovoltaikanlage? →
+        </a>
+      </div>
+    </div>
+  </section>
+
+</BaseLayout>
 
 <style>
   /* ── Hero ───────────────────────────────────────────────────────────── */
 
+  /* Millimeterpapier-Raster hinter dem Hero-Band — und NUR dort.
+     Begründung, damit es niemand versehentlich über die ganze Seite zieht:
+     Die Seite argumentiert durchgehend mit belegten Zahlen und soll wie ein
+     Messprotokoll aussehen, nicht wie eine Werbeseite (siehe Kopfkommentar
+     oben). Ein feines technisches Raster sagt genau das. Ein Farbverlauf,
+     eine Mesh-Fläche oder weichgezeichnete Farbflecken sagen das Gegenteil
+     und sind das bekannteste Merkmal generierter Landingpages
+     (Design-Regeln 2 und 5).
+     Umsetzung bewusst mit harten Farbstopps: Das rendert als 1px-Linie, nicht
+     als Verlauf. Ein einziger Farbwert, 3,5% Deckkraft — sichtbar als
+     Struktur, nicht als Muster. Die Untergrenze dafür ist die Trennlinie des
+     Bands selbst, deshalb braucht es keine Ausblendung nach unten. */
   .hero {
     border-bottom: 1px solid var(--color-border);
+    background-image:
+      linear-gradient(to right, rgba(20, 27, 34, 0.035) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(20, 27, 34, 0.035) 1px, transparent 1px);
+    /* 32px = der Grundabstand des Layouts, nicht frei gewählt. */
+    background-size: 32px 32px;
+    /* Der Ursprung liegt auf der linken Textkante, nicht in der Seitenmitte:
+       So fällt eine Rasterlinie exakt auf die Kante, an der auch Überschrift,
+       Eingabefeld und jeder andere Abschnitt beginnen. Ein frei laufendes
+       Raster wäre Dekoration; eines, das am Satzspiegel einrastet, gehört
+       zum Layout. Unterhalb von 1180px ist der Container nicht gedeckelt,
+       die Textkante liegt dann bei 20px. */
+    background-position: 20px top;
+  }
+
+  @media (min-width: 1180px) {
+    .hero {
+      /* 590 = halbe Containerbreite (1180/2), minus 20px Innenabstand. */
+      background-position: calc(50% - 570px) top;
+    }
   }
 
   .hero-inner {
     display: grid;
     gap: clamp(24px, 5vw, 64px);
-    padding-top: clamp(36px, 8vw, 92px);
-    padding-bottom: clamp(32px, 6vw, 72px);
+    padding-top: clamp(32px, 5vw, 64px);
+    padding-bottom: clamp(32px, 5vw, 60px);
     align-items: center;
   }
 
@@ -266,18 +437,22 @@ const quellen = [
     }
   }
 
+  /* 3,75 rem über drei Zeilen füllten den gesamten ersten Bildschirm und
+     drückten das Eingabefeld unter die Falz — die Überschrift war dann das
+     einzige, was jemand sah. 3 rem trägt dieselbe Stimme und lässt Feld und
+     Hinweis mit in den ersten Blick. */
   .hero h1 {
-    font-size: clamp(2.25rem, 5.4vw, 3.75rem);
-    line-height: 1.04;
+    font-size: clamp(2.125rem, 4.2vw, 3rem);
+    line-height: 1.06;
     letter-spacing: -0.03em;
     text-wrap: balance;
-    margin: 0 0 20px;
-    max-width: 17ch;
+    margin: 0 0 16px;
+    max-width: 20ch;
   }
 
   .hero-lead {
-    margin: 0 0 30px;
-    max-width: 46ch;
+    margin: 0 0 26px;
+    max-width: 44ch;
     font-size: clamp(1rem, 1.6vw, 1.0625rem);
     line-height: 1.6;
     color: var(--color-text-secondary);
@@ -290,11 +465,11 @@ const quellen = [
   @media (prefers-reduced-motion: no-preference) {
     .hero h1,
     .hero-lead,
-    .hero-aktionen {
+    .hero-start {
       animation: auftritt 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
     .hero-lead { animation-delay: 0.08s; }
-    .hero-aktionen { animation-delay: 0.16s; }
+    .hero-start { animation-delay: 0.16s; }
   }
 
   @keyframes auftritt {
@@ -302,13 +477,71 @@ const quellen = [
     to { opacity: 1; transform: none; }
   }
 
-  .hero-aktionen {
+  /* Feld und Knopf sitzen in einer Zeile und teilen dieselbe Höhe — das
+     Feld ist der Einstieg, der Knopf bestätigt ihn. Am Handy bricht die
+     Zeile um, der Knopf läuft dann über die volle Breite. */
+  .hero-start {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    align-items: flex-end;
+    gap: 10px;
   }
 
-  /* Das Bild sitzt randlos in derselben 1-px-Fläche wie die Cards der
+  .hero-feld {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 200px;
+  }
+
+  .hero-feld label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .hero-feld input {
+    width: 100%;
+    height: 50px;
+    padding: 0 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    background: var(--color-surface);
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.04em;
+    color: var(--color-text-primary);
+    transition: border-color 0.15s;
+  }
+
+  .hero-feld input::placeholder {
+    color: var(--color-text-muted);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-feld input:hover {
+    border-color: var(--color-text-muted);
+  }
+
+  /* Der Browser markiert ein leeres Pflichtfeld erst nach dem Absenden.
+     :user-invalid trifft genau das — nicht jedes noch nicht fertig
+     getippte Feld, wie :invalid es täte. */
+  .hero-feld input:user-invalid {
+    border-color: var(--color-accent-text);
+  }
+
+  .hero-start .knopf-primaer {
+    height: 50px;
+    flex: 0 0 auto;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+/* Das Bild sitzt randlos in derselben 1-px-Fläche wie die Cards der
      Seite — kein Schatten, kein Verlauf darüber (Design-Regeln 4 und 7).
      Es füllt die Höhe der Textspalte: eine kleinere, mittig schwebende
      Kachel ließ rechts neben der Überschrift eine tote Fläche stehen.
@@ -323,25 +556,26 @@ const quellen = [
     aspect-ratio: 4 / 3;
   }
 
-  .hero-bild img {
+  /* Das Motiv lebt von der Diagonale der Modulreihen — am Handy wird der
+     Rahmen flacher, damit es nicht den halben ersten Bildschirm einnimmt,
+     aber nie so flach, dass die Struktur zum Streifen wird. */
+  @media (max-width: 859px) {
+    .hero-bild {
+      aspect-ratio: 16 / 10;
+    }
+  }
+
+  .hero-bild :global(img) {
     display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Hochformatige Datei: am Handy den Bildausschnitt auf das Haus
-       ziehen, sonst füllt der Garten den flacheren Rahmen. */
-    object-position: 50% 46%;
-  }
-
-  @media (min-width: 860px) {
-    .hero-bild img {
-      object-position: 50% 50%;
-    }
+    object-position: 50% 50%;
   }
 
   @media (min-width: 860px) {
     .hero-bild {
-      aspect-ratio: 1200 / 1500;
+      aspect-ratio: 5 / 4;
       max-height: 560px;
     }
   }
@@ -365,9 +599,13 @@ const quellen = [
       transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  /* Tintenschwarz auf Orange, nicht Weiß: Weiß auf #FF5200 erreicht 3,25:1
+     und liegt damit bei 15 px unter der AA-Grenze von 4,5:1. #141B22 auf
+     demselben Orange liegt bei 5,39:1 — und die Marke behält ihr exaktes
+     Akzent-Orange, statt es für den Kontrast abdunkeln zu müssen. */
   .knopf-primaer {
     background: var(--color-accent);
-    color: #fff;
+    color: var(--color-text-primary);
     border: 1px solid var(--color-accent);
   }
 
@@ -410,7 +648,6 @@ const quellen = [
     font-size: 16px;
   }
 
-  .rechner,
   .ratgeber {
     padding-top: clamp(56px, 8vw, 96px);
     padding-bottom: clamp(56px, 8vw, 96px);
@@ -425,17 +662,16 @@ const quellen = [
      damit auf derselben Linie wie die Rechner-Karte darunter und wie der
      Abschluss-Block. Vorher endete sie 240 px früher und stand an der
      rechten Seite auf keiner Kante der Seite. */
+  /* Der Mini-Rechner hing bis September 2026 mit `margin-top: -56px` über
+     der Trennlinie des Hero-Bands. Gemeint war ein Aufsitzen auf der Kante,
+     sichtbar war ein Kasten, der die Linie um gut ein Sechstel seiner Höhe
+     überlappt — das liest sich als verrutscht, nicht als Absicht. Die Linie
+     trennt jetzt wieder sauber, der Rechner steht mit eigener Luft darunter. */
   .hero-rechner {
     position: relative;
     z-index: 1;
-    padding-top: 28px;
-  }
-
-  @media (min-width: 860px) {
-    .hero-rechner {
-      margin-top: clamp(-56px, -4vw, -28px);
-      padding-top: 0;
-    }
+    padding-top: clamp(28px, 4vw, 44px);
+    padding-bottom: clamp(8px, 2vw, 16px);
   }
 
   /* Ein heller Streifen im Wechsel mit dem Seitengrund — beide
@@ -448,45 +684,67 @@ const quellen = [
     border-bottom: 1px solid var(--color-border);
   }
 
-  /* ── Rechner ────────────────────────────────────────────────────────── */
+  /* ── Weitere Rechner ───────────────────────────────────────────────── */
 
-  .rechner-liste {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 1px;
-    background: var(--color-border);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    overflow: hidden;
+  /* Register statt Kartenraster: drei benannte Gruppen, darin nur die
+     Namen. Zehn gleich große Karten mit Icon, Titel und Beschreibungstext
+     sind die Standardform jeder generierten Übersichtsseite — und sie
+     helfen niemandem, weil jede Karte gleich wichtig aussieht. Die
+     Gruppenüberschrift trägt die Auswahlarbeit, der Name genügt dann. */
+  .weitere {
+    padding-top: clamp(56px, 8vw, 96px);
+    padding-bottom: clamp(56px, 8vw, 96px);
   }
 
-  /* Genau zwei Spalten: die zehn Nebenrechner gehen restlos auf. Mit
-     auto-fit blieben bei vier Spalten zwei leere Zellen übrig, in denen
-     der Rand-Hintergrund als grauer Block sichtbar wurde. */
-  @media (min-width: 640px) {
-    .rechner-liste {
-      grid-template-columns: 1fr 1fr;
+  .weitere-gruppen {
+    display: grid;
+    gap: 32px;
+  }
+
+  @media (min-width: 720px) {
+    .weitere-gruppen {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 48px;
     }
   }
 
-  /* Signet in eigener Spalte: es soll den Namen ankündigen, nicht über ihm
-     schweben wie das Icon-über-jeder-Überschrift-Muster. */
-  .rechner-liste a {
+  .weitere-gruppe h3 {
+    margin: 0 0 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .weitere-gruppe ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .weitere-gruppe li + li {
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* Signet in eigener Spalte, Name und Zweck daneben: Es soll den Namen
+     ankündigen, nicht über ihm schweben wie das
+     Icon-über-jeder-Überschrift-Muster. Die elf Zeichen sind eigens für
+     dieses Projekt gezeichnet — sie durch bloße Textlinks zu ersetzen hat
+     die Liste zur Sitemap-Fußzeile gemacht. */
+  .weitere-gruppe a {
     display: grid;
-    grid-template-columns: 22px 1fr;
-    column-gap: 14px;
-    height: 100%;
-    padding: 18px 20px;
-    background: var(--color-surface);
+    grid-template-columns: 20px 1fr;
+    column-gap: 12px;
+    padding: 14px 12px;
+    margin-inline: -12px;
+    border-radius: var(--radius-sm);
     text-decoration: none;
     color: inherit;
     transition: background-color 0.15s;
   }
 
-  .rechner-signet {
+  .weitere-gruppe .rechner-signet {
     grid-row: span 2;
     display: block;
     padding-top: 2px;
@@ -494,99 +752,184 @@ const quellen = [
     transition: color 0.15s;
   }
 
-  .rechner-liste a:hover {
+  .weitere-gruppe a:hover {
     background: var(--color-accent-subtle);
   }
 
-  .rechner-liste a:hover .rechner-signet {
+  .weitere-gruppe a:hover .rechner-signet {
     color: var(--color-accent);
   }
 
-  .rechner-name {
+  .weitere-gruppe a:hover .rechner-name {
+    color: var(--color-accent-hover);
+  }
+
+  .weitere-gruppe .rechner-name {
     display: block;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 16px;
-    margin-bottom: 5px;
+    font-size: 15px;
+    margin-bottom: 4px;
+    transition: color 0.15s;
   }
 
-  .rechner-zweck {
+  .weitere-gruppe .rechner-zweck {
     display: block;
-    font-size: 13.5px;
+    font-size: 13px;
     line-height: 1.5;
     color: var(--color-text-secondary);
   }
 
-  /* ── Quellen ────────────────────────────────────────────────────────── */
+  /* ── Was ist Photovoltaik? ──────────────────────────────────────────── */
 
-  /* Die einzige dunkle Platte der Seite. Sie trägt das Argument, mit dem
-     sich dieses Produkt von ADAC- und Anbieter-Rechnern unterscheidet, und
-     gibt der Seite gleichzeitig den tonalen Halt, der ihr in durchgehendem
-     Off-White gefehlt hat. Brand-Navy, nicht Schwarz — Schwarz plus
-     Neon-Akzent ist ein bekannter Generierungs-Tell (Design-Regel 5). */
-  .quellen {
-    background: var(--color-brand-navy);
-    color: #fff;
+  /* Bleibt auf dem normalen Seitengrund statt Weiß — grenzt sich so vom
+     Mini-Rechner darüber UND vom Ratgeber-Band darunter ab, ohne eine
+     dritte Fläche einzuführen. */
+  .pv-erklaert {
     padding-top: clamp(56px, 8vw, 96px);
     padding-bottom: clamp(56px, 8vw, 96px);
   }
 
-  .quellen-kopf h2 {
-    color: #fff;
-  }
-
-  /* Heller Text auf dunklem Grund wirkt dünner — 0,05 mehr Zeilenhöhe und
-     eine kräftigere Sekundärfarbe (ca. 7:1 statt 3,1:1 mit #5A6570). */
-  .quellen-kopf p {
-    color: #C9CCD6;
-    line-height: 1.65;
-  }
-
-  /* Typografische Liste statt Logo-Reihe oder Icon-Text-Pillen: Was eine
-     Quelle liefert, ist überprüfbar — ein Logo ist nur eine Behauptung. */
-  .quellen-liste {
-    margin: 0;
+  /* Schmale Spalte, aber LINKSBÜNDIG an derselben Kante wie jeder andere
+     Abschnitt. Vorher war der Block zentriert: Der Inhalt ist eine gelesene
+     Antwort, keine Liste, und dafür war eine schmale Spalte richtig — die
+     Zentrierung ließ ihn aber als einzigen Abschnitt der Seite an einer
+     anderen Kante beginnen (436px statt 150px), was über die ganze Seite
+     hinweg wie ein Versehen wirkt. Die schmale Spalte bleibt, die Mitte
+     geht. */
+  /* Text links, Bild rechts. Der Text behält seine Lesebreite, das Bild
+     nimmt den Rest — unterhalb von 1000px fällt die Spalte weg und das Bild
+     steht über dem Text, statt auf Briefmarkengröße zu schrumpfen. */
+  .pv-erklaert-spalten {
     display: grid;
-    gap: 0;
+    gap: 32px;
   }
 
-  @media (min-width: 720px) {
-    .quellen-liste {
-      grid-template-columns: 1fr 1fr;
-      column-gap: 48px;
+  @media (min-width: 1000px) {
+    .pv-erklaert-spalten {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: clamp(40px, 5vw, 72px);
+      align-items: start;
     }
   }
 
-  .quelle {
-    padding: 16px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
+  .pv-erklaert-bild {
+    margin: 0;
+    order: -1;
   }
 
-  .quelle dt {
+  @media (min-width: 1000px) {
+    .pv-erklaert-bild {
+      order: 0;
+      /* Bleibt beim Scrollen neben dem Frageblock stehen, statt oben
+         wegzulaufen, wenn jemand mehrere Fragen aufklappt. */
+      position: sticky;
+      top: 96px;
+    }
+  }
+
+  /* Querformat 3:2 — das Seitenverhältnis der Datei selbst. Vorher stand
+     hier 4:5 (hochkant, passend zur Höhe der Fragenliste). Mit einem
+     550x367-Querformat als Quelle hätte das gut die Hälfte des Bildes
+     weggeschnitten UND den Rest hochskaliert: zweimal Qualität verlieren für
+     eine Spaltenhöhe. `max-width` deckelt auf die Originalbreite, damit nicht
+     hochgerechnet wird. */
+  .pv-erklaert-bild :global(img) {
+    display: block;
+    width: 100%;
+    max-width: 550px;
+    height: auto;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+  }
+
+  .pv-erklaert .abschnitt-kopf {
+    max-width: 62ch;
+  }
+
+  .pv-erklaert-intro {
+    max-width: 62ch;
+    margin: 0 0 32px;
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+  }
+
+  .pv-erklaert-liste {
+    max-width: 62ch;
+    margin: 0;
+  }
+
+  /* Dieselbe Zeilen-Optik wie ArticleFaq.astro (Rand statt Karte, rotierender
+     Winkel statt Browser-Dreieck) — dieselbe Bildsprache für "Fragen" an
+     jeder Stelle der Seite, nicht extra erfunden. */
+  .pv-erklaert-item {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .pv-erklaert-item:first-of-type {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .pv-erklaert-item summary {
+    cursor: pointer;
+    padding: 16px 30px 16px 0;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 15.5px;
-    color: #fff;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 8px;
-    margin-bottom: 5px;
+    font-size: 16px;
+    color: var(--color-text-primary);
+    position: relative;
+    list-style: none;
+    transition: color 0.15s;
   }
 
-  .quelle-traeger {
-    font-family: var(--font-body);
-    font-weight: 400;
-    font-size: 12.5px;
-    color: #A9AEBC;
+  .pv-erklaert-item summary::-webkit-details-marker {
+    display: none;
   }
 
-  .quelle dd {
-    margin: 0;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #C9CCD6;
-    max-width: 50ch;
+  .pv-erklaert-item summary::after {
+    content: "";
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--color-text-muted);
+    border-bottom: 2px solid var(--color-text-muted);
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform 0.15s;
+  }
+
+  .pv-erklaert-item[open] summary::after {
+    transform: translateY(-30%) rotate(225deg);
+  }
+
+  .pv-erklaert-item summary:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .pv-erklaert-item p {
+    margin: 0 0 18px;
+    max-width: 60ch;
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  .pv-erklaert-mehr {
+    display: inline-block;
+    margin-top: 24px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-accent-text);
+    text-decoration: none;
+  }
+
+  .pv-erklaert-mehr:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 
   /* ── Ratgeber ───────────────────────────────────────────────────────── */
@@ -595,90 +938,32 @@ const quellen = [
      damit beide Listen sich gleich lesen. Vorher standen Kategorie und
      Titel auf einer Zeile mit justify-content: space-between, wodurch die
      Titel auf breiten Bildschirmen an der rechten Kante klebten. */
-  .artikel-liste {
+  /* Dasselbe Raster wie auf /ratgeber/ und den Kategorieseiten. */
+  .artikel-raster {
     list-style: none;
-    margin: 0 0 24px;
+    margin: 20px 0 0;
     padding: 0;
-  }
-
-  .artikel-liste li {
-    border-top: 1px solid var(--color-border);
-  }
-
-  .artikel-liste li:last-child {
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .artikel-liste a {
     display: grid;
-    gap: 4px 24px;
-    padding: 20px 12px 22px 0;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1), background-color 0.15s;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
   }
 
-  /* Kategorie in eine eigene schmale Spalte: sie wird beim Überfliegen
-     gesucht, soll dem Titel aber nicht die Zeile wegnehmen. */
-  @media (min-width: 760px) {
-    .artikel-liste a {
-      grid-template-columns: 170px 1fr;
+  .artikel-raster li {
+    display: flex;
+  }
+
+  @media (max-width: 520px) {
+    .artikel-raster {
+      grid-template-columns: 1fr;
+      gap: 16px;
     }
-
-    .artikel-kategorie {
-      grid-row: span 2;
-      padding-top: 4px;
-    }
-  }
-
-  .artikel-liste a:hover {
-    background: var(--color-surface);
-    transform: translateX(10px);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .artikel-liste a {
-      transition: background-color 0.15s;
-    }
-    .artikel-liste a:hover {
-      transform: none;
-    }
-  }
-
-  .artikel-kategorie {
-    font-size: var(--schrift-xs);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    color: var(--color-text-muted);
-  }
-
-  .artikel-titel {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: var(--schrift-lg);
-    line-height: 1.25;
-    letter-spacing: -0.015em;
-    max-width: 54ch;
-  }
-
-  .artikel-liste a:hover .artikel-titel {
-    color: var(--color-accent-hover);
-  }
-
-  .artikel-beschreibung {
-    font-size: var(--schrift-sm);
-    line-height: 1.55;
-    color: var(--color-text-secondary);
-    max-width: 68ch;
-    text-wrap: pretty;
   }
 
   .alle-artikel {
     display: inline-block;
     font-weight: 600;
     font-size: 15px;
-    color: var(--color-accent);
+    color: var(--color-accent-text);
     text-decoration: none;
   }
 
@@ -686,61 +971,92 @@ const quellen = [
     color: var(--color-accent-hover);
   }
 
-  /* ── Abschluss ──────────────────────────────────────────────────────── */
+
+  /* ── Abschluss ─────────────────────────────────────────────────────── */
 
   .abschluss {
-    background: var(--color-accent);
-    color: var(--color-text-primary);
+    padding-block: clamp(48px, 6vw, 72px) clamp(56px, 7vw, 88px);
   }
 
-  .abschluss-inner {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
+  .abschluss-karte {
+    display: grid;
     gap: 28px;
-    padding-top: clamp(40px, 5.5vw, 64px);
-    padding-bottom: clamp(40px, 5.5vw, 64px);
+    padding: clamp(24px, 3.5vw, 36px);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
   }
 
-  .abschluss h2 {
-    margin: 0 0 8px;
-    font-size: clamp(1.625rem, 3.2vw, 2.125rem);
-    letter-spacing: -0.025em;
-    color: var(--color-text-primary);
+  /* Zwei Drittel / ein Drittel: Der Rechner ist der Hauptweg, das Lesen der
+     Nebenweg — gleich breite Spalten würden beide gleich gewichten. */
+  @media (min-width: 820px) {
+    .abschluss-karte {
+      grid-template-columns: 1.6fr 1fr;
+      gap: clamp(32px, 4vw, 56px);
+      align-items: center;
+    }
+
+    .abschluss-neben {
+      padding-left: clamp(24px, 3vw, 40px);
+      border-left: 1px solid var(--color-border);
+    }
   }
 
-  .abschluss p {
-    margin: 0;
-    max-width: 52ch;
-    font-size: 15.5px;
+  .abschluss-haupt h2 {
+    font-size: var(--schrift-xl);
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+
+  .abschluss-haupt p {
+    margin: 0 0 20px;
+    max-width: 46ch;
+    color: var(--color-text-secondary);
     line-height: 1.6;
-    /* Dunkler Ton des Untergrunds statt Grau: Grau auf Farbe wirkt
-       ausgewaschen. #4A1500 auf #FF5200 liegt bei ca. 5,4:1. */
-    color: #4A1500;
-    text-wrap: pretty;
   }
 
-  .knopf-dunkel {
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    padding: 15px 28px;
+  .abschluss-knopf {
+    display: inline-block;
+    padding: 13px 22px;
     border-radius: var(--radius-pill);
-    background: var(--color-text-primary);
-    color: #fff;
-    font-size: 15px;
+    background: var(--color-accent);
+    /* Tintenschwarz auf Orange (5,39:1) — Weiß läge bei 3,25:1. Dieselbe
+       Paarung wie im Mini-Rechner. */
+    color: var(--color-text-primary);
     font-weight: 600;
+    font-size: 15px;
     text-decoration: none;
-    transition: background-color 0.15s, transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: background-color 0.15s;
   }
 
-  .knopf-dunkel:hover {
-    background: var(--color-brand-navy);
-    transform: translateY(-1px);
+  .abschluss-knopf:hover {
+    background: var(--color-accent-hover);
+    color: #fff;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .knopf-dunkel:hover { transform: none; }
+  .abschluss-neben-titel {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  .abschluss-neben-text {
+    margin: 0 0 12px;
+    font-size: var(--schrift-sm);
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .abschluss-link {
+    font-size: var(--schrift-sm);
+    font-weight: 600;
+    color: var(--color-accent-text);
+    text-decoration: none;
+  }
+
+  .abschluss-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
 </style>

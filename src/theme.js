@@ -8,11 +8,15 @@ const theme = {
     surface: "#FFFFFF",
     textPrimary: "#141B22",
     textSecondary: "#5A6570",
-    textMuted: "#8A9099",
+    // 4,96:1 auf Weiß — der vorherige Wert #8A9099 lag bei 3,02:1 und damit
+    // unter AA, siehe Kommentar in global.css.
+    textMuted: "#6B7179",
 
     accent: "#FF5200", // echtes PPC-Orange
     accentHover: "#D64700",
     accentSubtle: "#FFE9DD",
+    // Orange als Textfarbe auf hellem Grund (5,23:1). Flächen behalten accent.
+    accentText: "#C04300",
 
     // echte "pp"-Wortmarken-Farbe — für dunkle Headline-Akzente, nicht als
     // Button-Füllung oder Logo-Hintergrund-Chip.
