@@ -101,8 +101,78 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   JavaScript aufklappbar, Text steht trotzdem im HTML. Photovoltaik- und
   Gestehungskosten-Rechner haben je einen eigenen, gewachsenen Block; alle
   anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
+- `src/components/calculator/ui/Energiefluss.jsx` — Flussbild der Jahresbilanz
+  (Haus in der Mitte, vier Ströme als Bögen: Erzeugung, Netzbezug, Einspeisung,
+  Speicher; Hausverbrauch unter dem Haus). Das **Signature-Element der
+  Live-Vorschau** — es hat dort den Autarkie-Ring UND das Monatschart ersetzt,
+  weil drei Grafiken in einer 400px-Spalte gegen Design-Regel 11 verstießen.
+  Alles steckt in EINEM SVG mit fester viewBox, auch die Beschriftung; dadurch
+  skaliert der Text mit und läuft bei 288px Kartenbreite nicht aus seiner Box.
+  Farben sind dieselben wie in `MonthlyChart`/`Energiebilanz` (orange = selbst
+  erzeugt/genutzt, sky = eingespeist, grau = Netz, navy = Speicher) — eine
+  zweite Legende soll niemand lernen müssen. Kein CO2-Arm: kg in einem
+  kWh-Flussbild wäre eine andere Größenart, das bleibt der Ergebnisseite.
+  Bewusst NICHT auf der Ergebnisseite einsetzen — dort erklärt
+  `Energiebilanz.jsx` dieselben Zahlen als Balkenpaar, weil nur dort Autarkie
+  und Eigenverbrauchsquote nebeneinander liegen können. Der Kopfkommentar in
+  `Energiebilanz.jsx`, der das Haus-Motiv ablehnt, gilt weiterhin — aber nur
+  für die Ergebnisseite, nicht für die Live-Vorschau.
+- `src/components/Breadcrumb.astro` — Brotkrumen für Rechner-, Kategorie-,
+  Artikel- und Methodik-Seiten. Ersetzt dreizehn Einzelfassungen mit
+  abweichendem Abstand (10px vs. 16px) und einem Hover, den nur der Artikel
+  hatte. Semantisches `<ol>`, Trenner als CSS-`::before` (wird nicht
+  vorgelesen), `aria-current="page"` am letzten Glied. Das BreadcrumbList-
+  JSON-LD entsteht aus derselben Liste wie die sichtbare Navigation — die
+  elf Rechnerseiten hatten vorher gar keins. Nutzung:
+  `<Breadcrumb glieder={[{ name: "Rechner", href: "/rechner/" }, { name: "CO₂" }]} />`;
+  das Glied ohne `href` ist die aktuelle Seite, "Start" kommt automatisch davor.
+- `src/components/ArtikelKarte.astro` — die Ratgeber-Karte, gemeinsam genutzt
+  von `/ratgeber/` und den Kategorieseiten (vorher stand das Markup in beiden
+  Dateien doppelt). Foto in 16:9 über die volle Kartenbreite, Beschreibung auf
+  drei Zeilen gekappt, Fußzeile per `margin-top: auto` unten bündig — die drei
+  Regeln sind der Grund, warum die Karten einer Reihe auf gleicher Höhe
+  abschließen. `ausrichtung="quer"` legt Bild und Text nebeneinander; das
+  nutzt die Übersicht für Kategorien mit nur EINEM Artikel (vier der acht),
+  wo eine schmale Karte neben zwei leeren Rasterspalten wie ein Fehler
+  aussieht. Bewusst KEIN "Zum Artikel"-Knopf je Karte: siebzehn gleiche
+  Knöpfe untereinander sind die Kartenmonotonie aus Design-Regel 7 — die
+  Fußzeile trägt stattdessen die Lesezeit als echte Information.
+  Vorgeschichte in drei Stufen, damit sie nicht zum vierten Mal umgebaut
+  wird: flache Kartenwand ohne Gruppierung → typografische Zeilen mit
+  108px-Vorschau (Gruppierung richtig, Fotos unlesbar, Bildoberkanten
+  sprangen mit der Titellänge) → Karten MIT Gruppierung. Die Gruppierung nach
+  Kategorie bleibt in jedem Fall.
+- `src/lib/heroBilder.js` — löst den Frontmatter-Pfad eines Hero-Fotos auf die
+  optimierte Datei in `src/assets/heroes/` auf. Damit bleiben Schema und alle
+  17 MDX-Dateien unangetastet. Vier Aufrufer: `ArticleHero.astro`,
+  `ArtikelKarte.astro`, die Startseite und das Ratgeber-Panel im Header.
+- `src/lib/lesedauer.js` — EINE Formel (220 Wörter/Minute) für die Lesezeit
+  über dem Artikel und auf der Karte. Zwei Formeln hießen: Übersicht
+  verspricht 4 Minuten, Artikel sagt 6.
+- `src/pages/methodik/index.astro` + `src/lib/quellen.js` — die Methodik-Seite
+  mit jeder Konstante (Wert, Quelle, Begründung, Stand), den Grundlagen
+  (PVGIS vs. Bundesdurchschnitt, Autarkie vs. Eigenverbrauchsquote), einem
+  Abschnitt **"Was das Modell nicht kann"** und der Quellenliste.
+  **Alle Werte werden aus `calculate.js` importiert, nie abgeschrieben** —
+  eine abgeschriebene Tabelle veraltet beim ersten Konstanten-Update, und dann
+  behauptet ausgerechnet diese Seite etwas Falsches. Was sich nicht
+  importieren lässt (Quelle, Stand), steht im Kommentar über der Konstante;
+  die Spalten sind dessen Lesefassung. Beim Ändern eines Werts beide Stellen
+  ziehen. `quellen.js` ist die einzige Quelle für die Organisationsliste und
+  verlinkt bewusst Themen-Landingpages statt Einzelausgaben (Studienreihen
+  bekommen jährlich neue URLs). Seit September 2026 ersetzt diese Seite den
+  Quellen-Abschnitt der Startseite: Dort stand er als dunkle
+  Vollflächen-Platte an zweiter Position, vor allem, wofür Besucher gekommen
+  waren. Der Beleg steht jetzt als EINE Zeile neben der Zahl — im
+  `RechnerWidget` und in `DetailSection.jsx` —, die vollständige Tabelle hier.
+  Verlinkt aus dem Footer.
 - `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
-  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden. Trägt
+  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden. Der
+  "Weiterlesen"-Block zeigt seit September 2026 `ArtikelKarte.astro` mit
+  Hero-Foto statt reiner Textzeilen — vorher war das die fünfte
+  Darstellungsform für dieselbe Sache. Vier Vorschläge statt drei: Sie stehen
+  in einem Zweierraster (die Artikelspalte ist 620px breit, drei Karten darin
+  wären 190px schmal), und der vierte ist ein Link mehr im Themencluster. Trägt
   ein FAQ-Eintrag das optionale Feld `gruppe`, gliedert ArticleFaq die
   Fragen in benannte Blöcke; das FAQPage-JSON-LD bleibt trotzdem eine
   flache Liste, weil schema.org keine Gruppen kennt.
@@ -188,10 +258,63 @@ siehe dortiges CLAUDE.md):
     Fachbetrieb"). Eigene, konkrete Formulierungen.
 11. Ein Signature-Element statt vieler Mini-Dekorationen.
 
+### Hintergrund: Raster statt Verlauf
+
+Die Seite hat EINE Hintergrundtextur, und nur an einer Stelle: ein feines
+Millimeterpapier-Raster hinter dem Hero-Band der Startseite (`.hero` in
+`src/pages/index.astro`). Ein Farbwert bei 3,5% Deckkraft, 32px Teilung,
+harte Farbstopps — das rendert als 1px-Linie, nicht als Verlauf.
+
+Zwei Dinge daran sind Absicht und sollen so bleiben:
+
+1. **Der Ursprung liegt auf der linken Textkante**, nicht in der Seitenmitte
+   (`background-position: calc(50% - 570px)` ab 1180px, darunter `20px`).
+   Dadurch fällt eine Rasterlinie exakt auf die Kante, an der Überschrift,
+   Eingabefeld und jeder andere Abschnitt beginnen. Ein frei laufendes Raster
+   wäre Dekoration; eines, das am Satzspiegel einrastet, gehört zum Layout.
+   Geprüft bei 1440/1280/1180/900/360px — Linie und Textkante liegen überall
+   auf demselben Wert.
+2. **Nur das Hero-Band.** Über die ganze Seite gezogen wird aus Struktur ein
+   Muster.
+
+Was hier NICHT hingehört, auch wenn "schönerer Hintergrund" gewünscht wird:
+Farbverläufe, Mesh-Flächen, weichgezeichnete Farbflecken, Aurora-Effekte.
+Das ist das bekannteste Erkennungsmerkmal generierter Landingpages und
+verstößt gegen die Regeln 2 und 5. Die Seite argumentiert mit belegten Zahlen
+und soll wie ein Messprotokoll aussehen — ein technisches Raster sagt genau
+das, ein Verlauf sagt das Gegenteil.
+
 Bei jedem Vorschlag gegenprüfen: "Sieht das aus wie jede zweite
 AI-generierte SaaS-Landingpage gerade?" Wenn ja, überarbeiten.
 
+### Eine linke Kante für alle Seiten
+
+Seit September 2026 beginnt auf JEDER Seite alles an derselben linken Kante:
+Kopf, Brotkrume, Überschrift, Inhalt. Vorher liefen drei Raster nebeneinander
+— Seitenköpfe in der zentrierten `.prose`-Spalte (Kante 410px bei 1440px
+Breite), Inhalte im `.container` (150px), die Methodik-Tabellen in einem
+eigenen 920px-Block (280px). Auf einer Seite sah das aus wie ein Fehler, über
+mehrere Seiten wie Zufall.
+
+Regel für neue Seiten: Der Seitenkopf gehört in einen `.container`, nicht in
+`.prose`. Die Lesebreite setzt man am Textelement (`max-width: 68ch` am `<p>`),
+nicht am Abschnitt. Und Abstände am Kopf immer als `padding-block` — die
+`padding`-Kurzform setzt die seitlichen 20px des Containers auf 0, und der
+Kopf steht 20px links vom Rest (zweimal passiert, einmal auf der
+Kategorieseite, einmal auf den Rechnerseiten).
+
 ### Rechner-CTA-Platzierung: inline, nicht Sidebar
+
+Stand der CTAs außerhalb der Artikel (September 2026): Die Ratgeber-Übersicht,
+die acht Kategorieseiten und `/methodik/` hatten keinen einzigen Weg zum
+Rechner — siebzehn Artikel mit CTA, aber die Seiten, die sie auflisten,
+endeten im Nichts. Alle drei tragen jetzt dieselbe Abschluss-Box
+(`RechnerCta variant="final"`), damit niemand eine zweite Form lernen muss.
+Die Startseite endet mit einem eigenen Abschluss-Block (`.abschluss`): zwei
+verschiedene nächste Schritte (rechnen / erst lesen) auf hellem Grund mit
+1px-Rand. Bewusst KEIN vollflächig oranges Band mit demselben Link wie oben —
+genau das stand dort bis August 2026 und ist als Generierungs-Tell entfernt
+worden.
 
 Bewusste Entscheidung (siehe ursprünglicher Projekt-Prompt): Rechner-CTAs
 stehen INLINE im Artikeltext (`<RechnerCta variant="inline" />`, 1–2
@@ -210,7 +333,11 @@ kollabiert.
   als Kommentar direkt darüber (Strompreis, Einspeisevergütung,
   Systemkosten, CO2-Faktor). Diese Kommentare sind die Dokumentation —
   beim Ändern eines Werts den Kommentar mitziehen, sonst ist die Quelle
-  verloren.
+  verloren. Seit September 2026 sind diese Kommentare zusätzlich
+  die Grundlage der öffentlichen Methodik-Seite (`/methodik/`), die die Werte
+  live aus `calculate.js` importiert. Ändert sich ein Wert, ändert sich die
+  Seite mit; Quelle und Stand stehen nur im Kommentar und müssen dort
+  nachgezogen werden.
 - Autarkiegrad vs. Eigenverbrauchsquote nicht verwechseln (siehe Kommentar
   in `calculate.js` und Artikel "Wie funktioniert eine Photovoltaikanlage").
 - Alle abgeleiteten Rechner importieren aus `calculate.js`, statt Werte zu
@@ -304,6 +431,45 @@ plus `src/components/<name>/**`:
 - **rendite, kombi, co2, reinigung, eauto, steuer** — jeweils eigene
   Fragestellung, gemeinsame Konstanten.
 
+## Rechner-Bedienung
+
+**Im Rechner ist nichts vorausgewählt** (Nutzervorgabe, September 2026) —
+im großen Wizard UND im Mini-Rechner (`RechnerWidget.jsx`, dort `haushalt`
+und `speicher` auf `null`, Ergebnisblock erst ab `bereit`). Bis
+dahin standen Satteldach, Süd, mittlere Neigung, 4 Personen und "kein E-Auto"
+orange markiert da, bevor der Besucher etwas angeklickt hatte — er hält das
+leicht für seine eigene Angabe, und die Live-Vorschau zeigte eine fertige
+Ersparnis für ein Haus, das niemand beschrieben hat.
+
+Folgen, die beim Ändern mitgedacht werden müssen:
+
+- `dachform`, `ausrichtung`, `neigung`, `haushalt`, `eauto`, `waermepumpe`
+  starten auf `null`, `verbrauch` auf 0. `calculate()` verträgt das (geprüft:
+  kein NaN, kein Infinity) — `AUSRICHTUNG.find(...)?.factor || 1` und die
+  Verbrauch-0-Pfade fangen es ab.
+- **Ausnahme Schieberegler:** Die Dachfläche startet bei 60 m². Ein Regler
+  ohne Wert hat keine Position. Er zählt deshalb NICHT als getroffene
+  Entscheidung.
+- `angabenVollstaendig` (Wizard.jsx) = Dachform gewählt UND Verbrauch > 0.
+  Erst dann zeigen Live-Vorschau und mobile Leiste Zahlen, vorher "Noch keine
+  Angaben". Ohne dieses Gate griffe `computeKwp()` auf den Mittelwert 0.7
+  zurück und lieferte plausible 8,9 kWp für eine leere Eingabe.
+- Die Kontextleiste zeigt "–" statt eines Werts, solange die zugehörige
+  Angabe fehlt.
+
+Auto-Advance trägt den Ablauf weiterhin: Karten-Screens gehen erst nach einer
+Auswahl weiter, der übergeordnete "Weiter"-Knopf erscheint erst am Ende eines
+Sub-Flows. Ein Überspringen ohne Entscheidung ist damit nicht möglich.
+
+## Icon-Strichstärke
+
+`Icons.jsx` setzt zentral `strokeWidth: 1.9` (vorher 1.6) — bei 18–24px
+Anzeigegröße wirkten die Zeichen sonst blass, besonders in der grauen
+Sekundärfarbe. Der Wert gilt über den `<Svg>`-Wrapper AUCH für die elf
+Rechner-Signets in `IconsRechner.jsx`; die generierte Datei selbst trägt keine
+Strichangaben und bleibt unangetastet. Ab etwa 2.2 kippt die Optik ins Fette
+und die Innenräume kleiner Zeichen (Stecker, Batterie) laufen zu.
+
 ## Invarianten (bei jeder Änderung gegenprüfen)
 
 Diese vier sind schon einmal gebrochen worden und haben je einen echten
@@ -336,16 +502,23 @@ Fehler erzeugt:
 4. **Speicher- und Hauptrechner müssen denselben Mehr-Eigenverbrauch
    liefern.** Beide leiten ihn aus `autarkieSchaetzung()` ab. Eine eigene
    lineare Faustregel im Speicher-Rechner wich bei 10 kWh um Faktor 1,57 ab.
+   Seit dem Flussbild betrifft das einen dritten Aufrufer: `calculate()` gibt
+   `speicherBeitrag` zurück (der Teil des Eigenverbrauchs, den es ohne Speicher
+   nicht gäbe) und bildet ihn ebenfalls als Differenz zweier
+   `autarkieSchaetzung()`-Aufrufe. Gemessen (Sweep über Dachfläche 20–160 m²,
+   Verbrauch 1.500–15.000 kWh, Speicher 1–20 kWh, Sept. 2026): 216 Fälle,
+   maximale Abweichung zu `calculateSpeicher()` **1 kWh** — reine Rundung.
 
 Prüfskript-Muster für alle vier: Node gegen `src/lib/*.js` laufen lassen und
 die Werte vergleichen, nicht nur den Code lesen.
 
 ## Was noch offen ist (vor Livegang)
 
-- `src/pages/impressum/` und `src/pages/datenschutz/`: Pflichtangaben stehen
-  auf `[BITTE EINTRAGEN]` mit sichtbarem Warnbanner. **Die Seite darf so
-  nicht öffentlich gehen** (§ 5 TMG). Vorher standen dort erfundene
-  Musterdaten — nicht wieder einfügen, auch nicht als Beispiel.
+- ~~`src/pages/impressum/` und `src/pages/datenschutz/`~~ — erledigt: Beide
+  tragen seit dem 08.09.2026 die echten Angaben der PPC GmbH (vom Betreiber
+  geliefert). Der Absatz hier stand noch auf dem alten
+  `[BITTE EINTRAGEN]`-Stand und war damit falsch. Weiterhin gilt: nie
+  Musterdaten einsetzen, im Zweifel Platzhalter mit sichtbarem Warnbanner.
 - `LEAD_WEBHOOK_URL` (Vercel-Env) ist nicht gesetzt. Solange sie fehlt,
   landen Leads nur im Funktions-Log (`pv-lead`), niemand wird benachrichtigt.
 - ~~`public/og-default.png` und Favicon~~ — erledigt: beide aus der
@@ -357,13 +530,16 @@ die Werte vergleichen, nicht nur den Code lesen.
   (#D4950A), nicht das Akzent-Token #FF5200 der Oberfläche. Der Satz weiter
   oben, #FF5200 stamme aus dem Logo-File, stimmt so nicht — im PNG kommt
   dieser Wert nicht vor.
-- Bilder: Seit 14.09.2026 liegen Hero-Fotos für alle 17 Artikel unter
-  `public/images/heroes/` plus ein Startseiten-Hero
-  (`public/images/startseite.jpg`). Quelle ist Pexels (Lizenz erlaubt
-  kommerzielle Nutzung ohne Namensnennung); Fotograf, Pexels-ID und
-  Fundstelle je Datei stehen in `public/images/heroes/BILDNACHWEIS.md` —
-  bei neuen Bildern dort mit eintragen, sonst ist die Lizenzlage nicht
-  belegbar. **Offen:** `einspeiseverguetung.jpg` ist ein Bestandsbild ohne
+- Bilder: Hero-Fotos für alle 17 Artikel liegen seit September 2026 in
+  `src/assets/heroes/` (vorher `public/images/heroes/` — verschoben, damit
+  `astro:assets` sie in WebP wandelt und mehrere Breiten erzeugt; als
+  108px-Vorschau fiel das nicht auf, seit die Ratgeber-Karten sie groß
+  zeigen, wären es gut 4 MB Rohdaten je Seitenaufruf). Der Pfad im
+  Frontmatter bleibt die alte Schreibweise; `src/lib/heroBilder.js` löst ihn
+  über den Dateinamen auf. Quelle ist Pexels (Lizenz erlaubt kommerzielle
+  Nutzung ohne Namensnennung); Fotograf, Pexels-ID und Fundstelle je Datei
+  stehen in `src/assets/heroes/BILDNACHWEIS.md` — bei neuen Bildern dort mit
+  eintragen, sonst ist die Lizenzlage nicht belegbar. **Offen:** `einspeiseverguetung.jpg` ist ein Bestandsbild ohne
   dokumentierte Herkunft und muss vor Livegang ersetzt oder belegt werden.
   Echte Reportage-Bilder aus der Firmen-NAS-Quelle stehen weiter aus.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
