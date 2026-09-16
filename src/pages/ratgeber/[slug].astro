@@ -11,7 +11,14 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+
+// Lesezeit aus dem Rohtext schätzen — deutschsprachiger Lesetext liegt bei
+// etwa 200–250 Wörtern pro Minute, 220 ist ein üblicher Mittelwert. Der Wert
+// wird nur angezeigt, nicht gemessen: sekundengenaues Tracking gehört nicht
+// in diesen Prüfbericht. das wir ausnutzen k
+const woerter = entry.body?.trim().split(/\s+/).length ?? 0;
+const lesedauer = Math.max(1, Math.round(woerter / 220));
 ---
 
 <ArticleLayout
@@ -23,7 +30,12 @@ const { Content } = await render(entry);
   dateModified={entry.data.dateModified}
   relatedRechner={entry.data.relatedRechner}
   ogImage={entry.data.ogImage}
+  heroImage={entry.data.heroImage}
+  heroImageAlt={entry.data.heroImageAlt}
   faq={entry.data.faq}
+  zusammenfassung={entry.data.zusammenfassung}
+  headings={headings}
+  lesedauer={lesedauer}
 >
   <Content />
 </ArticleLayout>

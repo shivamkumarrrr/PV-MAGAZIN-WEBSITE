@@ -270,6 +270,14 @@ img {
   font-family: var(--font-body);
   font-size: var(--schrift-sm);
   margin: 1.6em 0;
+  /* Der Kommentar oben versprach den scrollenden Rahmen, die Regel fehlte:
+     eine dreispaltige Tabelle mit `white-space: nowrap` in der Kopfzeile
+     schob bei 360px die ganze Seite seitwärts. `display: block` macht die
+     Tabelle selbst zum Scrollbereich, ohne dass jede Tabelle im MDX von
+     Hand eingewickelt werden muss. */
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .article-body th,
@@ -295,4 +303,25 @@ img {
   padding-left: 1.1em;
   border-left: 2px solid var(--color-border);
   color: var(--color-text-secondary);
+}
+
+/* ── Artikel-Seitenhintergrund ─────────────────────────────────────────
+   Ein einziger, weicher Farbverlauf am Seitenkopf (Muster zolar): der
+   Lesebereich sitzt auf einer leicht kühlen Fläche, die nach ~620 px in
+   das normale Off-White übergeht. Bewusst EIN Verlauf für EINEN Zweck
+   (Design-Regel 2) — keine zweite getönte Fläche weiter unten, kein
+   Blur, keine Deko-Formen. Als background-Shorthand am <body>, damit
+   kein 100vw-Pseudoelement entsteht (das erzeugt bei sichtbarer
+   Scrollbar horizontales Scrollen). */
+body.seite-artikel {
+  background-color: var(--color-bg);
+  background-image: linear-gradient(
+    180deg,
+    #EDF3F1 0%,
+    #F2F6F4 46%,
+    var(--color-bg) 100%
+  );
+  background-repeat: no-repeat;
+  background-size: 100% 620px;
+  background-attachment: scroll;
 }

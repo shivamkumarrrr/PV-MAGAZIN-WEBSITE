@@ -1,0 +1,77 @@
+---
+// Definitionseinblendung für Fachbegriffe im Artikeltext (Muster:
+// LichtBlicks "Was bedeutet kWp?"-Hinweise). Bewusst eine Komponente statt
+// einer <abbr>-Alternative: <abbr title> kürzt den nat. Langtext ab, dieser
+// nur beim Hover-Block — hier steht das Fachwort sichtbar im Text und die
+// Erklärung erscheint als Popover. Ohne JavaScript: reines Hover/Focus-CSS.
+interface Props {
+  begriff: string;
+}
+const { begriff } = Astro.props;
+---
+
+<span class="def" tabindex="0" aria-label={`Was bedeutet „${begriff}"?`}>
+  <span class="def-term">{begriff}</span>
+  <span class="def-pop" role="tooltip"><slot /></span>
+</span>
+
+<style>
+  .def {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+    outline: none;
+  }
+
+  .def-term {
+    text-decoration: underline dotted var(--color-text-muted);
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 3px;
+  }
+
+  .def-pop {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% + 10px);
+    z-index: 5;
+    display: none;
+    width: max-content;
+    max-width: 240px;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: 0 2px 8px rgba(20, 27, 34, 0.18);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--color-text-primary);
+  }
+
+  .def-pop::after {
+    content: "";
+    position: absolute;
+    left: 22px;
+    top: 100%;
+    width: 8px;
+    height: 8px;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    transform: translateY(-60%) rotate(45deg);
+  }
+
+  .def:hover .def-pop,
+  .def:focus-visible .def-pop {
+    display: block;
+  }
+
+  @media (hover: none) {
+    /* Auf Touch-Geräten gibt es kein Hover: per Tap blurrt das Element nicht
+       zuverlässig. Popover bleibt trotzdem per Tastatur-Fokus erreichbar. */
+    .def-pop {
+      display: none;
+    }
+  }
+</style>

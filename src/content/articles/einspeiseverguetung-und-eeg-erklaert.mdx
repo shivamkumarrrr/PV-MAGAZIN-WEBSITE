@@ -5,6 +5,8 @@ category: "einspeiseverguetung"
 datePublished: 2026-08-12
 dateModified: 2026-08-24
 relatedRechner: "photovoltaik"
+heroImage: "/images/heroes/einspeiseverguetung.jpg"
+heroImageAlt: "Solarpark aus der Luft im Abendlicht — Strom, der ins Netz geht"
 faq:
   - frage: "Wie hoch ist die Einspeisevergütung aktuell?"
     antwort: "Für Anlagen bis 10 kWp liegt die Teileinspeisung (Überschusseinspeisung) nach § 49 EEG bei rund 7,7 Cent pro Kilowattstunde. Die Volleinspeisung wird mit rund 12,22 Cent vergütet, ist aber nur sinnvoll, wenn kein nennenswerter Eigenverbrauch möglich ist."
@@ -17,6 +19,7 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
 
 Die Einspeisevergütung ist der Teil der PV-Wirtschaftlichkeit, zu dem am
 meisten veraltete Informationen kursieren — kein Wunder, sie sinkt seit
@@ -79,3 +82,14 @@ Sicherheitsnetz für Überschüsse als die Haupteinnahmequelle einer gut
 dimensionierten Anlage. Welchen Anteil sie an der Gesamtrechnung hat, zeigt
 der Überblick zu [Kosten und
 Förderung](/ratgeber/pv-kosten-und-foerderung-ueberblick/).
+
+<Diagramm
+  titel="Was eine Kilowattstunde wirtschaftlich wert ist"
+  einheit="Cent pro kWh"
+  quelle="Strompreis: BDEW-Haushaltsdurchschnitt, rund 37 Ct/kWh. Vergütungssätze: Bundesnetzagentur / § 49 EEG 2023, Inbetriebnahme ab 1.8.2026, Anlagen bis 10 kWp."
+  werte={[
+    { label: "Selbst verbraucht (erspart Strombezug)", wert: 37, anzeige: "37,0 Ct", hervor: true },
+    { label: "Volleinspeisung", wert: 12.22, anzeige: "12,22 Ct" },
+    { label: "Teileinspeisung", wert: 7.7, anzeige: "7,70 Ct" },
+  ]}
+/>

@@ -2,6 +2,7 @@
 import BaseLayout from "./BaseLayout.astro";
 import RechnerCta from "../components/RechnerCta.astro";
 import ArticleFaq from "../components/ArticleFaq.astro";
+import ArticleHero from "../components/ArticleHero.astro";
 import VerwandteArtikel from "../components/VerwandteArtikel.astro";
 import { categoryLabel } from "../lib/categories.js";
 
@@ -14,7 +15,15 @@ interface Props {
   dateModified: Date;
   relatedRechner: string;
   ogImage?: string;
+  heroImage?: string;
+  heroImageAlt?: string;
   faq?: { frage: string; antwort: string }[];
+  zusammenfassung?: string[];
+  // Überschriften aus render() (astro:content): Grundlage der Inhaltsangabe.
+  // Bewusst aus dem echten Rendering statt aus dem Frontmatter — die TOC kann
+  // so nie gegen den sichtbaren Text auseinanderlaufen (gleiche Regel wie FAQ).
+  headings?: { depth: number; slug: string; text: string }[];
+  lesedauer?: number;
 }
 
 const {
@@ -26,7 +35,12 @@ const {
   dateModified,
   relatedRechner,
   ogImage,
+  heroImage,
+  heroImageAlt,
   faq,
+  zusammenfassung,
+  headings,
+  lesedauer,
 } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const catLabel = categoryLabel(category);
@@ -37,6 +51,11 @@ const datumFormat = (d: Date) =>
 // Aktualisierungsdatum nur zeigen, wenn es sich vom Veröffentlichungsdatum
 // unterscheidet — sonst steht zweimal dasselbe da.
 const wurdeAktualisiert = dateModified.getTime() !== datePublished.getTime();
+
+// Nur h2/h3 wandern in die Inhaltsangabe; die H1 steht schon als Titel darüber.
+const inhaltsangabe = (headings ?? [])
+  .filter((h) => h.depth >= 2 && h.slug)
+  .map((h) => ({ ...h, li: h.depth === 3 }));
 
 const articleLd = {
   "@context": "https://schema.org",
@@ -80,7 +99,7 @@ const faqLd =
     : null;
 ---
 
-<BaseLayout title={`${title} | Photovoltaik Aktuell`} description={description} ogImage={ogImage}>
+<BaseLayout title={`${title} | Photovoltaik Aktuell`} description={description} ogImage={ogImage} bodyClass="seite-artikel">
   <script type="application/ld+json" set:html={JSON.stringify(articleLd)} />
   <script type="application/ld+json" set:html={JSON.stringify(breadcrumbLd)} />
   {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
@@ -99,11 +118,39 @@ const faqLd =
       {wurdeAktualisiert && (
         <> · Aktualisiert am <time datetime={dateModified.toISOString()}>{datumFormat(dateModified)}</time></>
       )}
+      {lesedauer ? <span class="meta-sep" aria-hidden="true">·</span> : null}
+      {lesedauer && <span>Ca. {lesedauer} Min. Lesezeit</span>}
     </p>
+
+    <ArticleHero category={category} heroImage={heroImage} heroImageAlt={heroImageAlt} />
+
+    {inhaltsangabe.length > 1 && (
+      <nav class="toc" aria-labelledby="toc-heading">
+        <p id="toc-heading" class="toc-title">Inhaltsübersicht</p>
+        <ol class="toc-list">
+          {inhaltsangabe.map((h) => (
+            <li class={h.li ? "toc-li3" : ""}>
+              <a href={`#${h.slug}`}>{h.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
 
     <div class="article-body">
       <slot />
     </div>
+
+    {zusammenfassung && zusammenfassung.length > 0 && (
+      <section class="zusammenfassung" aria-labelledby="zusammenfassung-heading">
+        <h2 id="zusammenfassung-heading">Zusammenfassung</h2>
+        <ul>
+          {zusammenfassung.map((punkt) => (
+            <li>{punkt}</li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     {faq && <ArticleFaq faq={faq} />}
 
@@ -160,5 +207,106 @@ const faqLd =
     margin: 0 0 32px;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .meta-sep {
+    margin: 0 4px;
+  }
+
+  /* Inhaltsangabe — kompakte Anker-Navigation nach dem Muster von
+     zolar ("Das erwartet dich") und LichtBlick (Inhaltsangabe). Nur wenn der
+     Artikel mehr als eine Überschrift hat, sonst wäre sie Zierde. */
+  .toc {
+    margin: 0 0 32px;
+    padding: 18px 20px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .toc-title {
+    margin: 0 0 8px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--color-text-muted);
+  }
+
+  .toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .toc-list a {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    border-bottom: none;
+  }
+
+  .toc-list a:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1.5px;
+  }
+
+  .toc-li3 {
+    padding-left: 16px;
+    font-size: 13.5px;
+  }
+
+  .toc-li3 a {
+    color: var(--color-text-secondary);
+  }
+
+  /* Zusammenfassung am Artikelende (Muster: zolar). Authoren-Kernsätze, die
+     im Frontmatter gepflegt werden — kein automatisches Extrahieren, das
+     würde mutmaßen statt zusammenfassen. */
+  .zusammenfassung {
+    margin-top: 2.5em;
+    padding: 22px 24px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .zusammenfassung h2 {
+    font-size: 20px;
+    margin-bottom: 0.6em;
+  }
+
+  .zusammenfassung ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .zusammenfassung li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--color-text-primary);
+  }
+
+  .zusammenfassung li::before {
+    content: "";
+    position: absolute;
+    left: 2px;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--color-accent);
   }
 </style>

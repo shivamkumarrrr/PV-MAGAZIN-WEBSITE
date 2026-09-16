@@ -5,6 +5,8 @@ category: "kosten-foerderung"
 datePublished: 2026-08-12
 dateModified: 2026-08-12
 relatedRechner: "photovoltaik"
+heroImage: "/images/heroes/kosten.jpg"
+heroImageAlt: "Zwei Fachkräfte prüfen eine Modulreihe auf einer Freiflächenanlage"
 faq:
   - frage: "Was kostet eine Photovoltaikanlage für ein Einfamilienhaus?"
     antwort: "Systemkosten für schlüsselfertige Aufdach-Anlagen liegen laut Marktpreisübersichten des Fraunhofer ISE bei rund 1.000 bis 1.300 Euro pro Kilowattpeak. Für eine typische Anlage von 8 bis 10 kWp ergibt das grob 8.000 bis 13.000 Euro ohne Speicher."
@@ -14,9 +16,18 @@ faq:
     antwort: "Für Versicherung, Reinigung und Zählermiete liegen Praxiswerte bei rund 1 Prozent der Investitionssumme pro Jahr. Dazu kommt einmalig der Wechselrichter-Austausch nach 10 bis 15 Jahren, den der ADAC je nach Anlagengröße mit 1.000 bis 3.000 Euro beziffert."
   - frage: "Wie lange dauert die Amortisation?"
     antwort: "Seriöse Amortisationszeiten für private Anlagen liegen je nach Dimensionierung und Nutzungsprofil meist zwischen 8 und 13 Jahren. Bei über 25 Jahren Anlagenlaufzeit folgt danach ein Vielfaches an Jahren mit Netto-Ersparnis. Pauschalversprechen von etwa fünf Jahren beruhen in aller Regel auf unrealistisch günstigen Annahmen."
+zusammenfassung:
+  - "Schlüsselfertige Aufdach-Anlagen kosten laut Fraunhofer-ISE-Marktpreisübersicht 1.000 bis 1.300 € pro kWp; eine typische 8–10-kWp-Anlage liegt damit bei grob 8.000 bis 13.000 € ohne Speicher."
+  - "Seit 1.1.2023 gilt der Nullsteuersatz nach § 12 Abs. 3 UStG für Anlagen bis 30 kWp auf Wohngebäuden — der Angebotspreis ist der Endpreis."
+  - "Ein Speicher ist ein eigener Kostenblock (300–470 €/kWh). Sinnvolle Größe nach HTW-Faustregel: 1 bis 1,2 kWh je 1.000 kWh Jahresverbrauch."
+  - "Laufende Kosten (~1 % der Investition pro Jahr) und der Wechselrichter-Tausch (1.000–3.000 € nach 10–15 Jahren) sind einzurechnen."
+  - "Mit diesen Annahmen ergibt die Musterrechnung zu 10 kWp eine Amortisation von rund 9 bis 10 Jahren — nicht die pauschal versprochenen fünf."
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Definition from "../../components/Definition.astro";
+import RechnerWidget from "../../components/RechnerWidget.jsx";
+import Diagramm from "../../components/Diagramm.astro";
 
 Wer sich zum ersten Mal mit Photovoltaik beschäftigt, stößt schnell auf ein
 Problem: Kostenangaben im Netz schwanken stark — von "unter 10.000 €" bis
@@ -30,7 +41,8 @@ Kostenblöcke einzeln ein, statt eine einzige Pauschalzahl zu nennen.
 Systemkosten für schlüsselfertige Aufdach-Anlagen liegen laut
 Marktpreisübersichten des Fraunhofer-Instituts für Solare Energiesysteme
 (ISE) aktuell im Bereich von rund 1.000 bis 1.300 Euro pro Kilowattpeak
-(kWp) — je nach Anbieter, Region und Marge. Für eine typische
+(<Definition begriff="kWp">Kilowattpeak (kWp) ist die installierte Modulleistung unter Normbedingungen — die Maßeinheit für die Anlagengröße, nicht für die tatsächlich erzeugte Energiemenge.</Definition>)
+— je nach Anbieter, Region und Marge. Für eine typische
 Einfamilienhaus-Anlage von 8–10 kWp bedeutet das eine Investitionssumme von
 grob 8.000 bis 13.000 Euro, ohne Speicher.
 
@@ -44,7 +56,8 @@ Kleinunternehmerregelung ein eigener bürokratischer Schritt war).
 ## Speicher: eigener Kostenblock, eigene Logik
 
 Batteriespeicher werden nicht pauschal nach Anlagengröße bepreist, sondern
-nach nutzbarer Speicherkapazität in kWh. Für LiFePO₄-Speicher (der
+nach nutzbarer Speicherkapazität in <Definition begriff="kWh">Kilowattstunde (kWh) ist die Energiemenge — eine kWh genügt grob für eine Stunde Betrieb eines 1.000-Watt-Heizlüfters.</Definition>.
+Für LiFePO₄-Speicher (der
 heute übliche Zelltyp) liegen aktuelle Marktpreise bei etwa 300 bis 470 Euro
 pro kWh nutzbarer Kapazität. Eine gängige Faustregel der HTW Berlin für die
 Dimensionierung: rund 1 bis 1,2 kWh Speicherkapazität pro 1.000 kWh
@@ -74,7 +87,7 @@ Der finanzielle Rückfluss kommt aus zwei Quellen: dem selbst genutzten
 Strom (der den Zukauf zum Haushaltsstrompreis von aktuell rund 0,37 €/kWh
 im BDEW-Durchschnitt erspart) und der Einspeisevergütung für den Rest.
 Die Teileinspeisung-Vergütung für Anlagen bis 10 kWp liegt nach § 49 EEG
-aktuell bei rund 7,7 Cent/kWh und sinkt halbjährlich um 1 % (nächste
+aktuell bei rund 7,7 Cent/<Definition begriff="kWh">Kilowattstunde (kWh) ist die Energiemenge — eine kWh genügt grob für eine Stunde Betrieb eines 1.000-Watt-Heizlüfters.</Definition> und sinkt halbjährlich um 1 % (nächste
 Degression laut Bundesnetzagentur zum 1.8.2026). Sie gilt pro Anlage 20
 Jahre fest ab Inbetriebnahme — eine später sinkende Vergütung wirkt sich
 also nicht rückwirkend auf bereits installierte Anlagen aus.
@@ -85,6 +98,62 @@ Strompreis erspart statt nur die Einspeisevergütung zu erhalten. Genau das
 ist der Grund, warum Anlagengröße, Verbrauchsprofil und ein möglicher
 Speicher gemeinsam betrachtet werden müssen — eine isolierte "Kosten pro
 kWp"-Zahl sagt über die tatsächliche Wirtschaftlichkeit relativ wenig aus.
+
+## Vergleichstabelle: Anlagengrößen im Überblick
+
+Die folgenden Spannen verwenden die Preisdaten aus diesem Artikel (Systemsatz
+1.000–1.300 €/kWp, Speicher 300–470 €/kWh, Ertrag 950 kWh/kWp) und den
+Bundesdurchschnitts-Strompreis von 0,37 €/kWh als Muster-Haushalt mit
+4.000 kWh/Jahr. Sie sind damit eine erste Einordnung derselben Zahlen, die
+der Rechner mit individuellen Werten genauer bestimmt.
+
+| Anlage | nutzbare Dachfläche | Investition ohne Speicher | Investition mit Speicher | Jahresertrag |
+| --- | --- | --- | --- | --- |
+| 5 kWp | ca. 24 m² | 5.000–6.500 € | 7.300–9.400 € | ca. 4.750 kWh |
+| 8 kWp | ca. 38 m² | 8.000–10.400 € | 10.700–14.200 € | ca. 7.600 kWh |
+| 10 kWp | ca. 47 m² | 10.000–13.000 € | 13.000–17.500 € | ca. 9.500 kWh |
+| 15 kWp | ca. 70 m² | 15.000–19.500 € | 18.300–25.000 € | ca. 14.250 kWh |
+
+<Diagramm
+  titel="Investitionssumme ohne Speicher nach Anlagengröße"
+  einheit="Euro, Mittelwert der Spanne 1.000–1.300 €/kWp"
+  quelle="Eigene Darstellung auf Basis der Fraunhofer-ISE-Marktpreisübersicht 2026 (1.000–1.300 €/kWp, brutto = netto wegen Nullsteuersatz). Gezeigt ist jeweils die Mitte der Spanne; die Tabelle darüber nennt die vollen Bandbreiten."
+  werte={[
+    { label: "5 kWp", wert: 5750, anzeige: "≈ 5.750 €" },
+    { label: "8 kWp", wert: 9200, anzeige: "≈ 9.200 €" },
+    { label: "10 kWp", wert: 11500, anzeige: "≈ 11.500 €", hervor: true },
+    { label: "15 kWp", wert: 17250, anzeige: "≈ 17.250 €" },
+  ]}
+/>
+
+<details>
+  <summary>Speichergröße in der "mit Speicher"-Spalte ansehen</summary>
+  Für den 4.000-kWh-Haushalt gewählt (HTW-Faustregel), also 4,8 kWh nutzbar — die Preise daraus ergeben die obige Spanne. Größere Haushalte brauchen proportionale Größen, es gibt keine "ein Speicher für alle"-Logik.
+</details>
+
+## Musterrechnung: 10 kWp auf dem Einfamilienhaus
+
+Eine Beispielrechnung mit den Quellenwerten aus diesem Artikel — durchgerechnet
+mit 0,37 €/kWh (BDEW-Durchschnitt), 950 kWh Ertrag je kWp und Jahr:
+
+- **Anlage:** 10 kWp, Investition 11.500 € (Mittel der 1.000–1.300 €/kWp-Spanne)
+- **Ertrag:** ~9.500 kWh/Jahr, davon ~30 % selbst genutzt (~2.850 kWh)
+- **Selbstnutzung erspart:** 2.850 kWh × 0,37 € ≈ 1.055 €/Jahr
+- **Einspeisung:** ~6.650 kWh × 0,077 € ≈ 512 €/Jahr
+- **Erlös gesamt:** ~1.567 €/Jahr
+- **Laufende Kosten:** ~1 % = ~115 €; Wechselrichter-Tausch 2.000 € einmalig
+  (10.–15. Jahr, über Laufzeit ≈ 100 €/Jahr)
+- **Netto-Ersparnis:** ~1.350 €/Jahr → **Amortisation ≈ 8,5–9 Jahre**
+
+Dieselbe Rechnung mit einem Speicher (+ 6.000 €) hebt den Eigenverbrauch auf
+~60 %, erhöht die Netto-Ersparnis auf ~1.700 €/Jahr und verlängert die
+Amortisation trotzdem auf ~10 Jahre — weil der Zusatz-Ertrag den
+Zusatz-Preis nicht voll deckt. Das ist keine Wertung gegen Speicher, sondern
+das realistische Bild dafür, dass er die Autarkie erhöht, nicht die
+Rendite. Wer das für den eigenen Haushalt durchkalkulieren will, nutzt den
+Rechner mit individuellen Verbrauchswerten statt dieser Bundes-Durchschnitte.
+
+<RechnerWidget client:load />
 
 ## Amortisation: eine Spanne, keine Einzelzahl
 

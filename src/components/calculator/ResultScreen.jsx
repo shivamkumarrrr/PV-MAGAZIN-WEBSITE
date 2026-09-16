@@ -2,6 +2,7 @@ import theme from "../../theme.js";
 import ResultHeader from "./ResultHeader.jsx";
 import KeyMetrics from "./KeyMetrics.jsx";
 import MonthlyCharts from "./MonthlyCharts.jsx";
+import Energiebilanz from "./ui/Energiebilanz.jsx";
 import DetailSection from "./DetailSection.jsx";
 import LeadForm from "./LeadForm.jsx";
 import Transparency from "./Transparency.jsx";
@@ -31,6 +32,10 @@ export default function ResultScreen({ result, displayLocation, resolvedCity, da
       <ResultHeader result={result} displayLocation={displayLocation} savingsRef={savingsRef} savingsCount={savingsCount} />
 
       <KeyMetrics result={result} speicherKwh={speicherKwh} eauto={eauto} waermepumpe={waermepumpe} formatSpan={formatSpan} />
+
+      {/* Steht direkt hinter den Kennzahlen, weil er die beiden Prozentwerte
+          von dort auseinanderhält, bevor die Monatscharts anfangen. */}
+      <Energiebilanz result={result} />
 
       <MonthlyCharts result={result} />
 

@@ -4,20 +4,47 @@
 // strukturierte Daten und der für Nutzer sichtbare Text übereinstimmen.
 // Umsetzung als <details>: aufklappbar ohne JavaScript, und der Antworttext
 // steht trotzdem im HTML (also für Crawler lesbar).
+//
+// Optional tragen die Einträge eine `gruppe`. Dann stehen sie unter benannten
+// Zwischenüberschriften statt in einer durchlaufenden Liste — LichtBlick
+// gliedert seine Fragen genauso ("Kosten und Beispielrechnungen",
+// "Technische Details und Betrieb"). Ohne `gruppe` bleibt alles wie bisher,
+// ältere Artikel müssen nicht nachgezogen werden.
+interface FaqEintrag {
+  frage: string;
+  antwort: string;
+  gruppe?: string;
+}
+
 interface Props {
-  faq: { frage: string; antwort: string }[];
+  faq: FaqEintrag[];
 }
 const { faq } = Astro.props;
+
+// Reihenfolge der Gruppen folgt dem Frontmatter, nicht dem Alphabet: der
+// Autor entscheidet, womit der Leser anfängt.
+const gruppiert: { titel: string | null; eintraege: FaqEintrag[] }[] = [];
+for (const f of faq ?? []) {
+  const titel = f.gruppe ?? null;
+  const letzte = gruppiert[gruppiert.length - 1];
+  if (letzte && letzte.titel === titel) letzte.eintraege.push(f);
+  else gruppiert.push({ titel, eintraege: [f] });
+}
 ---
 
 {faq && faq.length > 0 && (
   <section class="faq" aria-labelledby="faq-heading">
     <h2 id="faq-heading">Häufige Fragen</h2>
-    {faq.map((f) => (
-      <details class="faq-item">
-        <summary>{f.frage}</summary>
-        <p>{f.antwort}</p>
-      </details>
+    {gruppiert.map((g) => (
+      <div class="faq-gruppe">
+        {g.titel && <h3 class="faq-gruppe-titel">{g.titel}</h3>}
+        {g.eintraege.map((f) => (
+          <details class="faq-item">
+            <summary>{f.frage}</summary>
+            <p>{f.antwort}</p>
+          </details>
+        ))}
+      </div>
     ))}
   </section>
 )}
@@ -34,6 +61,19 @@ const { faq } = Astro.props;
 
   .faq-item {
     border-bottom: 1px solid var(--color-border);
+  }
+
+  .faq-gruppe + .faq-gruppe {
+    margin-top: 2em;
+  }
+
+  .faq-gruppe-titel {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+    margin: 0 0 0.5em;
   }
 
   .faq-item:first-of-type {

@@ -102,7 +102,39 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   Gestehungskosten-Rechner haben je einen eigenen, gewachsenen Block; alle
   anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
 - `src/components/ArticleFaq.astro` + `VerwandteArtikel.astro` — werden von
-  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden.
+  `ArticleLayout.astro` gerendert, nicht einzeln im MDX eingebunden. Trägt
+  ein FAQ-Eintrag das optionale Feld `gruppe`, gliedert ArticleFaq die
+  Fragen in benannte Blöcke; das FAQPage-JSON-LD bleibt trotzdem eine
+  flache Liste, weil schema.org keine Gruppen kennt.
+- `src/pages/ratgeber/[slug].astro` reicht an `ArticleLayout.astro` neben den
+  Frontmatter-Daten zwei abgeleitete Werte durch: die **gerenderten
+  `headings`** (aus `render(entry)`) und die **`lesedauer`** (Wörter aus
+  `entry.body` ÷ 220). Das Layout rendert daraus die Inhaltsangabe (nur
+  h2/h3, nur wenn mehr als eine Überschrift), die Lesezeit-Meta, den
+  Kategorie-Hero und die optionale "Zusammenfassung"-Box
+  (`zusammenfassung` im Frontmatter). Diese Bausteine gehören NICHT in den
+  MDX-Fließtext.
+- `src/components/ArticleHero.astro` — Hero am Artikelanfang, von
+  ArticleLayout automatisch gerendert, kein Eingriff im MDX nötig. Zwei
+  Varianten: Liegt `heroImage` im Frontmatter, zeigt der Hero das Foto;
+  ohne Angabe greift als Fallback das datengetriebene SVG-Motiv mit EINER
+  belegten Kennzahl je Kategorie (Quelle + Stand direkt in der Datei) —
+  die Kennzahlen sind bei der jährlichen Datenpflege mitzuziehen. Seit
+  September 2026 haben alle 17 Artikel ein Foto, das SVG ist damit nur
+  noch der Pfad für neue Artikel ohne Bild.
+- `src/components/Definition.astro` — Fachbegriff-Einblendung im Fließtext:
+  sichtbares Wort, Erklärung als Hover/Focus-Popover, reines CSS ohne
+  JavaScript. Nutzung im MDX: `<Definition begriff="kWp">Erklärung…
+  </Definition>` (Komponente muss importiert werden).
+- `src/components/Diagramm.astro` — kleiner Balkenvergleich als Inline-SVG
+  für den Fließtext (Kostenanteile, Vergütungsverlauf). Werte und Quelle
+  kommen als Props aus dem MDX, kein Chart-Paket, kein JavaScript.
+- `src/components/RechnerWidget.jsx` — kompakter Mini-Rechner für den
+  Artikeltext. Nutzt `calculate.js`-Konstanten, `Slider`/`Segmented` aus
+  `calculator/ui` und `theme.js`. Einbindung im MDX mit
+  `<RechnerWidget client:load />`. Bewusst OHNE PVGIS/Standort — nur erste
+  Größenordnung mit Bundesdurchschnitt, damit der ausführliche Rechner
+  (`/rechner/photovoltaik/`) der Mehrwert bleibt.
 
 ## Design System
 
@@ -237,6 +269,15 @@ Betrifft in diesem Projekt konkret:
   Bei einem neuen Artikel beide Richtungen setzen — Link vom neuen Artikel
   zum Hub UND mindestens ein Link aus einem thematisch passenden Bestands-
   artikel auf den neuen.
+- Artikelseiten-Aufbau ist automatisiert: Inhaltsangabe und Lesezeit kommen
+  aus den MDX-Headings (`[slug].astro`), der Hero aus
+  `ArticleHero.astro` (Foto über `heroImage`/`heroImageAlt` im
+  Frontmatter, sonst SVG-Fallback). Diese drei NICHT von Hand im MDX
+  nachbauen; die
+  "Zusammenfassung"-Box ist optional über das Frontmatter-Feld
+  `zusammenfassung: [Liste kurzer Kernsätze]` aktivierbar. Tabellen und
+  Musterrechnungen gehören wie gehabt in den Fließtext — Vorbild ist der
+  Ausbau von `pv-kosten-und-foerderung-ueberblick.mdx`.
 
 ## Stand der Rechner
 
@@ -280,10 +321,18 @@ Fehler erzeugt:
 2. **Einspeisevergütung immer über `einspeiseStaffel(kwp)`**, nie `EINSPEISE`
    direkt. Der ≤10-kWp-Satz auf jede Anlagengröße anzuwenden überschätzte
    die Einspeiseerlöse bei 30 kWp um rund 9 %.
-3. **Speicher darf die Amortisation nie verkürzen.** Bekannte Restabweichung:
-   bei 2–3 kWh sinkt sie um 0,1 Jahre (7,8 → 7,7). Ursache sind zwei belegte
-   Werte (ADAC-Autarkiekurve, 400 €/kWh) — ohne neue Recherche nicht
-   anfassen.
+3. **Speicher darf die Amortisation nie verkürzen.** Wird derzeit verletzt,
+   die frühere Notiz ("0,1 Jahre bei 2–3 kWh") war zu eng gefasst. Gemessen
+   (Sweep über Dachfläche 20–160 m², Verbrauch 1.500–15.000 kWh, Speicher
+   1–20 kWh, Sept. 2026): 79 Fälle, in denen der Speicher die Amortisation
+   verkürzt, maximal um **0,6 Jahre**. Schwerpunkt sind überdimensionierte
+   Anlagen — 55 der 79 Fälle liegen bei Ertrag ≥ 2× Jahresverbrauch; bei
+   realistischer Auslegung (< 2×) bleibt die Abweichung ≤ 0,2 Jahre.
+   Identisch im `pvrechner`-Quellprojekt reproduzierbar, also kein Fehler
+   dieses Repos, sondern eine Eigenschaft des gemeinsamen Modells. Ursache
+   sind zwei belegte Werte (ADAC-Autarkiekurve, 400 €/kWh) — ohne neue
+   Recherche nicht anfassen. Beim Ändern eines der beiden Werte diesen
+   Sweep erneut fahren und die Zahlen hier mitziehen.
 4. **Speicher- und Hauptrechner müssen denselben Mehr-Eigenverbrauch
    liefern.** Beide leiten ihn aus `autarkieSchaetzung()` ab. Eine eigene
    lineare Faustregel im Speicher-Rechner wich bei 10 kWh um Faktor 1,57 ab.
@@ -308,8 +357,15 @@ die Werte vergleichen, nicht nur den Code lesen.
   (#D4950A), nicht das Akzent-Token #FF5200 der Oberfläche. Der Satz weiter
   oben, #FF5200 stamme aus dem Logo-File, stimmt so nicht — im PNG kommt
   dieser Wert nicht vor.
-- Keine Bilder im gesamten Projekt außer dem Logo. Artikel und Startseite
-  brauchen welche; Quelle ist voraussichtlich der Firmen-NAS.
+- Bilder: Seit 14.09.2026 liegen Hero-Fotos für alle 17 Artikel unter
+  `public/images/heroes/` plus ein Startseiten-Hero
+  (`public/images/startseite.jpg`). Quelle ist Pexels (Lizenz erlaubt
+  kommerzielle Nutzung ohne Namensnennung); Fotograf, Pexels-ID und
+  Fundstelle je Datei stehen in `public/images/heroes/BILDNACHWEIS.md` —
+  bei neuen Bildern dort mit eintragen, sonst ist die Lizenzlage nicht
+  belegbar. **Offen:** `einspeiseverguetung.jpg` ist ein Bestandsbild ohne
+  dokumentierte Herkunft und muss vor Livegang ersetzt oder belegt werden.
+  Echte Reportage-Bilder aus der Firmen-NAS-Quelle stehen weiter aus.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
   (ADAC, Verbraucherzentrale, co2online). Ausbau wartet auf die
   Themen-Priorisierung durch PPC.

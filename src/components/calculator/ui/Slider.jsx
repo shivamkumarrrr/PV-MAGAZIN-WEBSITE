@@ -46,25 +46,40 @@ export default function Slider({ value, onChange, min, max, step, unit, label })
             <span style={{ fontSize: 14, fontWeight: 600, color: theme.color.textSecondary }}>{unit}</span>
           </div>
         ) : (
-          <span
+          /* Der Wert steht in einem sichtbar umrandeten Feld, nicht als nackte
+             Zahl mit gestricheltem Rahmen beim Hover. Grund: Auf dem Handy gibt
+             es kein Hover — dort war nicht zu erkennen, dass man den Wert direkt
+             eintippen kann. Dasselbe Feldmuster benutzen LichtBlick und zolar in
+             ihren Rechnern (Wert groß, Einheit rechtsbündig daneben).
+             <button> statt <span>, damit die Eingabe auch per Tastatur
+             erreichbar ist. */
+          <button
+            type="button"
             onClick={() => { setTemp(String(value)); setEditing(true); }}
             style={{
+              display: "inline-flex",
+              alignItems: "baseline",
+              gap: 4,
+              fontFamily: "inherit",
               fontSize: 18,
               fontWeight: 700,
               color: theme.color.textPrimary,
               fontVariantNumeric: "tabular-nums",
               cursor: "text",
-              padding: "2px 8px",
-              borderRadius: 6,
-              border: "1.5px dashed transparent",
-              transition: "border 0.15s",
+              padding: "5px 10px",
+              borderRadius: 8,
+              border: `1px solid ${theme.color.border}`,
+              background: theme.color.surface,
+              transition: "border-color 0.15s",
             }}
-            onMouseEnter={(e) => e.target.style.borderColor = theme.color.border}
-            onMouseLeave={(e) => e.target.style.borderColor = "transparent"}
-            title="Klicken zum Bearbeiten"
+            onMouseEnter={(e) => e.currentTarget.style.borderColor = theme.color.textSecondary}
+            onMouseLeave={(e) => e.currentTarget.style.borderColor = theme.color.border}
+            title="Wert eintippen"
+            aria-label={`${label}: ${value.toLocaleString("de-DE")} ${unit} — Wert eintippen`}
           >
-            {value.toLocaleString("de-DE")} {unit}
-          </span>
+            {value.toLocaleString("de-DE")}
+            <span style={{ fontSize: 14, fontWeight: 600, color: theme.color.textSecondary }}>{unit}</span>
+          </button>
         )}
       </div>
       <input
