@@ -35,10 +35,19 @@ export default function OptionGroup({ options, selected, onSelect, minCol = 96, 
             {renderIcon && (
               <div style={{ display: "flex", justifyContent: "center", marginBottom: 9 }}>{renderIcon(opt, active)}</div>
             )}
-            {label}
+            {labelParts(label)}
           </TiltButton>
         );
       })}
     </div>
   );
+}
+
+// "Flach (0–15°)" brach in schmalen Karten (320px) mitten in der Klammer um
+// ("Flach (0–" / "15°)"). Der Klammerteil bleibt daher zusammen und rutscht
+// als Ganzes in die zweite Zeile.
+function labelParts(label) {
+  const m = /^(.*?) (\(.*\))$/.exec(label);
+  if (!m) return label;
+  return <>{m[1]} <span style={{ whiteSpace: "nowrap" }}>{m[2]}</span></>;
 }

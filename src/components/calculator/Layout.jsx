@@ -37,6 +37,12 @@ export default function Layout({ main, sidebar, mobileBar }) {
            Live-Vorschau als LETZTES auf der Seite, und genau sie lag sonst
            unter der Leiste. */
         .calc-layout--mit-leiste { padding-bottom: 92px; }
+        /* Mobil: weniger Kopf über jeder Frage — Kartentitel und die zweite
+           (Unter-)Fortschrittsleiste entfallen; Hauptfortschritt + "Schritt
+           X von 4" + Überschrift bleiben. */
+        @media (max-width: 719px) {
+          .calc-card__title, .subflow-progress { display: none !important; }
+        }
         @media (min-width: 960px) {
           .calc-layout { grid-template-columns: minmax(0, 1fr) 400px; }
           .calc-layout__sidebar { position: sticky; top: 84px; }

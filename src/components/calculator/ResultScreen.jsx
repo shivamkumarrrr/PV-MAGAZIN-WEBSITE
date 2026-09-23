@@ -6,11 +6,12 @@ import Energiebilanz from "./ui/Energiebilanz.jsx";
 import DetailSection from "./DetailSection.jsx";
 import LeadForm from "./LeadForm.jsx";
 import Transparency from "./Transparency.jsx";
+import SpeicherVergleich from "./ui/SpeicherVergleich.jsx";
 import { formatSpan } from "../../lib/calculate.js";
 import { usePrefersReducedMotion } from "../../lib/usePrefersReducedMotion.js";
 import { useCountUpOnView } from "../../lib/useCountUpOnView.js";
 
-export default function ResultScreen({ result, displayLocation, resolvedCity, dach, dachform, ausrichtung, neigung, speicherKwh, eauto, eautoProfil, waermepumpe, tageszeit, plz, onRestart }) {
+export default function ResultScreen({ result, displayLocation, resolvedCity, dach, dachform, ausrichtung, neigung, speicherKwh, speicherVergleich, eauto, eautoProfil, waermepumpe, tageszeit, plz, onRestart }) {
   const reduced = usePrefersReducedMotion();
   // Haupt-Ergebniszahl: zählt beim ersten Erscheinen von 0 auf den Wert hoch.
   // Angezeigt als ±12%-Spanne (formatSpan), deren Mitte hochzählt.
@@ -36,6 +37,9 @@ export default function ResultScreen({ result, displayLocation, resolvedCity, da
       {/* Steht direkt hinter den Kennzahlen, weil er die beiden Prozentwerte
           von dort auseinanderhält, bevor die Monatscharts anfangen. */}
       <Energiebilanz result={result} />
+
+      {/* Ohne vs. mit Speicher nebeneinander (Muster SMA Solarrechner). */}
+      <SpeicherVergleich {...(speicherVergleich || {})} gewaehlt={speicherKwh > 0 ? "mit" : "ohne"} />
 
       <MonthlyCharts result={result} />
 

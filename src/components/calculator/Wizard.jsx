@@ -31,11 +31,13 @@ export default function Wizard() {
   const [haushalt, setHaushalt] = useState(null);
   const [verbrauch, setVerbrauch] = useState(0);
   const [speicherKwh, setSpeicherKwh] = useState(0);
+  // Speicher-Entscheidung: null bis der Nutzer aktiv wählt (keine Vorauswahl).
+  const [speicherWahl, setSpeicherWahl] = useState(null); // null | "ohne" | "mit"
   // 3-Zustände: "nein" | "ja" | "geplant" — "geplant" zählt nicht in die
   // Berechnung. `null` = noch nicht beantwortet und rechnet wie "nein".
   const [eauto, setEauto] = useState(null);
   const [waermepumpe, setWaermepumpe] = useState(null);
-  const [eautoProfil, setEautoProfil] = useState("Hauptwagen");
+  const [eautoProfil, setEautoProfil] = useState(null);
   const [tageszeit, setTageszeit] = useState([]);
   const [plz, setPlz] = useState("");
   const [address, setAddress] = useState("");
@@ -56,6 +58,22 @@ export default function Wizard() {
   // dessen `back()`, um innerhalb eines Sub-Flows einen Screen zurückzugehen
   // (inkl. Timer-Cleanup des Auto-Advance).
   const subFlowRef = useRef(null);
+  // Wechsel Wizard <-> Ergebnis: Ohne Scroll blieb die Seite auf der Höhe des
+  // "Ergebnis berechnen"-Buttons stehen — auf dem Handy landete man dadurch
+  // mitten im Ergebnis, die Ersparnis-Zahl oben war nicht zu sehen (und ihr
+  // Count-up lief nie an). Nur nach oben korrigieren, wenn der Anfang
+  // außerhalb des Bildschirms liegt.
+  const topRef = useRef(null);
+  const firstRender = useRef(true);
+  useEffect(() => {
+    if (firstRender.current) { firstRender.current = false; return; }
+    const el = topRef.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top;
+    if (top < 0 || top > window.innerHeight * 0.5) {
+      window.scrollTo({ top: window.scrollY + top - 16 });
+    }
+  }, [showResult]);
   const [pvgisData, setPvgisData] = useState(null);
   const [pvgisLoading, setPvgisLoading] = useState(false);
   // Incremented on every successfully loaded PVGIS result — LivePanel uses it
@@ -187,6 +205,12 @@ export default function Wizard() {
   const speicherVorschlagKwh = Math.round(gesamtVerbrauch / 1000 * SPEICHER_KWH_PRO_1000_VERBRAUCH * 2) / 2;
 
   const result = calculate(dach, ausrichtung, neigung, verbrauch, speicherKwh, eauto, waermepumpe, pvgisData, dachform, eautoProfil, tageszeit);
+  // Speicher-Vergleich im Ergebnis (Muster SMA Solarrechner): dieselbe
+  // calculate()-Funktion zweimal — ohne und mit Speicher (gewählte Größe bzw.
+  // Faustregel-Vorschlag). Keine neue Rechenlogik, nur zwei Szenarien.
+  const vergleichKwh = speicherKwh > 0 ? speicherKwh : speicherVorschlagKwh;
+  const resultOhneSpeicher = showResult ? calculate(dach, ausrichtung, neigung, verbrauch, 0, eauto, waermepumpe, pvgisData, dachform, eautoProfil, tageszeit) : null;
+  const resultMitSpeicher = showResult ? calculate(dach, ausrichtung, neigung, verbrauch, vergleichKwh, eauto, waermepumpe, pvgisData, dachform, eautoProfil, tageszeit) : null;
 
   // Ab wann die Live-Vorschau echte Zahlen zeigen darf. Ohne Dachform greift
   // computeKwp() auf einen Mittelwert zurück und ohne Verbrauch ist die
@@ -250,6 +274,7 @@ export default function Wizard() {
       content: (
         <StepSpeicher
           speicherKwh={speicherKwh} setSpeicherKwh={setSpeicherKwh}
+          speicherWahl={speicherWahl} setSpeicherWahl={setSpeicherWahl}
           kwp={kwp} gesamtVerbrauch={gesamtVerbrauch}
           vorschlagKwh={speicherVorschlagKwh}
           tageszeit={tageszeit}
@@ -263,11 +288,12 @@ export default function Wizard() {
     { icon: <IconRuler size={15} />, label: "Dachfläche", value: dachform ? `${dach} m²` : "–" },
     { icon: <IconSun size={15} />, label: "Anlage", value: dachform ? `${Number(kwp).toLocaleString("de-DE")} kWp` : "–" },
     { icon: <IconBolt size={15} />, label: "Verbrauch", value: gesamtVerbrauch > 0 ? `${gesamtVerbrauch.toLocaleString("de-DE")} kWh` : "–" },
-    { icon: <IconBattery size={15} />, label: "Speicher", value: speicherKwh > 0 ? `${speicherKwh} kWh` : "–" },
+    { icon: <IconBattery size={15} />, label: "Speicher", value: speicherWahl === "mit" ? `${Number(speicherKwh).toLocaleString("de-DE")} kWh` : speicherWahl === "ohne" ? "ohne" : "–" },
   ];
 
   if (showResult) {
     return (
+      <div ref={topRef}>
       <ResultScreen
         result={result}
         displayLocation={displayLocation}
@@ -277,6 +303,7 @@ export default function Wizard() {
         ausrichtung={ausrichtung}
         neigung={neigung}
         speicherKwh={speicherKwh}
+        speicherVergleich={{ ohne: resultOhneSpeicher, mit: resultMitSpeicher, mitKwh: vergleichKwh }}
         eauto={eauto}
         eautoProfil={eautoProfil}
         waermepumpe={waermepumpe}
@@ -284,6 +311,7 @@ export default function Wizard() {
         plz={plz}
         onRestart={restart}
       />
+      </div>
     );
   }
 
@@ -341,14 +369,12 @@ export default function Wizard() {
           border: `1px solid ${theme.color.border}`,
           padding: "24px 22px",
         }}>
-          {/* Wizard Header */}
-          <div style={{ textAlign: "center", marginBottom: 20 }}>
+          {/* Wizard Header — auf Mobil ausgeblendet (Layout.jsx), damit die
+              Frage selbst schneller sichtbar ist. */}
+          <div className="calc-card__title" style={{ textAlign: "center", marginBottom: 20 }}>
             <h2 style={{ fontFamily: theme.font.display, fontSize: 19, fontWeight: 600, color: theme.color.textPrimary, margin: "0 0 4px" }}>
               Ihr persönlicher Photovoltaik-Rechner
             </h2>
-            <p style={{ fontSize: 13, color: theme.color.textMuted, margin: 0 }}>
-              4 kurze Schritte — kostenlos und unverbindlich
-            </p>
           </div>
 
           {/* Progress */}
@@ -417,7 +443,8 @@ export default function Wizard() {
                 onClick={goBack}
                 style={{
                   flex: 1,
-                  padding: "14px",
+                  padding: "14px 10px",
+                  whiteSpace: "nowrap",
                   borderRadius: 12,
                   border: `1.5px solid ${theme.color.border}`,
                   background: theme.color.white,
@@ -444,7 +471,7 @@ export default function Wizard() {
                 Schritt 0 (Standort) ist kein Sub-Flow, wird hier aber genauso
                 gegated: stepReady wird erst true, wenn die PLZ vollständig ist
                 (siehe eigener useEffect oben). */}
-            {((!SUB_FLOW_STEPS.includes(step) && step !== 0) || stepReady) && (
+            {(step === 3 ? speicherWahl != null : ((!SUB_FLOW_STEPS.includes(step) && step !== 0) || stepReady)) && (
               <button
                 onClick={() => {
                   if (step < steps.length - 1) goStep(step + 1);

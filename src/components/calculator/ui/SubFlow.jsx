@@ -83,7 +83,7 @@ const SubFlow = forwardRef(function SubFlow({ total, children, onReadyChange, in
         @keyframes subSlideInLeft { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: translateX(0); } }
         @keyframes subFadeIn { from { opacity: 0; } to { opacity: 1; } }
       `}</style>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 22, marginBottom: 14 }}>
+      <div className="subflow-progress" style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 22, marginBottom: 14 }}>
         {index > 0 ? (
           <button
             onClick={back}

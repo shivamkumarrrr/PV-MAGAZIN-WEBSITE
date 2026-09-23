@@ -34,7 +34,7 @@ export default function PvLeadForm({
   onRestart,
 }) {
   const zusammenfassung = [
-    `${result.kwp} kWp`,
+    `${result.kwp.toLocaleString("de-DE")} kWp`,
     `${result.jahresertrag.toLocaleString("de-DE")} kWh/Jahr`,
     `${result.jahresErsparnis.toLocaleString("de-DE")} €/Jahr Ersparnis`,
     displayLocation || null,
@@ -47,7 +47,7 @@ export default function PvLeadForm({
       onRestart={onRestart}
       daten={{
         plz: displayLocation || plz,
-        anlagengroesse: `${result.kwp} kWp`,
+        anlagengroesse: `${result.kwp.toLocaleString("de-DE")} kWp`,
         jahresertrag: `${result.jahresertrag.toLocaleString("de-DE")} kWh`,
         jahresersparnis: `${result.jahresErsparnis.toLocaleString("de-DE")} €`,
         amortisation: result.amortisation != null ? `${result.amortisation} Jahre` : "nicht bezifferbar",

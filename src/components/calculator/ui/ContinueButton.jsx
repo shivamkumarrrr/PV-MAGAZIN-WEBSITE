@@ -4,11 +4,14 @@ import theme from "../../../theme.js";
 // brauchen (Slider- oder Mehrfach-Entscheidungen). Die eine Akzentfarbe für
 // den einen klaren Zweck (Weiter im Sub-Flow) — die Haupt-"Weiter →"-Schalt-
 // fläche im Wizard bleibt bewusst dunkel.
-export default function ContinueButton({ onClick, label = "Weiter →" }) {
+export default function ContinueButton({ onClick, label = "Weiter →", disabled = false }) {
   return (
     <button
-      onClick={onClick}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      aria-disabled={disabled}
       style={{
+        opacity: disabled ? 0.45 : 1,
         width: "100%",
         padding: "14px",
         borderRadius: theme.radius.lg,
@@ -17,7 +20,7 @@ export default function ContinueButton({ onClick, label = "Weiter →" }) {
         color: theme.color.white,
         fontSize: 14,
         fontWeight: 600,
-        cursor: "pointer",
+        cursor: disabled ? "not-allowed" : "pointer",
         transition: "background-color 0.15s, transform 0.1s",
         marginTop: 8,
       }}

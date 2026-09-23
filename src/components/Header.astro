@@ -241,6 +241,23 @@ const THEMEN_BILD = {
     gap: 4px;
   }
 
+  /* 320-px-Geräte: Logo + zwei Nav-Pillen waren 358 px breit — die ganze
+     Seite scrollte horizontal (u. a. schnitt das die Vorschau-Leiste des
+     Rechners ab). Enger setzen statt umbrechen. */
+  @media (max-width: 360px) {
+    .logo {
+      height: 28px;
+    }
+    .main-nav {
+      gap: 0;
+    }
+    .main-nav .nav-link {
+      padding: 8px 8px;
+      font-size: 14px;
+      gap: 4px;
+    }
+  }
+
   .nav-panel {
     position: relative;
   }

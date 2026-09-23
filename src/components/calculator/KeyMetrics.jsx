@@ -95,8 +95,8 @@ export default function KeyMetrics({ result, speicherKwh, eauto, waermepumpe, fo
       )}
 
       {/* Key Metrics */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-        <ResultCard label="Anlagengröße" value={result.kwp} unit="kWp" sub={`${result.module} Module · ${result.nutzbar} m²`} />
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10, marginBottom: 16 }}>
+        <ResultCard label="Anlagengröße" value={result.kwp.toLocaleString("de-DE")} unit="kWp" sub={`${result.module} Module · ${result.nutzbar} m²`} />
         <ResultCard label="Jahresertrag" value={formatSpan(result.jahresertrag)} unit="kWh" sub="±12% Spannbreite" />
         {/* Ohne Jahresersparnis liefert calculate() bewusst null statt einer Zahl —
             dann "–" zeigen statt der 0, die formatSpan() sonst ausgeben würde. */}
