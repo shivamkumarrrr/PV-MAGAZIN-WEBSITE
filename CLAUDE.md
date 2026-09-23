@@ -103,7 +103,7 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   anderen nutzen diesen Baustein, wo Zwischenwerte sonst unsichtbar bleiben.
 - `src/components/calculator/ui/Energiefluss.jsx` — Flussbild der Jahresbilanz
   (Haus in der Mitte, vier Ströme als Bögen: Erzeugung, Netzbezug, Einspeisung,
-  Speicher; Hausverbrauch unter dem Haus). Das **Signature-Element der
+  Speicher; Hausverbrauch im Haus; Strichstärke folgt der Energiemenge). Das **Signature-Element der
   Live-Vorschau** — es hat dort den Autarkie-Ring UND das Monatschart ersetzt,
   weil drei Grafiken in einer 400px-Spalte gegen Design-Regel 11 verstießen.
   Alles steckt in EINEM SVG mit fester viewBox, auch die Beschriftung; dadurch

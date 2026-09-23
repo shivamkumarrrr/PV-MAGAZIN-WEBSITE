@@ -4,22 +4,34 @@ import Energiefluss from "./ui/Energiefluss.jsx";
 import { formatSpan } from "../../lib/calculate.js";
 import { useAnimatedNumber } from "../../lib/useAnimatedNumber.js";
 
+// Herkunft des Hausverbrauchs als EIN geteilter Balken: orange = vom eigenen
+// Dach (= Autarkiegrad), grau = aus dem Netz. Dieselben Farben wie die Bahnen
+// im Flussbild darüber, damit der Balken dessen Zusammenfassung ist.
 function AutarkieBalken({ pct, bereit = true }) {
   const animiert = useAnimatedNumber(pct);
-  const gezeigt = Math.round(animiert);
+  const eigen = Math.min(100, Math.max(0, Math.round(animiert)));
+  const netz = 100 - eigen;
   return (
-    <div style={{ marginTop: 4 }}>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 7, marginBottom: 7 }}>
-        <span style={{ fontSize: 13, color: theme.color.textSecondary }}>Autarkie</span>
-        <span style={{ fontSize: 17, fontWeight: 700, color: bereit ? theme.color.accentText : theme.color.textMuted, fontVariantNumeric: "tabular-nums" }}>{bereit ? `${gezeigt} %` : "–"}</span>
+    <div style={{ marginTop: 8 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 7, fontSize: 12, color: theme.color.textSecondary }}>
+        <span>
+          <span style={{ fontSize: 17, fontWeight: 700, color: bereit ? theme.color.accentText : theme.color.textMuted, fontVariantNumeric: "tabular-nums" }}>{bereit ? `${eigen} %` : "–"}</span>{" "}
+          vom eigenen Dach
+        </span>
+        <span>
+          aus dem Netz{" "}
+          <span style={{ fontSize: 13, fontWeight: 600, color: bereit ? theme.color.textPrimary : theme.color.textMuted, fontVariantNumeric: "tabular-nums" }}>{bereit ? `${netz} %` : "–"}</span>
+        </span>
       </div>
       <div
-        style={{ height: 8, borderRadius: theme.radius.pill, background: theme.color.bg, overflow: "hidden" }}
+        style={{ display: "flex", gap: 3, height: 8 }}
         role="img"
-        aria-label={bereit ? `Autarkiegrad ${gezeigt} Prozent` : "Autarkiegrad noch nicht berechnet"}
+        aria-label={bereit ? `Autarkiegrad ${eigen} Prozent, ${netz} Prozent aus dem Netz` : "Autarkiegrad noch nicht berechnet"}
       >
-        <div style={{ width: `${Math.min(100, Math.max(0, animiert))}%`, height: "100%", borderRadius: theme.radius.pill, background: theme.color.accent }} />
+        <div style={{ width: bereit ? `${eigen}%` : "0%", borderRadius: theme.radius.pill, background: theme.color.accent, transition: "width 0.4s ease" }} />
+        <div style={{ flex: 1, borderRadius: theme.radius.pill, background: bereit ? theme.color.border : theme.color.bg }} />
       </div>
+      <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 6 }}>Autarkiegrad: Anteil Ihres Verbrauchs, den die Anlage deckt</div>
     </div>
   );
 }
@@ -78,8 +90,8 @@ export default function LivePanel({ result, speicherKwh, flashKey, bereit = true
           .live-panel-punkt-ring { animation: none; opacity: 0; }
         }
       `}</style>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 600, color: theme.color.textPrimary }}>
+      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "baseline", justifyContent: "space-between", columnGap: 12, rowGap: 2, marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7, fontSize: 14, fontWeight: 600, color: theme.color.textPrimary, whiteSpace: "nowrap" }}>
           {/* Derselbe Punkt wie im Mini-Rechner auf der Startseite
               (RechnerWidget.jsx) — dieselbe Aussage ("rechnet gerade live"),
               hier zusätzlich zum bereits vorhandenen Textlabel. */}
@@ -102,7 +114,7 @@ export default function LivePanel({ result, speicherKwh, flashKey, bereit = true
           style={{
             fontSize: 27,
             fontWeight: 700,
-            color: theme.color.accentHover,
+            color: bereit ? theme.color.accentHover : theme.color.textMuted,
             fontVariantNumeric: "tabular-nums",
             lineHeight: 1.15,
             whiteSpace: "nowrap",
@@ -129,8 +141,7 @@ export default function LivePanel({ result, speicherKwh, flashKey, bereit = true
       <AutarkieBalken pct={bereit ? result.autarkie : 0} bereit={bereit} />
 
       <div style={{ marginTop: 14 }}>
-        <StatRow label="Anlagengröße" value={bereit ? `${result.kwp} kWp · ${result.module} Module` : "–"} />
-        <StatRow label="Speicher" value={speicherKwh > 0 ? `${speicherKwh} kWh` : "keiner"} />
+        <StatRow label="Anlagengröße" value={bereit ? `${Number(result.kwp).toLocaleString("de-DE")} kWp · ${result.module} Module` : "–"} />
       </div>
     </div>
   );
