@@ -19,6 +19,10 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Streudiagramm from "../../components/Streudiagramm.astro";
+import { autarkieNachSpeicher } from "../../lib/diagrammDaten.js";
+
+export const kurven = autarkieNachSpeicher();
 
 Ein Batteriespeicher ist die Zusatzoption, bei der Beratungsgespräche am
 häufigsten zu unrealistischen Erwartungen führen — in beide Richtungen.
@@ -43,6 +47,29 @@ Anlage erhöhen. Wer sich
 von einem Speicher einen höheren Ertrag statt einer besseren Verteilung
 des vorhandenen Ertrags erwartet, wird enttäuscht.
 
+Und der Zugewinn flacht ab. Die ersten Kilowattstunden Speicher heben den
+Autarkiegrad deutlich, jede weitere bringt weniger — die HTW Berlin
+beschreibt genau diese Sättigung. Das Diagramm zeigt es für drei Haushalte
+mit jeweils passend ausgelegter Anlage:
+
+<Streudiagramm
+  titel="Autarkiegrad nach Speichergröße"
+  untertitel="Je Haushalt eine Anlage mit 1 kWp je 1.000 kWh Jahresverbrauch"
+  x={{ titel: "Nutzbare Speicherkapazität", min: 0, max: 14, schritte: [0, 2, 4, 6, 8, 10, 12, 14], einheit: " kWh" }}
+  y={{ titel: "Autarkiegrad", min: 40, max: 75, schritte: [40, 50, 60, 70], einheit: " %" }}
+  reihen={[
+    { name: `${kurven[0].verbrauch.toLocaleString("de-DE")} kWh Verbrauch`, farbe: "akzent", verbinden: true, punkte: kurven[0].punkte },
+    { name: `${kurven[1].verbrauch.toLocaleString("de-DE")} kWh`, farbe: "sky", verbinden: true, punkte: kurven[1].punkte },
+    { name: `${kurven[2].verbrauch.toLocaleString("de-DE")} kWh`, farbe: "navy", verbinden: true, punkte: kurven[2].punkte },
+  ]}
+  quelle="Modellrechnung von Photovoltaik Aktuell mit der Autarkie-Kennlinie des Photovoltaik-Rechners (ADAC-Spannen, Speicherbonus nach HTW Berlin, Stromspeicher-Inspektion 2025). Typische Haushalte, kein Lastgang — reale Werte können abweichen."
+/>
+
+Für einen Haushalt mit 3.000 kWh ist der Effekt nach etwa 6 bis 7 kWh
+ausgeschöpft; größere Haushalte profitieren länger. Darum lautet die
+Faustregel der HTW Berlin rund 1 bis 1,2 kWh Speicher je 1.000 kWh
+Jahresverbrauch — und nicht „so groß wie möglich“.
+
 ## Kosten: pro kWh Kapazität, nicht pauschal
 
 Speicherkosten werden nach nutzbarer Kapazität in kWh berechnet, nicht
@@ -60,7 +87,7 @@ suggeriert. Dass zwei gleich große Speicher dabei nicht gleich viel
 liefern, zeigt der Artikel zum
 [Speicher-Wirkungsgrad](/ratgeber/speicher-wirkungsgrad-worauf-es-ankommt/).
 
-<RechnerCta text="Der Speicher-Schritt im Rechner zeigt einen dimensionierten Vorschlag für Ihren eigenen Verbrauch — mit Live-Vorschau, wie sich Ihr Autarkiegrad dadurch verändert." href="/rechner/speicher/" />
+<RechnerCta text="Der Speicherrechner zeigt für Ihre Anlage und Ihren Verbrauch, wie viel Mehr-Eigenverbrauch, Autarkie und Ersparnis ein Speicher bringt — und ob er sich in seiner Lebensdauer amortisiert." href="/rechner/speicher/" />
 
 ## Die unbequeme Wahrheit: Amortisation wird länger, nicht kürzer
 

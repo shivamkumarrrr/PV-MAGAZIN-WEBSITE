@@ -1,0 +1,504 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import Zeitleiste from "../../components/Zeitleiste.astro";
+import { STROMPREIS, EINSPEISE } from "../../lib/calculate.js";
+
+// Themenseite zur Umstellung 2027: Ende der festen Einspeisevergütung für neue
+// Kleinanlagen (EEG-Novelle, Regierungsentwurf) und MiSpeL (beschlossen).
+// Angestoßen durch ein Kundenbriefing (Oktober 2026); übernommen ist nur die
+// Sachlage, keine Firmenangaben — Photovoltaik Aktuell bleibt neutral.
+//
+// Die ausführliche Fassung mit Quellen im Fließtext und FAQ ist der Artikel
+// /ratgeber/photovoltaik-2027-eeg-novelle-energiesystem/. Diese Seite ist der
+// kompakte Einstieg. Ändert sich der Verfahrensstand (2./3. Lesung, Bundesrat,
+// EU-Genehmigung), BEIDE Stellen nachziehen, plus STAND unten — der Stand
+// erscheint auch als "Heute"-Marke in der Zeitleiste und muss dort zwischen
+// den richtigen Einträgen stehen.
+//
+// Strompreis und heutige Vergütung kommen aus calculate.js. Die 5,2 ct der
+// Übergangszahlung stehen bewusst als Literal hier: Sie sind ein Entwurfswert,
+// keine Rechnerkonstante — die Rechner rechnen weiter mit geltendem Recht.
+const STAND = "14. Oktober 2026";
+const STAND_KURZ = "14.10.2026";
+const UEBERGANG_ENTWURF = 0.052; // €/kWh, EEG 2027-RegE, Drucksache 21/7867, erster Satz
+
+const ct = (eur) =>
+  new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
+const ctKurz = (eur) =>
+  new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 }).format(eur * 100);
+
+// Die Zeitleiste ist das eine Signature-Element der Seite. `gilt` trennt
+// Beschlossenes von Geplantem — genau die Unterscheidung, die in der
+// Berichterstattung am häufigsten verwischt. `heute: true` ist kein Ereignis,
+// sondern die Marke, an der der Leser gerade steht.
+const zeitleiste = [
+  {
+    datum: "1.1.2025",
+    titel: "Dynamische Stromtarife für alle",
+    text: "Jeder Stromlieferant muss Kunden mit intelligentem Messsystem einen Tarif anbieten, der den Börsenpreis stundengenau weitergibt (§ 41a EnWG).",
+    gilt: true,
+  },
+  {
+    datum: "25.2.2025",
+    titel: "Solarspitzengesetz",
+    text: "Neue Anlagen: keine Vergütung bei negativen Börsenpreisen, ohne Steuerungseinrichtung höchstens 60 % Einspeiseleistung.",
+    gilt: true,
+  },
+  {
+    datum: "29.7.2026",
+    titel: "Kabinett beschließt EEG-Entwurf",
+    text: "Die feste 20-jährige Einspeisevergütung soll für neue Anlagen unter 25 kW entfallen. Seit 24.9.2026 im Bundestag (Drucksache 21/7867).",
+    gilt: false,
+  },
+  {
+    datum: "1.10.2026",
+    titel: "MiSpeL beschlossen",
+    text: "Speicher dürfen Netz- und Solarstrom mischen, ohne die Förderung für den Solarstrom zu verlieren. Bidirektionale Ladepunkte werden Speichern weitgehend gleichgestellt.",
+    gilt: true,
+  },
+  { heute: STAND_KURZ },
+  {
+    datum: "31.12.2026",
+    titel: "Stichtag für das heutige Vergütungsmodell",
+    text: `Wer bis hier in Betrieb nimmt, behält nach dem Entwurf ${ct(EINSPEISE)} ct je kWh für 20 Jahre (Teileinspeisung bis 10 kWp).`,
+    gilt: false,
+  },
+  {
+    datum: "1.1.2027",
+    titel: "Geplanter Start der Novelle",
+    text: `Übergangszahlung von zunächst ${ct(UEBERGANG_ENTWURF)} ct für drei Jahre, danach Eigenverbrauch, Direktvermarktung oder unbezahlte Abgabe ans Netz. Dauerhafte Einspeisegrenze 50 % für Dachanlagen unter 100 kW.`,
+    gilt: false,
+  },
+  {
+    datum: "Ende Sept. 2027",
+    titel: "MiSpeL-Übergangsphase endet",
+    text: "Bis dahin geht MiSpeL nur mit Einverständnis von Netz- und Messstellenbetreiber. Die Pauschaloption braucht zusätzlich die Genehmigung der EU-Kommission.",
+    gilt: true,
+  },
+];
+
+// `rolle` ist das Verb, das der Baustein im System übernimmt. In dieser
+// Reihenfolge gelesen ergibt die Spalte den Ablauf: erzeugen, speichern,
+// messen, steuern, bepreisen, verbrauchen.
+const bausteine = [
+  {
+    rolle: "Erzeugen",
+    name: "Photovoltaikanlage",
+    aufgabe: "Ohne feste Vergütung nach dem eigenen Verbrauch auslegen, nicht nach der größtmöglichen Dachfläche.",
+  },
+  {
+    rolle: "Speichern",
+    name: "Batteriespeicher",
+    aufgabe: "Verschiebt Solarstrom vom Mittag in den Abend — und darf mit MiSpeL zusätzlich günstigen Netzstrom aufnehmen.",
+  },
+  {
+    rolle: "Messen",
+    name: "Intelligentes Messsystem",
+    aufgabe: "Misst im Viertelstundentakt. Voraussetzung für dynamischen Tarif, Direktvermarktung und volle Einspeiseleistung; über 7 kWp Pflicht.",
+  },
+  {
+    rolle: "Steuern",
+    name: "Energiemanagement (HEMS)",
+    aufgabe: "Verknüpft Wetterprognose, Ladezustand, Strompreis und Verbrauch — niemand muss die Börse beobachten.",
+  },
+  {
+    rolle: "Bepreisen",
+    name: "Dynamischer Stromtarif",
+    aufgabe: "Gibt den Börsenpreis stundengenau weiter. Lohnt sich vor allem, wenn große Verbraucher in günstige Stunden wandern.",
+  },
+  {
+    rolle: "Verbrauchen",
+    name: "Wärmepumpe, Wallbox, E-Auto",
+    aufgabe: "Die großen, verschiebbaren Verbraucher. Mit bidirektionalem Laden wird das Auto perspektivisch selbst zum Speicher.",
+  },
+];
+---
+
+<BaseLayout
+  title="Photovoltaik 2027: EEG-Novelle, MiSpeL und das Energiesystem | Photovoltaik Aktuell"
+  description="Feste Einspeisevergütung vor dem Aus, MiSpeL seit Oktober 2026 beschlossen: was für neue PV-Anlagen gilt, was nur geplant ist und warum Speicher, Smart Meter und Steuerung jetzt den Wert bestimmen."
+>
+  <section class="container p27-kopf">
+    <Breadcrumb glieder={[{ name: "Photovoltaik 2027" }]} />
+    <p class="p27-eyebrow">Themenseite · Stand {STAND}</p>
+    <h1>Photovoltaik 2027: Vom Einspeisen zum Energiesystem</h1>
+    <p class="p27-lead">
+      Ab 2027 kann eine Solaranlage mehr als einspeisen: Batteriespeicher
+      dürfen erstmals am Strommarkt mitspielen, und Smart Meter und
+      Energiemanagement entscheiden, wann Strom genutzt, gespeichert oder
+      verkauft wird. Die feste Einspeisevergütung für neue Anlagen soll dafür
+      entfallen — sie war für eine gut ausgelegte Anlage ohnehin nie der
+      größte Posten.
+    </p>
+  </section>
+
+  <section class="container p27-abschnitt">
+    <h2>Die Frage ändert sich</h2>
+    <div class="p27-vergleich">
+      <div class="p27-spalte">
+        <p class="p27-jahr">2026</p>
+        <p class="p27-frage">„Wie hoch ist meine Einspeisevergütung?“</p>
+        <p class="p27-spalte-text">
+          Die Anlage erzeugt Strom, der Überschuss geht ins Netz und bekommt
+          einen festen Satz — heute{" "}{ct(EINSPEISE)} ct je kWh bis 10 kWp,
+          20 Jahre lang.
+        </p>
+      </div>
+      <svg class="p27-pfeil" viewBox="0 0 40 16" aria-hidden="true">
+        <path d="M2 8h34M29 2l7 6-7 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div class="p27-spalte p27-spalte--neu">
+        <p class="p27-jahr">2027</p>
+        <p class="p27-frage">„Wie viel kann mein Energiesystem für mich herausholen?“</p>
+        <p class="p27-spalte-text">
+          Die Anlage wird Teil eines Energiesystems: günstig einkaufen,
+          Solarstrom speichern, Verbrauch verschieben, teuren Netzstrom
+          vermeiden, Überschüsse marktorientiert verkaufen.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="container p27-abschnitt p27-wert">
+    <div class="p27-wert-text">
+      <h2>Warum der Eigenverbrauch zählt</h2>
+      <p>
+        Eine selbst genutzte Kilowattstunde erspart rund{" "}
+        <strong>{ctKurz(STROMPREIS)} ct</strong>{" "}Strombezug. Eingespeist
+        bringt sie heute {ct(EINSPEISE)} ct, nach dem Entwurf zunächst{" "}
+        {ct(UEBERGANG_ENTWURF)} ct. Die Lücke dazwischen ist der Hebel — und
+        sie wird größer, je weniger die Einspeisung wert ist.
+      </p>
+      <p>
+        Genau diese Lücke schließen Speicher, Steuerung und verschiebbare
+        Verbraucher: Jede Kilowattstunde, die im Haus bleibt statt ins Netz zu
+        gehen, ist ab 2027 noch mehr wert als heute.
+      </p>
+    </div>
+    <div class="p27-wert-grafik">
+      <Diagramm
+        titel="Was eine Kilowattstunde Solarstrom wert ist"
+        einheit="Cent pro kWh"
+        quelle="Strompreis: BDEW-Haushaltsdurchschnitt. Einspeisevergütung: Bundesnetzagentur / § 49 EEG, Inbetriebnahme 1.8.2026–31.1.2027, bis 10 kWp. Übergangszahlung: Regierungsentwurf EEG 2027, Drucksache 21/7867, erster Satz, nicht beschlossen."
+        werte={[
+          { label: "Selbst verbraucht", wert: STROMPREIS * 100, anzeige: `${ctKurz(STROMPREIS)} Ct`, hervor: true },
+          { label: "Eingespeist, Inbetriebnahme 2026", wert: EINSPEISE * 100, anzeige: `${ct(EINSPEISE)} Ct` },
+          { label: "Eingespeist ab 2027 (Entwurf)", wert: UEBERGANG_ENTWURF * 100, anzeige: `${ct(UEBERGANG_ENTWURF)} Ct` },
+        ]}
+      />
+    </div>
+  </section>
+
+  <section class="container p27-abschnitt">
+    <h2>Was gilt, was geplant ist</h2>
+    <Zeitleiste eintraege={zeitleiste} />
+    <p class="p27-text p27-klein">
+      Bestandsanlagen sind von der Novelle nicht betroffen. Bundesrat und
+      Branchenverbände fordern Änderungen, vor allem eine längere und höhere
+      Übergangszahlung; die Zahlen aus dem Entwurf können sich bis zur
+      Verabschiedung noch ändern.
+    </p>
+  </section>
+
+  <section class="container p27-abschnitt">
+    <h2>Woraus ein Energiesystem besteht</h2>
+    <p class="p27-text">
+      Einzeln gibt es diese Geräte seit Jahren. Neu ist, dass die Regeln ab
+      2027 ihr Zusammenspiel belohnen.
+    </p>
+    <dl class="bausteine">
+      {bausteine.map((b) => (
+        <div class="baustein">
+          <dt>
+            <span class="baustein-rolle">{b.rolle}</span>
+            <span class="baustein-name">{b.name}</span>
+          </dt>
+          <dd>{b.aufgabe}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="container p27-abschnitt">
+    <h2>Was sich nicht versprechen lässt</h2>
+    <p class="p27-text">
+      Speicher-Arbitrage, dynamischer Tarif und Direktvermarktung sind{" "}
+      <strong>zusätzliche</strong>{" "}Einspar- und Erlösmöglichkeiten neben dem
+      klassischen Eigenverbrauch — keine garantierten Mehrerträge. Wie viel
+      übrig bleibt, hängt an Preisunterschieden über den Tag, die niemand für
+      zwanzig Jahre vorhersagt, und an Gebühren für Messung und Vermarktung.
+      Unsere Rechner bilden diese neuen Erlöse deshalb nicht ab und rechnen
+      mit dem heute geltenden Recht; warum, steht unter{" "}
+      <a href="/methodik/">Methodik</a>.
+    </p>
+
+    <RechnerCta
+      variant="final"
+      text="Heute planen, 2027 intelligent starten: Der Rechner zeigt Ihren Eigenverbrauch getrennt von der Einspeisung — die Größe, auf die es ab 2027 ankommt. Ersparnis und Amortisation rechnen mit der heutigen Vergütung, gelten also für eine Inbetriebnahme bis 31.12.2026."
+    />
+
+    <a class="p27-weiter" href="/ratgeber/photovoltaik-2027-eeg-novelle-energiesystem/">
+      <span class="p27-weiter-kopf">Ausführlich, mit Quellen und FAQ</span>
+      <span class="p27-weiter-titel">Photovoltaik 2027: Was die EEG-Novelle ändert →</span>
+    </a>
+
+    <p class="p27-quellen">
+      Quellen: Bundesnetzagentur, MiSpeL-Festlegung vom 1.10.2026
+      (Az. 618-25-02); Deutscher Bundestag, Drucksachen 21/7867 und 21/8298;
+      Stiftung Umweltenergierecht, EEG 2027-RegE; § 14a und § 41a EnWG;
+      Solarspitzengesetz 2025. Stand {STAND}.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ---------- Kopf ---------- */
+  .p27-kopf {
+    padding-block: 8px 8px;
+  }
+
+  .p27-eyebrow {
+    margin: 20px 0 10px;
+    font-family: var(--font-display);
+    font-size: var(--schrift-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .p27-kopf h1 {
+    max-width: 18ch;
+    font-size: clamp(2rem, 1.3rem + 3.2vw, 3.25rem);
+    line-height: 1.06;
+    letter-spacing: -0.028em;
+    margin-bottom: 20px;
+  }
+
+  .p27-lead {
+    max-width: 62ch;
+    margin: 0;
+    font-size: var(--schrift-md);
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  /* ---------- Abschnitte ---------- */
+  .p27-abschnitt {
+    padding-block: 56px 0;
+  }
+
+  .p27-abschnitt h2 {
+    max-width: 24ch;
+    font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+    margin-bottom: 18px;
+  }
+
+  .p27-text {
+    max-width: 68ch;
+    line-height: 1.65;
+  }
+
+  .p27-klein,
+  .p27-quellen {
+    font-size: var(--schrift-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .p27-quellen {
+    max-width: 68ch;
+    margin: 28px 0 0;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+    line-height: 1.6;
+  }
+
+  /* ---------- 2026 → 2027 ----------
+     Zwei Spalten, keine Karten. Die Jahreszahl trägt den Vergleich; Orange
+     steht wie in der Zeitleiste für das Kommende, sonst nirgends. */
+  .p27-vergleich {
+    display: grid;
+    gap: 24px;
+    max-width: 1020px;
+  }
+
+  .p27-spalte {
+    border-top: 1px solid var(--color-border);
+    padding-top: 14px;
+  }
+
+  .p27-spalte--neu {
+    border-top: 2px solid var(--color-text-primary);
+    padding-top: 13px;
+  }
+
+  .p27-jahr {
+    margin: 0 0 6px;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: clamp(2.75rem, 2rem + 3vw, 4rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-text-muted);
+  }
+
+  .p27-spalte--neu .p27-jahr {
+    color: var(--color-accent);
+  }
+
+  .p27-frage {
+    margin: 0 0 10px;
+    max-width: 22ch;
+    font-family: var(--font-display);
+    font-size: var(--schrift-lg);
+    font-weight: 600;
+    line-height: 1.25;
+    color: var(--color-text-primary);
+  }
+
+  .p27-spalte-text {
+    margin: 0;
+    max-width: 44ch;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  .p27-pfeil {
+    display: none;
+    width: 40px;
+    color: var(--color-text-muted);
+  }
+
+  @media (min-width: 760px) {
+    .p27-vergleich {
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0 32px;
+    }
+
+    .p27-pfeil {
+      display: block;
+      align-self: start;
+      margin-top: 44px;
+    }
+  }
+
+  /* ---------- Wert einer kWh ---------- */
+  .p27-wert {
+    display: grid;
+    gap: 8px 48px;
+    align-items: start;
+  }
+
+  .p27-wert-text p {
+    max-width: 52ch;
+    line-height: 1.65;
+  }
+
+  .p27-wert-grafik :global(.diagramm) {
+    margin-top: 0;
+  }
+
+  @media (min-width: 900px) {
+    .p27-wert {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    }
+
+    .p27-wert-grafik {
+      padding-top: 8px;
+    }
+  }
+
+  /* ---------- Bausteine ----------
+     Typografische Liste mit Trennlinien, keine Icon-Karten (Regeln 6 und 7).
+     Das Verb über dem Namen trägt die Ordnung, nicht ein Symbol. */
+  .bausteine {
+    margin: 20px 0 0;
+    display: grid;
+    gap: 0 40px;
+    max-width: 1020px;
+  }
+
+  .baustein {
+    border-top: 1px solid var(--color-border);
+    padding: 16px 0 20px;
+  }
+
+  .baustein dt {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .baustein-rolle {
+    font-family: var(--font-display);
+    font-size: var(--schrift-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .baustein-name {
+    font-family: var(--font-display);
+    font-size: var(--schrift-md);
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  .baustein dd {
+    margin: 6px 0 0;
+    max-width: 44ch;
+    color: var(--color-text-secondary);
+    font-size: var(--schrift-sm);
+    line-height: 1.6;
+  }
+
+  @media (min-width: 640px) {
+    .bausteine {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (min-width: 980px) {
+    .bausteine {
+      grid-template-columns: 1fr 1fr 1fr;
+    }
+  }
+
+  /* ---------- Weiterlesen ---------- */
+  .p27-weiter {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 8px;
+    text-decoration: none;
+    color: var(--color-text-primary);
+  }
+
+  .p27-weiter-kopf {
+    font-size: var(--schrift-sm);
+    color: var(--color-text-secondary);
+  }
+
+  .p27-weiter-titel {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--color-border);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.15s;
+  }
+
+  .p27-weiter:hover .p27-weiter-titel {
+    text-decoration-color: var(--color-accent);
+  }
+
+  /* Abstand zum Footer: der letzte Abschnitt endet sonst bündig. */
+  .p27-abschnitt:last-of-type {
+    padding-bottom: 64px;
+  }
+</style>

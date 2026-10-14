@@ -20,6 +20,12 @@ const articles = defineCollection({
     dateModified: z.coerce.date(),
     relatedRechner: z.string().default("photovoltaik"),
 
+    // Optionaler Text der Rechner-Abschlussbox. Ohne Angabe steht dort die
+    // Beschreibung des Rechners aus src/lib/rechner.js. Nur setzen, wenn der
+    // Artikel einen Vorbehalt braucht (z. B. EEG 2027: der Rechner rechnet mit
+    // heutigem Recht).
+    rechnerText: z.string().optional(),
+
     // Optionales OG-Bild pro Artikel (Pfad relativ zur Site, z. B.
     // "/og/speicher.jpg"). Ohne Angabe greift das Standardbild aus
     // BaseLayout.astro — vorher hatte KEINE Seite ein og:image, jeder
@@ -45,6 +51,13 @@ const articles = defineCollection({
     // Kurze, quellenbelegte Kernsätze; optional, damit ältere Artikel nicht
     // nachträglich gepflegt werden müssen. Wird als gestylte Liste gerendert.
     zusammenfassung: z.array(z.string()).optional(),
+
+    // "So gehen Sie vor"-Block am Ende des Fließtexts (Muster: Finanztip).
+    // Drei bis fünf konkrete nächste Schritte in sinnvoller Reihenfolge; der
+    // letzte Schritt ist sinnvollerweise der Rechner, dessen Abschluss-Box nach
+    // den FAQ folgt.
+    // Optional — nur für Artikel, aus denen eine Handlung folgt.
+    vorgehen: z.array(z.string()).optional(),
 
     // Optionales Hero-Foto pro Artikel (pfad relativ zu /public, z.B.
     // "/images/heroes/kosten.jpg"). Wenn gesetzt, zeigt ArticleHero das Foto

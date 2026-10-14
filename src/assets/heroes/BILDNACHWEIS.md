@@ -3,8 +3,9 @@
 Alle Dateien stammen von Pexels. Die Pexels-Lizenz erlaubt die kommerzielle
 Nutzung ohne Namensnennung; die Urheber sind hier trotzdem festgehalten,
 damit bei einer Lizenzpruefung die Herkunft belegbar bleibt.
-Zuschnitt: mittiger Ausschnitt auf 1600x686 (Skript im Sitzungs-Scratchpad).
-Stand: 14.09.2026.
+Zuschnitt: mittiger Ausschnitt auf 1600x1067 (3:2), neu aus den Pexels-Originalen
+geschnitten am 14.10.2026 (vorher 1600x686 — als Artikel-Hero zu flach).
+Stand: 14.10.2026.
 
 | Datei | Fotograf | Pexels-ID | Seite |
 | --- | --- | --- | --- |
@@ -23,8 +24,9 @@ Stand: 14.09.2026.
 | speicher-wirkungsgrad.jpg | Elite Power Group | 38171130 | https://www.pexels.com/photo/electrician-installing-solar-inverter-outdoors-38171130/ |
 | steuern.jpg | Kindel Media | 7979432 | https://www.pexels.com/photo/man-couple-love-woman-7979432/ |
 | versicherung.jpg | Gustavo Fring | 4254171 | https://www.pexels.com/photo/solar-technician-inspecting-solar-panel-4254171/ |
+| energiesystem-2027.jpg | Jakub Zerdzicki | 16423104 | https://www.pexels.com/photo/smart-home-control-16423104/ (ergänzt 14.10.2026) |
 | waermepumpe.jpg | alpha innotec | 38067300 | https://www.pexels.com/photo/modern-heat-pump-in-residential-setting-38067300/ |
-| einspeiseverguetung.jpg | (Bestand, Herkunft nicht dokumentiert) | – | – |
+| einspeiseverguetung.jpg | Kindel Media | 9800010 | https://www.pexels.com/photo/aerial-photography-of-solar-farm-9800010/ (ersetzt am 14.10.2026 das Bestandsbild ohne dokumentierte Herkunft) |
 
 Startseiten-Hero (/src/assets/hero-modulflaeche.jpg, 2400x1800, unbeschnitten):
 

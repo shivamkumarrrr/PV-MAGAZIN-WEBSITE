@@ -51,13 +51,18 @@ const vorschlaege = [...new Map(gewichtet.map((a) => [a.id, a])).values()].slice
 )}
 
 <style>
+  /* Gleicher Abschnittsbeginn wie "Das Wichtigste in Kürze" und "So gehen
+     Sie vor" im ArticleLayout: kräftige Linie, dann die Überschrift. */
   .verwandte {
-    margin-top: 2.5em;
+    margin-top: 64px;
+    padding-top: 22px;
+    border-top: 2px solid var(--color-text-primary);
   }
 
   .verwandte h2 {
+    margin-top: 0;
     font-size: 24px;
-    margin-bottom: 0.6em;
+    margin-bottom: 18px;
   }
 
   /* Dieselbe Karte wie auf /ratgeber/, der Startseite und den

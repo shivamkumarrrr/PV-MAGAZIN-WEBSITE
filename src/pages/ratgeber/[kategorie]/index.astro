@@ -1,7 +1,8 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
-import { CATEGORIES, categoryLabel } from "../../../lib/categories.js";
+import { CATEGORIES, categoryLabel, categoryRechner } from "../../../lib/categories.js";
+import { rechnerBySlug } from "../../../lib/rechner.js";
 import Breadcrumb from "../../../components/Breadcrumb.astro";
 import RechnerCta from "../../../components/RechnerCta.astro";
 import ArtikelKarte from "../../../components/ArtikelKarte.astro";
@@ -12,6 +13,11 @@ export async function getStaticPaths() {
 
 const { kategorie } = Astro.params;
 const label = categoryLabel(kategorie);
+const rechner = categoryRechner(kategorie);
+const rechnerText =
+  rechner === "photovoltaik"
+    ? "Die Zahlen aus diesen Artikeln für Ihr eigenes Dach — mit der Einstrahlung für Ihre Postleitzahl statt mit dem Bundesdurchschnitt."
+    : rechnerBySlug(rechner)?.beschreibung;
 const articles = (await getCollection("articles", (a) => a.data.category === kategorie)).sort(
   (a, b) => b.data.datePublished.valueOf() - a.data.datePublished.valueOf()
 );
@@ -42,10 +48,7 @@ const articles = (await getCollection("articles", (a) => a.data.category === kat
     </ul>
     )}
 
-    <RechnerCta
-      variant="final"
-      text="Die Zahlen aus diesen Artikeln für Ihr eigenes Dach — mit der Einstrahlung für Ihre Postleitzahl statt mit dem Bundesdurchschnitt."
-    />
+    <RechnerCta variant="final" href={`/rechner/${rechner}/`} text={rechnerText} />
   </section>
 </BaseLayout>
 

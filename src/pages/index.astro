@@ -334,7 +334,7 @@ const wasIstPvLd = {
               return (
                 <li>
                   <a href={`/rechner/${r.slug}/`}>
-                    {Signet && <span class="rechner-signet" aria-hidden="true"><Signet size={26} /></span>}
+                    {Signet && <span class="rechner-signet" aria-hidden="true"><Signet size={30} /></span>}
                     <span class="rechner-name">{r.kurz}</span>
                     <span class="rechner-zweck">{r.beschreibung}</span>
                   </a>
@@ -734,9 +734,9 @@ const wasIstPvLd = {
      die Liste zur Sitemap-Fußzeile gemacht. */
   .weitere-gruppe a {
     display: grid;
-    grid-template-columns: 20px 1fr;
-    column-gap: 12px;
-    padding: 14px 12px;
+    grid-template-columns: 48px 1fr;
+    column-gap: 16px;
+    padding: 16px 12px;
     margin-inline: -12px;
     border-radius: var(--radius-sm);
     text-decoration: none;
@@ -744,12 +744,22 @@ const wasIstPvLd = {
     transition: background-color 0.15s;
   }
 
+  /* Signet auf einer eigenen Kachel (Oktober 2026): Bei 20px in Grau gingen
+     die eigens gezeichneten Zeichen neben dem Text unter. Die Kachel gibt
+     ihnen eine feste Fläche und richtet alle elf auf dieselbe Achse aus —
+     1px-Rand statt Schatten (Design-Regel 7), Navy statt Akzent, damit Orange
+     dem Hover vorbehalten bleibt. */
   .weitere-gruppe .rechner-signet {
     grid-row: span 2;
-    display: block;
-    padding-top: 2px;
-    color: var(--color-text-muted);
-    transition: color 0.15s;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-brand-navy);
+    transition: color 0.15s, border-color 0.15s;
   }
 
   .weitere-gruppe a:hover {
@@ -757,7 +767,8 @@ const wasIstPvLd = {
   }
 
   .weitere-gruppe a:hover .rechner-signet {
-    color: var(--color-accent);
+    color: var(--color-accent-text);
+    border-color: var(--color-accent);
   }
 
   .weitere-gruppe a:hover .rechner-name {
@@ -766,6 +777,7 @@ const wasIstPvLd = {
 
   .weitere-gruppe .rechner-name {
     display: block;
+    padding-top: 2px;
     font-family: var(--font-display);
     font-weight: 600;
     font-size: 15px;
@@ -961,6 +973,7 @@ const wasIstPvLd = {
 
   .alle-artikel {
     display: inline-block;
+    margin-top: 24px;
     font-weight: 600;
     font-size: 15px;
     color: var(--color-accent-text);

@@ -1,0 +1,359 @@
+---
+// Zeitleiste für Rechtslagen: was gilt, was nur geplant ist, und wo "heute"
+// liegt. Genutzt auf /photovoltaik-2027/ und im EEG-2027-Artikel — bei neuem
+// Verfahrensstand beide Stellen ziehen.
+//
+// Aufbau als Protokoll-Tafel (Oktober 2026 neu gestaltet, vorher eine lose
+// Liste mit großen Leerräumen). Kopfzeile nur mit Legende; drei Spalten — Datum rechtsbündig, Schiene mit
+// Punkt, Inhalt. Der Status steckt dreifach im Bild, damit er auch ohne Farbe
+// lesbar bleibt:
+// - Punkt: gefüllt = gilt, hohler oranger Ring = Entwurf;
+// - Schiene: durchgezogen bis "Heute", danach gestrichelt (Zukunft);
+// - Etikett hinter dem Titel: "gilt" neutral, "Entwurf" in Akzent-Hell.
+// `{ heute: "14.10.2026" }` setzt die Heute-Marke. Kein Stand-Datum in der
+// Kopfzeile (Nutzerwunsch) — der Stand steht im Fließtext darunter.
+//
+// Bewusst ohne Einblend-Animation: Einträge, die unsichtbar starten, fehlen in
+// Ganzseiten-Screenshots und beim Drucken.
+//
+// Nutzung im MDX:
+//   <Zeitleiste eintraege={[
+//     { datum: "1.1.2025", titel: "…", text: "…", gilt: true },
+//     { heute: "14.10.2026" },
+//     { datum: "1.1.2027", titel: "…", text: "…", gilt: false },
+//   ]} />
+interface Ereignis {
+  datum: string;
+  titel: string;
+  text: string;
+  gilt: boolean;
+}
+interface Heute {
+  heute: string;
+}
+interface Props {
+  eintraege: (Ereignis | Heute)[];
+  /** Ältere Prop, wird ignoriert — die Tafel passt sich der Breite selbst an. */
+  kompakt?: boolean;
+}
+
+const { eintraege } = Astro.props;
+const heuteIndex = eintraege.findIndex((e) => "heute" in e);
+---
+
+<figure class="zeitleiste">
+  <figcaption class="zl-kopf">
+    <span class="zl-legende">
+      <span class="zl-legende-eintrag"><span class="zl-punkt zl-punkt--klein" aria-hidden="true"></span>gilt</span>
+      <span class="zl-legende-eintrag"><span class="zl-punkt zl-punkt--klein zl-punkt--entwurf" aria-hidden="true"></span>Entwurf</span>
+    </span>
+  </figcaption>
+
+  <ol class="zl-liste">
+    {eintraege.map((e, i) => {
+      const zukunft = heuteIndex >= 0 && i > heuteIndex;
+      return "heute" in e ? (
+        <li class="zl-heute">
+          <span class="zl-datum zl-heute-label">Heute</span>
+          <span class="zl-schiene" aria-hidden="true"><span class="zl-heute-punkt"></span></span>
+          <span class="zl-heute-linie" aria-hidden="true"></span>
+        </li>
+      ) : (
+        <li class:list={["zl-eintrag", { "zl-zukunft": zukunft, "zl-ist-entwurf": !e.gilt }]}>
+          <span class="zl-datum">{e.datum}</span>
+          <span class="zl-schiene" aria-hidden="true">
+            <span class:list={["zl-punkt", { "zl-punkt--entwurf": !e.gilt }]}></span>
+          </span>
+          <div class="zl-inhalt">
+            <p class="zl-titel">
+              {e.titel}
+              <span class:list={["zl-status", { "zl-status--entwurf": !e.gilt }]}>
+                {e.gilt ? "gilt" : "Entwurf"}
+              </span>
+            </p>
+            <p class="zl-text">{e.text}</p>
+          </div>
+        </li>
+      );
+    })}
+  </ol>
+</figure>
+
+<style>
+  .zeitleiste {
+    --datum: 112px;
+    --schiene: 18px;
+    --abstand: 16px;
+    margin: 24px 0 28px;
+    max-width: 860px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    font-family: var(--font-display);
+    overflow: hidden;
+  }
+
+  /* ---- Kopfzeile: Legende ---- */
+  .zl-kopf {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 6px 16px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--color-border);
+    font-size: var(--schrift-xs);
+    color: var(--color-text-secondary);
+  }
+
+  .zl-legende {
+    display: flex;
+    gap: 16px;
+  }
+
+  .zl-legende-eintrag {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  /* ---- Liste ---- */
+  .zl-liste {
+    list-style: none;
+    margin: 0;
+    padding: 22px 20px 6px;
+  }
+
+  .zl-eintrag,
+  .zl-heute {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--datum) var(--schiene) minmax(0, 1fr);
+    column-gap: var(--abstand);
+  }
+
+  .zl-inhalt {
+    padding-bottom: 22px;
+  }
+
+  /* Die Schiene: eine Linie vom Punkt bis in die nächste Zeile. Sie hängt an
+     der Schienen-Spalte selbst (nicht am <li>), damit sie in jedem Layout
+     exakt durch die Punktmitte läuft. Bis "Heute" durchgezogen, danach
+     gestrichelt. */
+  .zl-eintrag .zl-schiene::after {
+    content: "";
+    position: absolute;
+    left: calc(50% - 1px);
+    top: 12px;
+    bottom: -6px;
+    border-left: 2px solid var(--color-text-primary);
+  }
+
+  .zl-zukunft .zl-schiene::after {
+    border-left: 2px dashed var(--color-text-muted);
+  }
+
+  .zl-eintrag:last-child .zl-schiene::after {
+    display: none;
+  }
+
+  .zl-datum {
+    padding-top: 2px;
+    text-align: right;
+    font-size: var(--schrift-sm);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+    color: var(--color-text-primary);
+  }
+
+  .zl-zukunft .zl-datum {
+    color: var(--color-text-secondary);
+  }
+
+  .zl-schiene {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding-top: 5px;
+  }
+
+  .zl-punkt {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--color-text-primary);
+    box-sizing: border-box;
+    flex: none;
+  }
+
+  .zl-punkt--entwurf {
+    background: var(--color-surface);
+    border: 2.5px solid var(--color-accent);
+  }
+
+  .zl-punkt--klein {
+    width: 9px;
+    height: 9px;
+  }
+
+  .zl-punkt--klein.zl-punkt--entwurf {
+    border-width: 2px;
+  }
+
+  .zeitleiste p {
+    font-family: var(--font-display);
+    margin: 0;
+  }
+
+  .zl-titel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    font-size: var(--schrift-base) !important;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--color-text-primary) !important;
+  }
+
+  .zl-status {
+    display: inline-block;
+    padding: 1px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--color-bg);
+    font-size: 11.5px;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  .zl-status--entwurf {
+    background: var(--color-accent-subtle);
+    color: var(--color-accent-text);
+  }
+
+  .zl-text {
+    margin-top: 4px !important;
+    max-width: 58ch;
+    font-size: var(--schrift-sm) !important;
+    line-height: 1.55;
+    color: var(--color-text-secondary) !important;
+  }
+
+  /* ---- Heute-Marke: quer durch die Tafel ---- */
+  .zl-heute {
+    align-items: center;
+    margin: -4px 0 22px;
+    height: 22px;
+  }
+
+  .zl-heute-label {
+    padding-top: 0;
+    font-size: var(--schrift-xs);
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .zl-heute .zl-schiene {
+    padding-top: 0;
+    align-items: center;
+    height: 100%;
+  }
+
+  .zl-heute-punkt {
+    position: relative;
+    z-index: 1;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+
+  /* Schiene läuft durch die Marke hindurch (gestrichelt, ab hier Zukunft). */
+  .zl-heute .zl-schiene::before {
+    content: "";
+    position: absolute;
+    left: calc(50% - 1px);
+    top: -4px;
+    bottom: -22px;
+    border-left: 2px dashed var(--color-text-muted);
+  }
+
+  .zl-heute-linie {
+    height: 0;
+    border-top: 1px solid var(--color-accent);
+    opacity: 0.55;
+  }
+
+  /* ---- Schmale Spalten: Datum über den Titel, Schiene links ---- */
+  @media (max-width: 520px) {
+    .zeitleiste {
+      --datum: 0px;
+      --abstand: 12px;
+    }
+
+    .zl-liste {
+      padding: 18px 16px 4px;
+    }
+
+    .zl-kopf {
+      padding: 10px 16px;
+    }
+
+    .zl-eintrag,
+    .zl-heute {
+      grid-template-columns: var(--schiene) minmax(0, 1fr);
+    }
+
+    .zl-eintrag .zl-datum {
+      grid-column: 2;
+      grid-row: 1;
+      text-align: left;
+      padding-top: 0;
+      font-size: var(--schrift-xs);
+    }
+
+    .zl-eintrag .zl-schiene {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+      padding-top: 3px;
+    }
+
+    .zl-eintrag .zl-inhalt {
+      grid-column: 2;
+      grid-row: 2;
+      margin-top: 2px;
+    }
+
+    .zl-heute .zl-schiene {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .zl-heute .zl-heute-label {
+      grid-column: 2;
+      grid-row: 1;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .zl-heute .zl-heute-label::after {
+      content: "";
+      flex: 1;
+      border-top: 1px solid var(--color-accent);
+      opacity: 0.55;
+    }
+
+    .zl-heute-linie {
+      display: none;
+    }
+  }
+</style>

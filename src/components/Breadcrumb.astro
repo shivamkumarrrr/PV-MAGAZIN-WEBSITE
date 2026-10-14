@@ -107,4 +107,17 @@ const ld = {
   .brotkrumen [aria-current="page"] {
     color: var(--color-text-secondary);
   }
+
+  /* Langer Artikeltitel als letztes Glied: einzeilig mit Auslassung statt
+     Umbruch in eine zweite Zeile (photovoltaik.eu/Carbon Brief zeigen dort nur
+     die Rubrik). flex-basis 0 + min-width lassen das Glied in der ersten Zeile
+     schrumpfen; der volle Titel steht ohnehin direkt darunter als H1 und im
+     JSON-LD. */
+  .brotkrumen li:last-child {
+    flex: 1 1 0;
+    min-width: 10ch;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
 </style>

@@ -181,17 +181,43 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   `headings`** (aus `render(entry)`) und die **`lesedauer`** (Wörter aus
   `entry.body` ÷ 220). Das Layout rendert daraus die Inhaltsangabe (nur
   h2/h3, nur wenn mehr als eine Überschrift), die Lesezeit-Meta, den
-  Kategorie-Hero und die optionale "Zusammenfassung"-Box
-  (`zusammenfassung` im Frontmatter). Diese Bausteine gehören NICHT in den
-  MDX-Fließtext.
-- `src/components/ArticleHero.astro` — Hero am Artikelanfang, von
-  ArticleLayout automatisch gerendert, kein Eingriff im MDX nötig. Zwei
-  Varianten: Liegt `heroImage` im Frontmatter, zeigt der Hero das Foto;
-  ohne Angabe greift als Fallback das datengetriebene SVG-Motiv mit EINER
-  belegten Kennzahl je Kategorie (Quelle + Stand direkt in der Datei) —
-  die Kennzahlen sind bei der jährlichen Datenpflege mitzuziehen. Seit
-  September 2026 haben alle 17 Artikel ein Foto, das SVG ist damit nur
-  noch der Pfad für neue Artikel ohne Bild.
+  Hero-Foto, die optionale Box "Das Wichtigste in Kürze"
+  (`zusammenfassung` im Frontmatter — seit Oktober 2026 ÜBER dem Text statt
+  am Ende, Muster Finanztip) und den optionalen Block "So gehen Sie vor"
+  (`vorgehen`, nummerierte nächste Schritte nach dem Fließtext). Diese
+  Bausteine gehören NICHT in den MDX-Fließtext.
+- `src/components/ArticleHero.astro` — Hero-Foto am Artikelanfang, von
+  ArticleLayout automatisch gerendert (`heroImage`/`heroImageAlt` im
+  Frontmatter). **Nur das Foto** — seit Oktober 2026 kein Kennzahl-Band mehr
+  darunter und kein SVG-Ersatzkästchen: Die Kennzahl hing an der Kategorie,
+  nicht am Artikel (Steuerartikel zeigte Systemkosten, EEG-2027-Artikel eine
+  Vergütung, deren Wegfall er erklärt), und das Ersatzkästchen sah aus wie
+  ein Platzhalter. Ohne Foto rendert die Komponente nichts — **jeder neue
+  Artikel braucht deshalb ein Foto** plus Eintrag in `BILDNACHWEIS.md`.
+  Achtung: `[slug].astro` muss `heroImage`/`heroImageAlt` durchreichen; als
+  die beiden Zeilen einmal fehlten, liefen alle 18 Artikel ohne Bild.
+- Artikelseite ab Oktober 2026 (`ArticleLayout.astro`): Auch der Artikel folgt
+  jetzt der einen linken Kante — Brotkrume, Titel, Foto, Text beginnen bündig
+  mit dem Logo (vorher zentrierte 620px-Spalte). Textspalte 660px, Vorbild
+  cleanthinking.de. Ab 1240px läuft die Inhaltsübersicht RECHTS mit (bündig
+  mit der rechten Kante der Kopfzeile) und markiert den gelesenen
+  Abschnitt (kleines Inline-Skript, IntersectionObserver). Das ist
+  Navigation, keine Sidebar im Sinne der CTA-Regel — Rechner-Hinweise bleiben
+  im Text. Darunter ist die Übersicht ein zugeklappter `<details>`-Block
+  (ohne JS offen). Oben läuft eine 3px-Lesefortschrittslinie, reines CSS
+  (`animation-timeline: scroll()`). Alle Bewegungen — Fortschritt,
+  wachsende `Diagramm`-Balken — nutzen
+  scroll-driven animations ohne JavaScript und entfallen bei "Bewegung
+  reduzieren" bzw. ohne Browserunterstützung. Bewegt sind nur Fortschritts-
+  linie und Diagramm-Balken; Hero-Foto (LCP-Element) und Zeitleiste bewusst
+  NICHT einblenden. Abschlussblöcke ("So gehen Sie vor", FAQ, Weiterlesen)
+  beginnen einheitlich mit 2px-Linie, 24px-Überschrift, 64px Abstand.
+- `src/components/Zeitleiste.astro` — Rechtslage als Protokoll-Tafel
+  (Kopfzeile mit Legende; Spalten Datum | Schiene | Inhalt; gilt =
+  gefüllter Punkt + neutrales Etikett, Entwurf = hohler oranger Ring +
+  Akzent-Etikett; Schiene bis "Heute" durchgezogen, danach gestrichelt;
+  `{ heute: "…" }` als Heute-Marke). Genutzt auf `/photovoltaik-2027/` und im
+  EEG-2027-Artikel; bei neuem Verfahrensstand beide Stellen ziehen.
 - `src/components/Definition.astro` — Fachbegriff-Einblendung im Fließtext:
   sichtbares Wort, Erklärung als Hover/Focus-Popover, reines CSS ohne
   JavaScript. Nutzung im MDX: `<Definition begriff="kWp">Erklärung…
@@ -199,6 +225,15 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
 - `src/components/Diagramm.astro` — kleiner Balkenvergleich als Inline-SVG
   für den Fließtext (Kostenanteile, Vergütungsverlauf). Werte und Quelle
   kommen als Props aus dem MDX, kein Chart-Paket, kein JavaScript.
+- `src/components/Streudiagramm.astro` + `src/lib/diagrammDaten.js` —
+  Streu-/Kurvendiagramm als Inline-SVG (kein Paket, kein JS), Gegenstück zu
+  `Diagramm.astro`. Die Datenreihen werden in `diagrammDaten.js` mit den
+  Funktionen und Konstanten aus `calculate.js` GERECHNET, nie abgeschrieben —
+  ändert sich eine Konstante, ändert sich das Diagramm. Deshalb steht in jeder
+  Quellenzeile "Modellrechnung". Im Einsatz: EEG-2027-Artikel (Jahreswert je
+  Haushalt, heutige Vergütung vs. Übergangszahlung) und Speicher-Artikel
+  (Autarkie nach Speichergröße). Neue Diagramme nur mit Daten, die das Modell
+  tatsächlich liefert oder die eine Quelle haben.
 - `src/components/RechnerWidget.jsx` — kompakter Mini-Rechner für den
   Artikeltext. Nutzt `calculate.js`-Konstanten, `Slider`/`Segmented` aus
   `calculator/ui` und `theme.js`. Einbindung im MDX mit
@@ -399,10 +434,11 @@ Betrifft in diesem Projekt konkret:
 - Artikelseiten-Aufbau ist automatisiert: Inhaltsangabe und Lesezeit kommen
   aus den MDX-Headings (`[slug].astro`), der Hero aus
   `ArticleHero.astro` (Foto über `heroImage`/`heroImageAlt` im
-  Frontmatter, sonst SVG-Fallback). Diese drei NICHT von Hand im MDX
+  Frontmatter, Pflicht für neue Artikel). Diese drei NICHT von Hand im MDX
   nachbauen; die
-  "Zusammenfassung"-Box ist optional über das Frontmatter-Feld
-  `zusammenfassung: [Liste kurzer Kernsätze]` aktivierbar. Tabellen und
+  Box "Das Wichtigste in Kürze" ist optional über das Frontmatter-Feld
+  `zusammenfassung: [Liste kurzer Kernsätze]` aktivierbar, der Block
+  "So gehen Sie vor" über `vorgehen: [Liste nächster Schritte]`. Tabellen und
   Musterrechnungen gehören wie gehabt in den Fließtext — Vorbild ist der
   Ausbau von `pv-kosten-und-foerderung-ueberblick.mdx`.
 
@@ -539,8 +575,7 @@ die Werte vergleichen, nicht nur den Code lesen.
   über den Dateinamen auf. Quelle ist Pexels (Lizenz erlaubt kommerzielle
   Nutzung ohne Namensnennung); Fotograf, Pexels-ID und Fundstelle je Datei
   stehen in `src/assets/heroes/BILDNACHWEIS.md` — bei neuen Bildern dort mit
-  eintragen, sonst ist die Lizenzlage nicht belegbar. **Offen:** `einspeiseverguetung.jpg` ist ein Bestandsbild ohne
-  dokumentierte Herkunft und muss vor Livegang ersetzt oder belegt werden.
+  eintragen, sonst ist die Lizenzlage nicht belegbar. `einspeiseverguetung.jpg` ist seit 14.10.2026 durch ein belegtes Pexels-Foto ersetzt. Alle Hero-Fotos sind seit diesem Tag 1600x1067 (3:2), neu aus den Pexels-Originalen geschnitten — 1600x686 wirkte im Artikel als gequetschter Streifen.
   Echte Reportage-Bilder aus der Firmen-NAS-Quelle stehen weiter aus.
 - Artikel-Umfang Ø ~630 Wörter gegen 1.500–3.000 beim Wettbewerb
   (ADAC, Verbraucherzentrale, co2online). Ausbau wartet auf die

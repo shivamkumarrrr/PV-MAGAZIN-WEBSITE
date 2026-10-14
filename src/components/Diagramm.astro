@@ -61,7 +61,7 @@ const zahlFormat = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
     ))}
   </ul>
 
-  <p class="diagramm-quelle">{quelle}</p>
+  <p class="diagramm-quelle">Quelle: {quelle}</p>
 </figure>
 
 <style>
@@ -133,6 +133,30 @@ const zahlFormat = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
 
   .diagramm-balken--hervor {
     background: var(--color-accent);
+  }
+
+  /* Balken wachsen beim Hereinscrollen von links auf ihren Wert — reines CSS
+     (scroll-driven animations), kein JavaScript. Ohne Browserunterstützung
+     oder mit "Bewegung reduzieren" stehen sie sofort in voller Länge da; die
+     Zahl daneben ist ohnehin immer sichtbar. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .diagramm-balken {
+        transform-origin: left center;
+        animation: balken-wachsen linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 40%;
+      }
+    }
+  }
+
+  @keyframes balken-wachsen {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
   }
 
   .diagramm-wert {

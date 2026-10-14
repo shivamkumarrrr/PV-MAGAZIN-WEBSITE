@@ -198,9 +198,12 @@ export default function RechnerWidget({ variante = "artikel" }) {
                     transition: "all 0.15s",
                   }}
                 >
-                  <div style={{ fontSize: 13, fontWeight: 600, color: active ? theme.color.accentHover : theme.color.textPrimary }}>{h.persons}</div>
-                  <div style={{ fontSize: 10, color: theme.color.textMuted, marginTop: 1 }}>
-                    {h.persons === 1 ? "Person" : h.persons === 5 ? "5+" : `${h.persons} Pers.`}
+                  {/* Zahl + Einheit, nicht zweimal dieselbe Zahl ("2 / 2 Pers."). */}
+                  <div style={{ fontSize: 15, fontWeight: 600, color: active ? theme.color.accentHover : theme.color.textPrimary, fontVariantNumeric: "tabular-nums" }}>
+                    {h.persons === 5 ? "5+" : h.persons}
+                  </div>
+                  <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 1 }}>
+                    {h.persons === 1 ? "Person" : "Personen"}
                   </div>
                 </button>
               );
