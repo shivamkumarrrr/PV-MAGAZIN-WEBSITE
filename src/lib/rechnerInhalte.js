@@ -22,38 +22,38 @@ export const RECHNER_INHALTE = {
     schritte: [
       {
         titel: "Standort",
-        text: "Die Postleitzahl bestimmt über PVGIS (EU Joint Research Centre) die Einstrahlung und die zwölf Monatserträge für genau diese Koordinaten. Ohne Angabe rechnen wir mit 950 kWh je kWp und Jahr — der Mitte der Praxisspanne von 850 bis 1.150. Das ist eine Größenordnung, keine Standortwahrheit.",
+        text: "Aus Ihrer Postleitzahl holen wir über PVGIS (EU Joint Research Centre) die Einstrahlung und die zwölf Monatserträge für Ihre Koordinaten. Ohne Postleitzahl rechnen wir mit 950 kWh je kWp und Jahr, innerhalb der Praxisspanne von 850 bis 1.150. Das ist eine grobe Orientierung, kein Standortwert.",
       },
       {
         titel: "Dach und Verbrauch",
-        text: "Aus Dachform, Ausrichtung, Neigung und freier Fläche ergibt sich die mögliche Anlagengröße — gerechnet mit 4,7 m² je kWp auf dem Schrägdach und 12 m² je kWp auf dem aufgeständerten Flachdach (Quelle: ADAC beziehungsweise übereinstimmende PV-Ratgeber). Ihr Jahresverbrauch entscheidet dann, wie viel vom erzeugten Strom für Sie überhaupt wertvoll ist.",
+        text: "Aus Dachform, Ausrichtung, Neigung und freier Fläche ermitteln wir, wie groß Ihre Anlage werden kann. Wir setzen 4,7 m² je kWp auf dem Schrägdach und 12 m² je kWp auf dem aufgeständerten Flachdach an (Quelle: ADAC und übereinstimmende PV-Ratgeber). Ihr Jahresverbrauch zeigt dann, wie viel vom Solarstrom Sie selbst gut nutzen können.",
       },
       {
         titel: "Ergebnis",
-        text: "Anlagengröße, Jahresertrag, Autarkiegrad, Investition, Ersparnis und Amortisation, jeweils mit der Annahme dahinter. Nichts davon ist ein Angebot: Ein Installateur, der Ihr Dach gesehen hat, kann zu anderen Zahlen kommen.",
+        text: "Sie sehen Anlagengröße, Jahresertrag, Autarkiegrad, Investition, Ersparnis und Amortisation, jeweils mit der Annahme dahinter. Das ist kein Angebot. Ein Installateur, der Ihr Dach gesehen hat, kann auf andere Zahlen kommen.",
       },
     ],
     abschnitte: [
       {
         titel: "Was den Ertrag bestimmt",
         absaetze: [
-          "Die Einstrahlung ist der größte Hebel und der einzige, den Sie nicht beeinflussen können. Zwischen Flensburg und Freiburg liegen rund 20 Prozent Jahresertrag. Deshalb fragt dieser Rechner als erstes die Postleitzahl ab und holt die gemessenen Werte für Ihre Koordinaten aus PVGIS, statt mit einem bundesweiten Mittelwert zu rechnen.",
-          "Ausrichtung und Neigung wirken kleiner, als viele erwarten: Südwest oder Südost kosten gegenüber Süd etwa fünf Prozent, Ost oder West rund 15 Prozent. Erst eine Nordausrichtung fällt mit rund 29 Prozent des Südwerts deutlich ab (Quelle: photovoltaik.org). Eine flache oder sehr steile Neigung bleibt im Bereich von 88 bis 90 Prozent des Optimums.",
-          "In die PVGIS-Abfrage gehen 14 Prozent Systemverluste ein — Kabel, Wechselrichter, Verschmutzung und Temperatur. Der ausgegebene Jahresertrag ist also bereits ein Nettowert und keine Modulnennleistung auf dem Papier.",
+          "Die Einstrahlung ist der größte Hebel, und Sie können sie nicht beeinflussen. Zwischen Flensburg und Freiburg liegen rund 20 Prozent Jahresertrag. Deshalb fragt der Rechner zuerst die Postleitzahl ab und nimmt gemessene PVGIS-Werte statt eines Bundesmittels.",
+          "Ausrichtung und Neigung wirken schwächer, als viele denken. Südwest oder Südost kosten gegenüber Süd etwa 5 Prozent, Ost oder West rund 15 Prozent. Erst Nord fällt mit rund 29 Prozent des Südwerts deutlich ab (Quelle: photovoltaik.org). Eine flache oder sehr steile Neigung liegt bei 88 bis 90 Prozent des Optimums.",
+          "In die PVGIS-Abfrage gehen 14 Prozent Systemverluste ein: Kabel, Wechselrichter, Verschmutzung und Temperatur. Der angezeigte Jahresertrag ist damit ein Nettowert und nicht die Nennleistung auf dem Papier.",
         ],
       },
       {
-        titel: "Warum Autarkiegrad und Eigenverbrauchsquote nicht dasselbe sind",
+        titel: "Autarkiegrad und Eigenverbrauchsquote: der Unterschied",
         absaetze: [
-          "Der Autarkiegrad ist der Anteil Ihres Verbrauchs, den die Anlage deckt. Die Eigenverbrauchsquote ist der Anteil des erzeugten Stroms, den Sie selbst nutzen. Beide bewegen sich mit der Anlagengröße in entgegengesetzte Richtungen: Eine große Anlage deckt mehr von Ihrem Bedarf, produziert aber gleichzeitig mehr Überschuss, den Sie einspeisen statt zu nutzen.",
-          "Eine Anlage kann gleichzeitig 65 Prozent Autarkie und 45 Prozent Eigenverbrauchsquote haben. Der Ergebnis-Screen zeigt deshalb beide Balken übereinander, mit demselben orangen Mittelstück: dem selbst genutzten Solarstrom. Die Kennlinie dahinter nutzt die vom ADAC kommunizierten Spannen von 30 bis 55 Prozent ohne Speicher und bis zu 85 Prozent mit Speicher als Ober- und Untergrenze.",
+          "Der Autarkiegrad sagt, welchen Anteil Ihres Verbrauchs die Anlage deckt. Die Eigenverbrauchsquote sagt, welchen Anteil des erzeugten Stroms Sie selbst nutzen. Mit wachsender Anlage laufen beide auseinander: Sie deckt mehr von Ihrem Bedarf, aber es bleibt auch mehr Überschuss, der ins Netz geht.",
+          "So kann eine Anlage 65 Prozent Autarkie und 45 Prozent Eigenverbrauchsquote haben. Die Ergebnisseite zeigt beide Balken übereinander, mit demselben Mittelstück: dem selbst genutzten Solarstrom. Als Grenzen der Kennlinie dienen die ADAC-Spannen von 30 bis 55 Prozent ohne Speicher und bis zu 85 Prozent mit Speicher.",
         ],
       },
       {
         titel: "Woher die Geldbeträge kommen",
         absaetze: [
-          "Selbst verbrauchter Strom wird mit 37,00 ct je Kilowattstunde bewertet (BDEW-Strompreisanalyse, Referenzhaushalt 3.500 kWh, Stand April 2026), eingespeister Strom mit 7,70 ct für Anlagen bis 10 kWp (Bundesnetzagentur, § 49 EEG, Inbetriebnahme 1.8.2026 bis 31.1.2027). Größere Anlagen bekommen den niedrigeren Satz nur für den Anteil oberhalb von 10 kWp — 6,66 ct bis 40 kWp, 5,44 ct darüber.",
-          "Die Investition rechnet mit 1.300 € je kWp. Das ist das obere Ende der Fraunhofer-ISE-Spanne und die Mitte realer Anbieterpreise inklusive Marge. Brutto entspricht netto: Anlagen bis 30 kWp auf Wohngebäuden sind seit dem 1.1.2023 von der Umsatzsteuer befreit (§ 12 Abs. 3 UStG).",
+          "Selbst verbrauchter Strom zählt mit 37,00 ct je kWh (BDEW-Strompreisanalyse, Referenzhaushalt 3.500 kWh, Stand April 2026). Eingespeister Strom zählt mit 7,70 ct für Anlagen bis 10 kWp (Bundesnetzagentur, § 49 EEG, Inbetriebnahme 1.8.2026 bis 31.1.2027). Bei größeren Anlagen gilt dieser Satz nur für die ersten 10 kWp. Darüber sind es 6,66 ct bis 40 kWp und 5,44 ct ab 40 kWp.",
+          "Die Investition rechnet mit 1.300 € je kWp. Das ist das obere Ende der Fraunhofer-ISE-Spanne und die Mitte realer Anbieterpreise inklusive Marge. Brutto gleich netto, weil Anlagen bis 30 kWp auf Wohngebäuden seit dem 1.1.2023 von der Umsatzsteuer befreit sind (§ 12 Abs. 3 UStG).",
         ],
       },
     ],
