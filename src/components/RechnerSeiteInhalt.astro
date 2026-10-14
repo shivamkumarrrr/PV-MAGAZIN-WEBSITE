@@ -1,0 +1,228 @@
+---
+// Der Begleitinhalt unter jedem Rechner: die drei Schritte, die Erklär-
+// abschnitte und die häufigen Fragen — plus die beiden Strukturdatensätze.
+//
+// Vorher hatte nur /rechner/photovoltaik/ so einen Block, und zwar als
+// abgeschriebenes Markup in der Seite selbst. Die anderen zehn Seiten
+// bestanden aus Brotkrume, Überschrift, einem Absatz und der React-Insel.
+//
+// Zwei Strukturdatensätze, beide aus demselben Inhalt wie die sichtbare
+// Seite erzeugt:
+//
+// 1. FAQPage — die Rechnerseiten zeigten vorher sichtbare Fragen ganz ohne
+//    Auszeichnung, während die Artikel sie korrekt hatten. Google verlangt,
+//    dass Frage und Antwort im Strukturdatensatz dem entsprechen, was der
+//    Besucher sieht; deshalb entsteht beides aus derselben Liste in
+//    src/lib/rechnerInhalte.js.
+//
+// 2. WebApplication — sagt Suchmaschinen, dass die Seite ein benutzbares
+//    Werkzeug ist und nicht nur ein Text darüber. Bewusst OHNE
+//    aggregateRating: Sternebewertungen, die es nicht gibt, wären eine
+//    erfundene Aussage über das Angebot (CLAUDE.md, § 5 UWG) — und Google
+//    wertet selbstvergebene Bewertungen ohnehin ab.
+import { RECHNER_INHALTE } from "../lib/rechnerInhalte.js";
+
+interface Props {
+  slug: string;
+  /** Vollständiger Name des Werkzeugs, wie er im Titel steht. */
+  name: string;
+  beschreibung: string;
+}
+
+const { slug, name, beschreibung } = Astro.props;
+const inhalt = RECHNER_INHALTE[slug];
+
+const seitenUrl = new URL(`/rechner/${slug}/`, Astro.site).toString();
+
+const anwendungLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name,
+  description: beschreibung,
+  url: seitenUrl,
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Web",
+  inLanguage: "de-DE",
+  isAccessibleForFree: true,
+  // Kostenlos und ohne Anmeldung — beides trifft zu und ist auf der Seite
+  // sichtbar, sonst dürfte es hier nicht stehen.
+  offers: { "@type": "Offer", price: "0", priceCurrency: "EUR" },
+  provider: {
+    "@type": "Organization",
+    name: "PPC GmbH",
+    url: new URL("/", Astro.site).toString(),
+  },
+};
+
+const faqLd = inhalt?.faq?.length
+  ? {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: inhalt.faq.map((f) => ({
+        "@type": "Question",
+        name: f.frage,
+        acceptedAnswer: { "@type": "Answer", text: f.antwort },
+      })),
+    }
+  : null;
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(anwendungLd)} />
+{faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
+
+{inhalt && (
+  <>
+    <section class="container rechner-text">
+      <h2>So funktioniert der Rechner</h2>
+      <div class="schritte">
+        {inhalt.schritte.map((s, i) => (
+          <div class="schritt">
+            <span class="schritt-nr">{i + 1}</span>
+            <h3>{s.titel}</h3>
+            <p>{s.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    {inhalt.abschnitte.map((a) => (
+      <section class="container rechner-text">
+        <h2>{a.titel}</h2>
+        {a.absaetze.map((p) => <p class="fliesstext">{p}</p>)}
+      </section>
+    ))}
+
+    <section class="container rechner-text rechner-faq">
+      <h2>Häufige Fragen</h2>
+      {inhalt.faq.map((f) => (
+        <details class="faq-item">
+          <summary>{f.frage}</summary>
+          <p>{f.antwort}</p>
+        </details>
+      ))}
+    </section>
+  </>
+)}
+
+<style>
+  /* Containerbreite wie alles andere auf der Seite — die Lesebreite sitzt am
+     Textelement, nicht am Abschnitt (siehe CLAUDE.md, "Eine linke Kante für
+     alle Seiten"). */
+  .rechner-text {
+    padding-block: 0 8px;
+  }
+
+  .rechner-text h2 {
+    font-size: 24px;
+    max-width: 30ch;
+    margin-bottom: 0.5em;
+  }
+
+  .fliesstext {
+    max-width: 68ch;
+    font-size: 15.5px;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    margin: 0 0 1em;
+  }
+
+  .schritte {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin: 18px 0 8px;
+  }
+
+  .schritt {
+    padding: 20px 18px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  /* Nummerierte Kreise sind hier keine Dekoration (Design-Regel 9), sondern
+     tragen die Reihenfolge der Schritte — sie benennen, was nacheinander
+     passiert. */
+  .schritt-nr {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--color-brand-navy);
+    color: var(--color-surface);
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 12px;
+  }
+
+  .schritt h3 {
+    font-size: 16px;
+    margin: 0 0 6px;
+  }
+
+  .schritt p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .rechner-faq {
+    padding-bottom: 56px;
+  }
+
+  .faq-item {
+    border-bottom: 1px solid var(--color-border);
+    max-width: 78ch;
+  }
+
+  .faq-item:first-of-type {
+    border-top: 1px solid var(--color-border);
+  }
+
+  .faq-item summary {
+    cursor: pointer;
+    padding: 15px 28px 15px 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 16px;
+    color: var(--color-text-primary);
+    position: relative;
+    list-style: none;
+  }
+
+  .faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .faq-item summary::after {
+    content: "";
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    width: 8px;
+    height: 8px;
+    border-right: 2px solid var(--color-text-muted);
+    border-bottom: 2px solid var(--color-text-muted);
+    transform: translateY(-70%) rotate(45deg);
+    transition: transform 0.15s;
+  }
+
+  .faq-item[open] summary::after {
+    transform: translateY(-30%) rotate(225deg);
+  }
+
+  .faq-item summary:hover {
+    color: var(--color-accent-hover);
+  }
+
+  .faq-item p {
+    margin: 0 0 18px;
+    max-width: 68ch;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+  }
+</style>

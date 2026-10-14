@@ -32,10 +32,10 @@ export default function ResultHeader({ result, displayLocation, savingsRef, savi
         style={{
           marginTop: 16,
           padding: "10px 16px",
-          background: "rgba(255,84,0,0.18)",
+          background: theme.color.accentOnDarkSubtle,
           borderRadius: theme.radius.md,
           fontSize: 13,
-          color: theme.color.accent,
+          color: theme.color.accentOnDark,
         }}
       >
         {/* 25-Jahres-Wert: deutlich mehr kumulierte Unsicherheit als der Jahres-Ersparnis-Wert

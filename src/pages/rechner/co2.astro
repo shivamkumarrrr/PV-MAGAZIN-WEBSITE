@@ -7,6 +7,7 @@
 // Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumb from "../../components/Breadcrumb.astro";
+import RechnerSeiteInhalt from "../../components/RechnerSeiteInhalt.astro";
 import Wizard from "../../components/co2/Wizard.jsx";
 ---
 
@@ -28,6 +29,12 @@ import Wizard from "../../components/co2/Wizard.jsx";
   <section class="container wizard-wrap">
     <Wizard client:load />
   </section>
+
+  <RechnerSeiteInhalt
+    slug="co2"
+    name="CO2-Einsparungsrechner"
+    beschreibung="Wie viel CO2 spart Ihre Anlage gegenüber dem deutschen Strommix ein? Pro Jahr, über 25 Jahre und im Vergleich zu Bäumen & Autofahrten."
+  />
 </BaseLayout>
 
 <style>

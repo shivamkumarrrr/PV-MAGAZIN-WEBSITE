@@ -58,7 +58,7 @@ export default function ReinigungWizard() {
             style={{
               fontFamily: theme.font.display, fontSize: 30, fontWeight: 600,
               fontVariantNumeric: "tabular-nums",
-              color: lohnt ? theme.color.accent : "#fff",
+              color: lohnt ? theme.color.accentOnDark : "#fff",
             }}
           >
             {lohnt ? `+${euro(result.nettoNutzen)}` : `${euro(Math.abs(result.nettoNutzen))} mehr Kosten`}

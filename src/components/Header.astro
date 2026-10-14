@@ -256,6 +256,10 @@ const THEMEN_BILD = {
       font-size: 14px;
       gap: 4px;
     }
+    .main-nav .nav-link.active::after {
+      left: 8px;
+      right: 8px;
+    }
   }
 
   .nav-panel {
@@ -282,14 +286,31 @@ const THEMEN_BILD = {
     display: none;
   }
 
-  .nav-link:hover {
-    background: var(--color-accent-subtle);
-    color: var(--color-accent-hover);
+  /* Hover/offen: ruhige Fläche in Seitengrund-Ton, Schrift wird tintenschwarz.
+     Vorher #D64700 auf Orange-Tönung — rund 3,4:1, unter AA. */
+  .nav-link:hover,
+  .nav-panel[open] > .nav-link {
+    background: var(--color-bg);
+    color: var(--color-text-primary);
   }
 
+  /* Aktiver Bereich: schwarze Schrift plus 2px-Akzentstrich unter dem Wort.
+     Vorher eine vollflächig schwarze Pille — der schwerste Fleck der ganzen
+     Kopfzeile, schwerer als das Logo, für eine reine Ortsangabe. */
   .nav-link.active {
-    background: var(--color-text-primary);
-    color: #fff;
+    color: var(--color-text-primary);
+    position: relative;
+  }
+
+  .nav-link.active::after {
+    content: "";
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 2px;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-accent);
   }
 
   .nav-pfeil {

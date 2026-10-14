@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
-import heroBild from "../assets/hero-modulflaeche.jpg";
+import heroBild from "../assets/hero-dach.jpg";
 // Bild neben "Was ist Photovoltaik?". EINE Stelle zum Austauschen: Datei nach
 // src/assets/ legen, hier importieren, Alt-Text unten anpassen, Fotograf und
 // Fundstelle in src/assets/heroes/BILDNACHWEIS.md eintragen.
@@ -192,7 +192,7 @@ const wasIstPvLd = {
         <figure class="hero-bild">
           <Image
             src={heroBild}
-            alt="Streiflicht über einer zusammenhängenden Fläche von Solarmodulen, die Zellstruktur der einzelnen Module ist erkennbar"
+            alt="Klinkerhaus mit rotem Ziegel-Satteldach, auf der Dachfläche eine Reihe Solarmodule, davor ein Vorgarten an der Straße"
             widths={[640, 960, 1280, 1800]}
             sizes="(min-width: 860px) 46vw, 100vw"
             loading="eager"
@@ -224,8 +224,8 @@ const wasIstPvLd = {
        Quellenband und dem Ratgeber — wer den Zahlen gerade vertraut hat,
        bekommt hier die Grundlagen dazu, bevor er zu den Artikeln weiterzieht
        oder zurück zum Rechner springt. -->
-  <section class="pv-erklaert container">
-    <div class="pv-erklaert-spalten">
+  <section class="pv-erklaert">
+    <div class="container pv-erklaert-spalten">
     <div class="pv-erklaert-text">
     <div class="abschnitt-kopf">
       <h2>Was ist Photovoltaik?</h2>
@@ -243,7 +243,7 @@ const wasIstPvLd = {
         Normbedingungen, nicht der tatsächlichen Stromerzeugung.
       </Definition> bestimmt, wie viel davon zusammenkommt; wie viel Sie <Definition begriff="selbst nutzen">
         Der Eigenverbrauch — nicht zu verwechseln mit der Autarkie, siehe
-        zweite Frage unten.
+        dritte Frage unten.
       </Definition>, hängt von Ihrem Verbrauchsprofil ab.
     </p>
 
@@ -257,7 +257,8 @@ const wasIstPvLd = {
     </div>
 
     <a href="/ratgeber/wie-funktioniert-eine-photovoltaikanlage/" class="pv-erklaert-mehr">
-      Ausführlich erklärt: Wie funktioniert eine Photovoltaikanlage? →
+      Ausführlich erklärt: Wie funktioniert eine Photovoltaikanlage?
+      <span class="pv-erklaert-pfeil" aria-hidden="true">→</span>
     </a>
     </div>
 
@@ -315,7 +316,8 @@ const wasIstPvLd = {
        Quellenband. Wer gerade seine erste Zahl bekommen hat, bekommt nicht
        sofort zehn gleichwertige Alternativen vorgehalten. Dieselbe
        Gruppierung trägt das Nav-Panel im Header (src/lib/rechner.js). -->
-  <section class="weitere container">
+  <section class="weitere">
+    <div class="container">
     <div class="abschnitt-kopf">
       <h2>Für die Frage danach</h2>
       <p>
@@ -344,6 +346,7 @@ const wasIstPvLd = {
           </ul>
         </section>
       ))}
+    </div>
     </div>
   </section>
 
@@ -570,7 +573,9 @@ const wasIstPvLd = {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: 50% 50%;
+    /* Die Modulfläche sitzt links oben im Foto — der Ausschnitt hält sie
+       im Bild, wenn das Handy-Format (16:10) oben und unten beschneidet. */
+    object-position: 25% 20%;
   }
 
   @media (min-width: 860px) {
@@ -599,13 +604,10 @@ const wasIstPvLd = {
       transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Tintenschwarz auf Orange, nicht Weiß: Weiß auf #FF5200 erreicht 3,25:1
-     und liegt damit bei 15 px unter der AA-Grenze von 4,5:1. #141B22 auf
-     demselben Orange liegt bei 5,39:1 — und die Marke behält ihr exaktes
-     Akzent-Orange, statt es für den Kontrast abdunkeln zu müssen. */
+  /* Weiße Schrift auf Solargrün: 5,3:1. */
   .knopf-primaer {
     background: var(--color-accent);
-    color: var(--color-text-primary);
+    color: #fff;
     border: 1px solid var(--color-accent);
   }
 
@@ -679,7 +681,7 @@ const wasIstPvLd = {
      Kartenrahmen (LichtBlick: #FFFFFF und #F0F0F0 im Wechsel, je 64 px
      Luft). Keine neue Farbe, kein Verlauf. */
   .ratgeber {
-    background: var(--color-surface);
+    background: var(--color-bg);
     border-top: 1px solid var(--color-border);
     border-bottom: 1px solid var(--color-border);
   }
@@ -694,6 +696,8 @@ const wasIstPvLd = {
   .weitere {
     padding-top: clamp(56px, 8vw, 96px);
     padding-bottom: clamp(56px, 8vw, 96px);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
   }
 
   .weitere-gruppen {
@@ -757,9 +761,11 @@ const wasIstPvLd = {
     height: 48px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
-    background: var(--color-surface);
+    /* Seitengrund als Kachel: Das Band ist weiß, eine weiße Kachel darauf
+       bestand nur aus ihrem Rand. */
+    background: var(--color-bg);
     color: var(--color-brand-navy);
-    transition: color 0.15s, border-color 0.15s;
+    transition: color 0.15s, border-color 0.15s, background-color 0.15s;
   }
 
   .weitere-gruppe a:hover {
@@ -769,10 +775,13 @@ const wasIstPvLd = {
   .weitere-gruppe a:hover .rechner-signet {
     color: var(--color-accent-text);
     border-color: var(--color-accent);
+    background: var(--color-surface);
   }
 
+  /* accent-text statt accent-hover: #D64700 auf der Orange-Tönung lag
+     unter AA. */
   .weitere-gruppe a:hover .rechner-name {
-    color: var(--color-accent-hover);
+    color: var(--color-accent-text);
   }
 
   .weitere-gruppe .rechner-name {
@@ -797,9 +806,17 @@ const wasIstPvLd = {
   /* Bleibt auf dem normalen Seitengrund statt Weiß — grenzt sich so vom
      Mini-Rechner darüber UND vom Ratgeber-Band darunter ab, ohne eine
      dritte Fläche einzuführen. */
+  /* Bänder im Wechsel (Oktober 2026): Weiß für "Was ist Photovoltaik?"
+     und die Rechner-Liste, Seitengrund für Ratgeber und Abschluss. Vorher
+     lagen Mini-Rechner + Erklärblock und Rechner-Liste + Abschluss je auf
+     derselben Fläche — zwei lange graue Strecken ohne Gliederung. Weiterhin
+     nur die zwei Token-Flächen, kein Verlauf, kein Muster (Design-Regeln
+     2 und 5). */
   .pv-erklaert {
     padding-top: clamp(56px, 8vw, 96px);
     padding-bottom: clamp(56px, 8vw, 96px);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border);
   }
 
   /* Schmale Spalte, aber LINKSBÜNDIG an derselben Kante wie jeder andere
@@ -825,9 +842,11 @@ const wasIstPvLd = {
     }
   }
 
+  /* Unter 1000px steht das Foto NACH dem Text. Vorher (order: -1) stand es
+     darüber und schob Überschrift und Fragen auf dem Handy um eine ganze
+     Bildschirmhöhe nach unten — für ein Foto, das nur illustriert. */
   .pv-erklaert-bild {
     margin: 0;
-    order: -1;
   }
 
   @media (min-width: 1000px) {
@@ -918,8 +937,14 @@ const wasIstPvLd = {
     transform: translateY(-30%) rotate(225deg);
   }
 
+  /* accent-text statt accent-hover: #D64700 auf dem Seitengrund liegt bei
+     etwa 3,9:1, für 16px-Text unter AA. */
   .pv-erklaert-item summary:hover {
-    color: var(--color-accent-hover);
+    color: var(--color-accent-text);
+  }
+
+  .pv-erklaert-item[open] summary {
+    padding-bottom: 10px;
   }
 
   .pv-erklaert-item p {
@@ -942,6 +967,20 @@ const wasIstPvLd = {
   .pv-erklaert-mehr:hover {
     text-decoration: underline;
     text-underline-offset: 3px;
+  }
+
+  .pv-erklaert-pfeil {
+    display: inline-block;
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+
+  .pv-erklaert-mehr:hover .pv-erklaert-pfeil {
+    transform: translateX(3px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pv-erklaert-pfeil { transition: none; }
+    .pv-erklaert-mehr:hover .pv-erklaert-pfeil { transform: none; }
   }
 
   /* ── Ratgeber ───────────────────────────────────────────────────────── */
@@ -1033,9 +1072,7 @@ const wasIstPvLd = {
     padding: 13px 22px;
     border-radius: var(--radius-pill);
     background: var(--color-accent);
-    /* Tintenschwarz auf Orange (5,39:1) — Weiß läge bei 3,25:1. Dieselbe
-       Paarung wie im Mini-Rechner. */
-    color: var(--color-text-primary);
+    color: #fff;
     font-weight: 600;
     font-size: 15px;
     text-decoration: none;

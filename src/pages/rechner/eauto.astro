@@ -7,6 +7,7 @@
 // Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumb from "../../components/Breadcrumb.astro";
+import RechnerSeiteInhalt from "../../components/RechnerSeiteInhalt.astro";
 import Wizard from "../../components/eauto/Wizard.jsx";
 ---
 
@@ -28,6 +29,12 @@ import Wizard from "../../components/eauto/Wizard.jsx";
   <section class="container wizard-wrap">
     <Wizard client:load />
   </section>
+
+  <RechnerSeiteInhalt
+    slug="eauto"
+    name="E-Auto-Laderechner"
+    beschreibung="Solarstromanteil, Ladekosten und passende PV-Größe für Ihr Elektroauto — nach Ihrem Fahrprofil."
+  />
 </BaseLayout>
 
 <style>

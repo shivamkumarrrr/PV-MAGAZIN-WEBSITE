@@ -44,7 +44,7 @@ export default function EAutoWizard() {
       <div style={{ maxWidth: theme.maxWidth, margin: "0 auto", fontFamily: theme.font.family }}>
         <div style={{ background: theme.color.textPrimary, borderRadius: theme.radius.lg, padding: "32px 28px", color: theme.color.white, marginBottom: 20, textAlign: "center" }}>
           <div style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 2, opacity: 0.6, marginBottom: 6 }}>Ihre Ersparnis pro Jahr</div>
-          <div style={{ fontFamily: theme.font.display, fontSize: 42, fontWeight: 600, fontVariantNumeric: "tabular-nums", color: theme.color.accent }}>
+          <div style={{ fontFamily: theme.font.display, fontSize: 42, fontWeight: 600, fontVariantNumeric: "tabular-nums", color: theme.color.accentOnDark }}>
             {euro(result.ersparnisProJahr)}
           </div>
           <div style={{ fontSize: 14, opacity: 0.75, marginTop: 2 }}>

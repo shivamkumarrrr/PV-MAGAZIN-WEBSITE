@@ -88,7 +88,7 @@ export default function KombiWizard() {
           <div style={{ fontSize: 14, opacity: 0.75, marginTop: 2 }}>
             pro Jahr im besten Szenario („{aktiv.label}") · gegenüber {formatEur(aktiv.netzbezugKosten)} Netzstromkosten für denselben Verbrauch ohne PV
           </div>
-          <div style={{ marginTop: 14, padding: "10px 16px", background: "rgba(255,84,0,0.18)", borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accent }}>
+          <div style={{ marginTop: 14, padding: "10px 16px", background: theme.color.accentOnDarkSubtle, borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accentOnDark }}>
             Autarkie im besten Szenario: <strong>{aktiv.autarkie}%</strong> · Amortisation ca. <strong>{aktiv.amortisation != null ? aktiv.amortisation.toLocaleString("de-DE") + " Jahre" : "n. a."}</strong>
           </div>
         </div>

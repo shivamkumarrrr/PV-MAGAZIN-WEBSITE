@@ -80,12 +80,12 @@ export default function Roof3DPreview({ dachform, neigung }) {
         aria-label={selected ? `Seitenansicht: Dach mit ${target} Grad Neigung` : "Seitenansicht: Dachneigung noch nicht gewählt"}
       >
         {/* Sonne */}
-        <circle cx={262} cy={26} r={11} fill={theme.color.accent} />
+        <circle cx={262} cy={26} r={11} fill={theme.color.sun} />
         {[0, 45, 90, 135, 180, 225, 270, 315].map((d) => (
           <line key={d}
             x1={262 + 16 * Math.cos(rad(d))} y1={26 + 16 * Math.sin(rad(d))}
             x2={262 + 21 * Math.cos(rad(d))} y2={26 + 21 * Math.sin(rad(d))}
-            stroke={theme.color.accent} strokeWidth="2" strokeLinecap="round" />
+            stroke={theme.color.sun} strokeWidth="2" strokeLinecap="round" />
         ))}
 
         {/* Boden */}

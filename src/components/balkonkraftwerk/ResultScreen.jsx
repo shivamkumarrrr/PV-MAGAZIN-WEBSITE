@@ -45,10 +45,10 @@ export default function ResultScreen({ result, modulleistung, onRestart }) {
             style={{
               marginTop: 16,
               padding: "10px 16px",
-              background: "rgba(255,84,0,0.18)",
+              background: theme.color.accentOnDarkSubtle,
               borderRadius: theme.radius.md,
               fontSize: 13,
-              color: theme.color.accent,
+              color: theme.color.accentOnDark,
             }}
           >
             Amortisiert nach ca. <strong>{result.amortisation.toLocaleString("de-DE")} Jahren</strong> (Anschaffungspreis {result.investition.toLocaleString("de-DE")} €)

@@ -64,7 +64,7 @@ export default function RenditeWizard() {
           <div style={{ fontSize: 14, opacity: 0.75, marginTop: 2 }}>
             Gewinn über {RENDITE_LAUFZEIT} Jahre · {result.kwp.toLocaleString("de-DE")} kWp · Investition {formatEur(result.investition)}
           </div>
-          <div style={{ marginTop: 14, padding: "10px 16px", background: "rgba(255,84,0,0.18)", borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accent }}>
+          <div style={{ marginTop: 14, padding: "10px 16px", background: theme.color.accentOnDarkSubtle, borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accentOnDark }}>
             Rendite auf Ihre Investition: <strong>{result.roiProzent}%</strong> über {RENDITE_LAUFZEIT} Jahre
             {result.amortisationsJahr != null && <> · amortisiert nach ca. <strong>{result.amortisationsJahr.toLocaleString("de-DE")}</strong> Jahren</>}
           </div>

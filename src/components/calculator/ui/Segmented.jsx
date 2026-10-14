@@ -2,10 +2,13 @@ import theme from "../../../theme.js";
 
 // Segmented control für 2–3 gegenseitig exklusive Zustände (z.B. "Nein/Ja/Geplant").
 // options: [{ value, label, icon? }]; onChange liefert den gewählten value.
-export default function Segmented({ options, value, onChange }) {
+// labelledBy: id des sichtbaren Labels — ohne sie meldet ein Screenreader die
+// Gruppe namenlos.
+export default function Segmented({ options, value, onChange, labelledBy }) {
   return (
     <div
       role="radiogroup"
+      aria-labelledby={labelledBy}
       style={{
         display: "flex",
         background: theme.color.bg,
@@ -19,7 +22,8 @@ export default function Segmented({ options, value, onChange }) {
         const active = value === opt.value;
         return (
           <button
-            key={opt.value}
+            key={String(opt.value)}
+            type="button"
             role="radio"
             aria-checked={active}
             onClick={() => onChange(opt.value)}

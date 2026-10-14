@@ -18,10 +18,10 @@ export default function SunArc({ variant = "hero", onDark = true }) {
   return (
     <svg width={w} height={h} viewBox="0 0 340 190" role="img" aria-label="Sonnenverlauf über einem Hausdach mit Solarmodulen" style={{ display: "block", margin: large ? "0 auto" : undefined }}>
       {/* Arc path (sun's daily trajectory) */}
-      <path d="M20 150 A150 150 0 0 1 320 150" fill="none" stroke={theme.color.accent} strokeWidth={large ? 2 : 1.5} strokeDasharray="1 9" strokeLinecap="round" opacity="0.55" />
+      <path d="M20 150 A150 150 0 0 1 320 150" fill="none" stroke={theme.color.sun} strokeWidth={large ? 2 : 1.5} strokeDasharray="1 9" strokeLinecap="round" opacity="0.55" />
       {/* Sun, positioned along the arc */}
-      <circle cx="245" cy="70" r={large ? 16 : 8} fill={theme.color.accent} opacity="0.95" />
-      <circle cx="245" cy="70" r={large ? 26 : 13} fill="none" stroke={theme.color.accent} strokeWidth="1" opacity="0.3" />
+      <circle cx="245" cy="70" r={large ? 16 : 8} fill={theme.color.sun} opacity="0.95" />
+      <circle cx="245" cy="70" r={large ? 26 : 13} fill="none" stroke={theme.color.sun} strokeWidth="1" opacity="0.3" />
 
       {/* Roofline */}
       <path d="M40 150 L170 90 L300 150" fill="none" stroke={roof} strokeWidth={large ? 2.5 : 2} strokeLinejoin="round" />
@@ -33,7 +33,7 @@ export default function SunArc({ variant = "hero", onDark = true }) {
         [196, 96, 32], [224, 112, 32], [252, 128, 32],
       ].map(([x, y, rot], i) => (
         <rect key={i} x={x - 11} y={y - 5} width="22" height="10" rx="1.5"
-          fill={theme.color.accent} opacity={large ? 0.9 : 0.75}
+          fill={theme.color.sun} opacity={large ? 0.9 : 0.75}
           transform={`rotate(${rot} ${x} ${y})`} />
       ))}
     </svg>

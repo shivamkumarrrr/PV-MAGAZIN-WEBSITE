@@ -74,14 +74,20 @@
      #F6F8F7. Der Ton bleibt derselbe kühle Graublau-Stich. */
   --color-text-muted: #6B7179;
 
-  --color-accent: #FF5200;
-  --color-accent-hover: #D64700;
-  --color-accent-subtle: #FFE9DD;
-  /* Orange als TEXT auf hellem Grund: #FF5200 erreicht nur 3,05:1, auch
-     #D64700 bleibt mit 4,43:1 knapp darunter. #C04300 liegt bei 5,23:1 auf
-     Weiß und 4,90:1 auf dem Seitengrund. Nur für Textlinks — Flächen
-     (Knöpfe, Hover-Grund) tragen weiter das reine Akzent-Orange. */
-  --color-accent-text: #C04300;
+  /* Akzent seit 14.10.2026: tiefes Solargrün statt Orange. Orange stand an
+     rund 200 Stellen (Knöpfe, Links, Fokus, Auswahl) und trug dadurch keine
+     Aussage mehr. Grün gehört zum Thema (Strom aus der Sonne), liegt weit
+     weg von Sky (Daten) und Navy (Marke) und ist KEIN Tailwind-Grün.
+     Kontrast: Weiß auf #0B7A62 = 5,3:1, Weiß auf Hover #08604C = 7,5:1,
+     Text #0A6A55 auf Weiß 6,2:1. Knöpfe tragen deshalb WEISSE Schrift
+     (vorher Tintenschwarz auf Orange). */
+  --color-accent: #0B7A62;
+  --color-accent-hover: #08604C;
+  --color-accent-subtle: #E0F1EB;
+  --color-accent-text: #0A6A55;
+  /* Die Sonne selbst (Sonnenbogen, Dachvorschau) bleibt warm — das Gold der
+     Logo-Bildmarke. Eine grüne Sonne wäre falsch. */
+  --color-sun: #D4950A;
 
   --color-brand-navy: #382E4A;
   --color-sky: #2E6F95;

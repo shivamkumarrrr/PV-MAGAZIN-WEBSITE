@@ -33,4 +33,4 @@ export function useInView(options) {
   }, []);
 
   return [ref, inView];
-}
+}fix

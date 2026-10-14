@@ -44,7 +44,7 @@ export default function Co2Wizard() {
           <div style={{ fontSize: 14, opacity: 0.75, marginTop: 2 }}>
             pro Jahr · {result.kwp.toLocaleString("de-DE")} kWp · {result.jahresertrag.toLocaleString("de-DE")} kWh/Jahr
           </div>
-          <div style={{ marginTop: 16, padding: "10px 16px", background: "rgba(255,84,0,0.18)", borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accent }}>
+          <div style={{ marginTop: 16, padding: "10px 16px", background: theme.color.accentOnDarkSubtle, borderRadius: theme.radius.md, fontSize: 13, color: theme.color.accentOnDark }}>
             Über 25 Jahre (mit Moduldegradation) sparen Sie ca. <strong>{formatKg(result.co2Gesamt25Jahre)} CO₂</strong>
           </div>
         </div>

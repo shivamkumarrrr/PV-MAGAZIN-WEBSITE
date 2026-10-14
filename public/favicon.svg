@@ -10,8 +10,8 @@
   zu einem grauen Fleck. Die Vier-Felder-Form bleibt auch dort lesbar.
 
   Farben aus dem Logo-File gemessen: #161616 Grundfläche, #252525 Felder,
-  #D4950A Akzentfeld. Das ist NICHT das Akzent-Token #FF5200 der Website —
-  das Logo trägt Gold, die Oberfläche Orange.
+  #D4950A Akzentfeld. Das ist NICHT das Akzent-Token der Website (seit
+  14.10.2026 Solargrün #0B7A62) — das Logo trägt Gold.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 92 92" width="92" height="92">
   <rect width="92" height="92" rx="20" fill="#161616" />

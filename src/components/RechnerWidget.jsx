@@ -24,6 +24,64 @@ const kWh = (v) => `${NF.format(Math.round(v))} kWh`;
 const ct = (eur) =>
   new Intl.NumberFormat("de-DE", { minimumFractionDigits: 2 }).format(eur * 100);
 
+// Eine Beschriftung für alle drei Eingaben. Haushalt und Speicher standen in
+// 14px/500 Grau, der Schieberegler dazwischen in 15px/600 Schwarz — drei Felder
+// derselben Karte, zwei Gewichtungen. Der Regler ist geteilter Baustein
+// (Slider.jsx), also zieht das Widget auf dessen Maß.
+const feldLabel = {
+  fontSize: 15,
+  fontWeight: 600,
+  color: theme.color.textPrimary,
+  marginBottom: 8,
+};
+
+// Nur für die Live-Region: Screenreader bekommen den Endwert als ein Satz
+// statt 30 Zwischenwerten pro Sekunde aus der Zählanimation.
+const nurVorlesen = {
+  position: "absolute",
+  width: 1,
+  height: 1,
+  margin: -1,
+  padding: 0,
+  overflow: "hidden",
+  clip: "rect(0 0 0 0)",
+  whiteSpace: "nowrap",
+  border: 0,
+};
+
+// Hover wie `.cta-final-button` in RechnerCta.astro: dunkleres Orange, weiße
+// Schrift (4,6:1). Inline-Styles kennen kein :hover — der Knopf trug vorher
+// `transition: background-color`, aber nichts, was sich ändern konnte.
+// Der Pfeil rückt beim Hover nach rechts; entfällt bei "Bewegung reduzieren".
+const LAYOUT_CSS = `
+  @container (min-width: 820px) {
+    .rw-koerper {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    }
+    .rw-ergebnis {
+      border-top: 0 !important;
+      border-left: 1px solid ${theme.color.border};
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+  }
+`;
+
+const CTA_CSS = `
+  /* Farben stehen hier, nicht inline: Inline-Werte schlügen das :hover.
+     Weiß auf Solargrün (5,3:1). */
+  .widget-cta { background: ${theme.color.accent}; color: ${theme.color.white}; transition: background-color 0.15s, color 0.15s; }
+  .widget-cta:hover { background: ${theme.color.accentHover}; color: ${theme.color.white}; }
+  .widget-cta-pfeil { display: inline-block; transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1); }
+  .widget-cta:hover .widget-cta-pfeil { transform: translateX(3px); }
+  @media (prefers-reduced-motion: reduce) {
+    .widget-cta-pfeil { transition: none; }
+    .widget-cta:hover .widget-cta-pfeil { transform: none; }
+  }
+`;
+
 // Pulsierender Punkt + "Live"-Beschriftung — signalisiert ehrlich, was hier
 // tatsächlich passiert: Das Ergebnis ist kein Snapshot, es rechnet bei jeder
 // Eingabe neu (useMemo oben). Dieselbe Bildsprache wie "Live-Vorschau" in
@@ -75,13 +133,13 @@ function Kennzahl({ label, wert, sub, akzent, grund }) {
         background: grund ?? theme.color.surface,
       }}
     >
-      <div style={{ fontSize: 11, color: theme.color.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px", marginBottom: 4 }}>
+      <div style={{ fontSize: 12, color: theme.color.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.4px", marginBottom: 4 }}>
         {label}
       </div>
       <div style={{ fontSize: 22, fontWeight: 700, color: akzent ? theme.color.accent : theme.color.textPrimary, fontVariantNumeric: "tabular-nums", letterSpacing: "-0.01em", whiteSpace: "nowrap" }}>
         {wert}
       </div>
-      {sub && <div style={{ fontSize: 11, color: theme.color.textSecondary, marginTop: 2 }}>{sub}</div>}
+      {sub && <div style={{ fontSize: 12, color: theme.color.textSecondary, marginTop: 2 }}>{sub}</div>}
     </div>
   );
 }
@@ -94,6 +152,8 @@ function Kennzahl({ label, wert, sub, akzent, grund }) {
 export default function RechnerWidget({ variante = "artikel" }) {
   const imHero = variante === "hero";
   const kachelGrund = imHero ? theme.color.bg : theme.color.surface;
+  // Kennzahl-Kacheln liegen in der Antwortzone, deren Grund umgekehrt ist.
+  const kennzahlGrund = imHero ? theme.color.surface : theme.color.bg;
   // Verbrauch wird über die Haushaltsgröße gesetzt (wie im großen Rechner,
   // dort frei überschreibbar) — hier reicht die Personenzahl.
   // Nichts ist vorausgewählt — dieselbe Vorgabe wie im großen Rechner
@@ -138,6 +198,23 @@ export default function RechnerWidget({ variante = "artikel" }) {
   const animKwp = useAnimatedNumber(ergebnis.kwp);
   const animErtrag = useAnimatedNumber(ergebnis.jahresertrag);
 
+  // "Jahre" nur im Plural: Bei 1 Jahr stand "1 Jahren" da.
+  const jahre = (n) => {
+    const r = Math.round(n);
+    return `${NF.format(r)} ${r === 1 ? "Jahr" : "Jahren"}`;
+  };
+
+  const fehlt =
+    haushalt === null && speicher === null
+      ? "Haushaltsgröße und Speicher wählen"
+      : haushalt === null
+        ? "Noch die Haushaltsgröße wählen"
+        : "Noch den Speicher wählen";
+
+  const zusammenfassung = ergebnis.amortisation
+    ? `Nach rund ${jahre(ergebnis.amortisation)} hat sich die Anlage bezahlt. Ersparnis ${euro(ergebnis.jahresErsparnis)} pro Jahr, Anlagengröße ${NF.format(Math.round(ergebnis.kwp * 10) / 10)} kWp.`
+    : `Bei dieser Kombination trägt sich die Anlage rechnerisch nicht. Anlagengröße ${NF.format(Math.round(ergebnis.kwp * 10) / 10)} kWp.`;
+
   return (
     <section
       aria-labelledby="widget-titel"
@@ -147,8 +224,13 @@ export default function RechnerWidget({ variante = "artikel" }) {
         borderRadius: theme.radius.lg,
         overflow: "hidden",
         background: imHero ? theme.color.surface : theme.color.bg,
+        // Container-Query statt Media-Query: Dieselbe Karte steht auf der
+        // Startseite (1140px) und in der 660px-Artikelspalte. Nur die Karte
+        // selbst weiß, ob zwei Spalten hineinpassen.
+        containerType: "inline-size",
       }}
     >
+      <style>{LAYOUT_CSS}</style>
       {/* Kein Kleinversalien-Label über der Überschrift: Das Muster ist ein
           bekannter Generierungs-Tell, und "MINI-RECHNER" sagt nichts, was die
           Karte nicht selbst zeigt. Die Überschrift ist ein echtes <h2>, damit
@@ -170,9 +252,12 @@ export default function RechnerWidget({ variante = "artikel" }) {
         <LivePunkt />
       </div>
 
+      <div className="rw-koerper">
       <div style={{ padding: "18px 20px 6px" }}>
-        <div style={{ marginBottom: 14 }}>
-          <div id="haushalt-label" style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 8 }}>Haushalt</div>
+        {/* 28px Abstand zwischen den Feldern — das Maß, das Slider.jsx selbst
+            unter sich lässt. Vorher 14 / 28 / 16: drei Abstände für drei Felder. */}
+        <div style={{ marginBottom: 28 }}>
+          <div id="haushalt-label" style={feldLabel}>Personen im Haushalt</div>
           {/* Fünf Knöpfe, die sich gegenseitig ausschließen, sind eine
               Auswahlgruppe — ohne role/aria-checked meldet ein Screenreader
               nur fünf namenlose Schaltflächen ohne erkennbaren Zustand. */}
@@ -188,23 +273,24 @@ export default function RechnerWidget({ variante = "artikel" }) {
                   aria-label={`${h.persons === 5 ? "5 oder mehr" : h.persons} ${h.persons === 1 ? "Person" : "Personen"}`}
                   onClick={() => setHaushalt(h.label)}
                   style={{
-                    padding: "9px 4px",
-                    borderRadius: 10,
+                    minHeight: 48,
+                    padding: "0 4px",
+                    borderRadius: theme.radius.md,
                     // Beide Zustände 2px — sonst wächst der Knopf beim
                     // Auswählen um einen halben Pixel und die Reihe ruckt.
                     border: `2px solid ${active ? theme.color.accent : theme.color.border}`,
                     background: active ? theme.color.accentSubtle : kachelGrund,
                     cursor: "pointer",
-                    transition: "all 0.15s",
+                    transition: "background-color 0.15s, border-color 0.15s",
                   }}
                 >
-                  {/* Zahl + Einheit, nicht zweimal dieselbe Zahl ("2 / 2 Pers."). */}
-                  <div style={{ fontSize: 15, fontWeight: 600, color: active ? theme.color.accentHover : theme.color.textPrimary, fontVariantNumeric: "tabular-nums" }}>
+                  {/* Nur die Zahl; die Einheit steht in der Beschriftung. Vorher
+                      stand "Personen" in 11px unter jeder Zahl — bei 360px
+                      Breite sind die Knöpfe knapp 51px breit, das Wort ist
+                      ~46px lang und lief über den Rand. */}
+                  <span style={{ fontSize: 17, fontWeight: 600, color: theme.color.textPrimary, fontVariantNumeric: "tabular-nums" }}>
                     {h.persons === 5 ? "5+" : h.persons}
-                  </div>
-                  <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 1 }}>
-                    {h.persons === 1 ? "Person" : "Personen"}
-                  </div>
+                  </span>
                 </button>
               );
             })}
@@ -214,8 +300,9 @@ export default function RechnerWidget({ variante = "artikel" }) {
         <Slider label="Dachfläche (Satteldach, gesamt)" value={dach} onChange={setDach} min={20} max={120} step={5} unit="m²" />
 
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 14, color: theme.color.textSecondary, fontWeight: 500, marginBottom: 8 }}>Speicher</div>
+          <div id="speicher-label" style={feldLabel}>Speicher</div>
           <Segmented
+            labelledBy="speicher-label"
             options={[
               { value: false, label: "Ohne Speicher" },
               { value: true, label: "Mit Speicher" },
@@ -223,7 +310,7 @@ export default function RechnerWidget({ variante = "artikel" }) {
             value={speicher}
             onChange={setSpeicher}
           />
-          <div style={{ fontSize: 11, color: theme.color.textMuted, marginTop: 6, lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: theme.color.textMuted, marginTop: 8, lineHeight: 1.5 }}>
             Speichergröße folgt der HTW-Berlin-Faustregel (≈ 1,2 kWh je 1.000 kWh Jahresverbrauch).
           </div>
         </div>
@@ -236,10 +323,25 @@ export default function RechnerWidget({ variante = "artikel" }) {
           Auskunft. Jetzt trägt ein Satz das Ergebnis, zwei Werte stützen
           ihn, der Rest liegt eine Klappe tiefer.
 
-          aria-live="polite": Die Zahlen ändern sich beim Schieben, ohne dass
-          der Fokus sie berührt — ohne Live-Region bliebe das für einen
-          Screenreader lautlos. */}
-      <div style={{ padding: "16px 20px 18px" }} aria-live="polite">
+          Live-Region: Die Zahlen ändern sich beim Schieben, ohne dass der
+          Fokus sie berührt — ohne Region bliebe das für einen Screenreader
+          lautlos. Sie liegt aber NICHT auf den sichtbaren Zahlen: Die zählen
+          500 ms lang hoch, und jeder Zwischenwert wäre eine Ansage. Stattdessen
+          trägt ein verstecktes <p> den Endwert als einen Satz; die sichtbare
+          Fassung ist für Screenreader ausgeblendet.
+
+          Der Platzhalter nennt, was noch fehlt. Vorher stand immer derselbe
+          Satz da, auch wenn der Haushalt längst gewählt war. */}
+      {/* Antwortzone: eigene Fläche, damit Eingabe und Ergebnis als Frage und
+          Antwort lesbar sind. Ab 820px Kartenbreite steht sie rechts neben
+          den Eingaben — vorher liefen die fünf Haushaltsknöpfe 200px breit
+          über die volle Startseitenbreite, und das Ergebnis stand weit unten. */}
+      <div className="rw-ergebnis" style={{ background: imHero ? theme.color.bg : theme.color.surface, borderTop: `1px solid ${theme.color.border}` }}>
+      <div style={{ padding: bereit ? "18px 20px 2px" : "18px 20px 18px" }}>
+        <p role="status" aria-live="polite" style={nurVorlesen}>
+          {bereit ? zusammenfassung : ""}
+        </p>
+
         {!bereit && (
           <p
             style={{
@@ -253,13 +355,13 @@ export default function RechnerWidget({ variante = "artikel" }) {
               textWrap: "balance",
             }}
           >
-            Haushaltsgröße und Speicher wählen — dann steht hier Ihre erste
-            Größenordnung.
+            {fehlt} — dann steht hier Ihre erste Größenordnung.
           </p>
         )}
 
         {bereit && (
         <>
+        <div aria-hidden="true">
         <p
           style={{
             margin: "0 0 14px",
@@ -276,7 +378,7 @@ export default function RechnerWidget({ variante = "artikel" }) {
             <>
               Nach rund{" "}
               <span style={{ color: theme.color.accentText, fontVariantNumeric: "tabular-nums" }}>
-                {NF.format(Math.round(animAmortisation))} Jahren
+                {jahre(animAmortisation)}
               </span>{" "}
               hat sich die Anlage bezahlt.
             </>
@@ -286,10 +388,14 @@ export default function RechnerWidget({ variante = "artikel" }) {
         </p>
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 }}>
-          <Kennzahl grund={kachelGrund} label="Ersparnis" wert={euro(animErsparnis)} sub="pro Jahr" />
-          <Kennzahl grund={kachelGrund} label="Anlagengröße" wert={`${NF.format(Math.round(animKwp * 10) / 10)} kWp`} sub={`${kWh(animErtrag)} Ertrag im Jahr`} />
+          <Kennzahl grund={kennzahlGrund} label="Ersparnis" wert={euro(animErsparnis)} sub="pro Jahr" />
+          <Kennzahl grund={kennzahlGrund} label="Anlagengröße" wert={`${NF.format(Math.round(animKwp * 10) / 10)} kWp`} sub={`${kWh(animErtrag)} Ertrag im Jahr`} />
+        </div>
         </div>
 
+        {/* Eigener Abstand nach oben: Die Kacheln und der Falt-Block lagen
+            vorher ohne jede Lücke aufeinander (Faltblock trägt nur margin-bottom). */}
+        <div style={{ marginTop: 12 }}>
         <Faltblock
           titel="Woraus sich das ergibt"
           zeilen={[
@@ -305,6 +411,7 @@ export default function RechnerWidget({ variante = "artikel" }) {
           vollständige Rechner die tatsächliche Einstrahlung aus den
           PVGIS-Satellitendaten der EU-Kommission.
         </Faltblock>
+        </div>
         </>
         )}
       </div>
@@ -324,24 +431,26 @@ export default function RechnerWidget({ variante = "artikel" }) {
           gap: "14px 22px",
         }}
       >
+        <style>{CTA_CSS}</style>
         <a
           href="/rechner/photovoltaik/"
+          className="widget-cta"
           style={{
             display: "inline-flex",
             alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            textWrap: "balance",
             gap: 8,
             padding: "12px 22px",
             borderRadius: theme.radius.pill,
-            background: theme.color.accent,
-            // Tintenschwarz auf Orange (5,39:1). Weiß läge bei 3,25:1.
-            color: theme.color.textPrimary,
             fontWeight: 600,
             fontSize: 14,
             textDecoration: "none",
-            transition: "background-color 0.15s",
           }}
         >
-          Mit Standort-Daten genauer rechnen →
+          Mit Standort-Daten genauer rechnen
+          <span className="widget-cta-pfeil" aria-hidden="true">→</span>
         </a>
 
         {imHero && (
@@ -350,6 +459,8 @@ export default function RechnerWidget({ variante = "artikel" }) {
             Bundesdurchschnitt.
           </span>
         )}
+      </div>
+      </div>
       </div>
 
       {/* Der Beleg steht neben der Zahl, nicht in einem eigenen Abschnitt
@@ -361,7 +472,8 @@ export default function RechnerWidget({ variante = "artikel" }) {
       <p
         style={{
           margin: 0,
-          padding: "0 20px 18px",
+          padding: "14px 20px 16px",
+          borderTop: `1px solid ${theme.color.border}`,
           fontSize: 12.5,
           lineHeight: 1.55,
           color: theme.color.textMuted,

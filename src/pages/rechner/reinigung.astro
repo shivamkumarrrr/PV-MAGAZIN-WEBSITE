@@ -7,6 +7,7 @@
 // Klick nicht wert.
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Breadcrumb from "../../components/Breadcrumb.astro";
+import RechnerSeiteInhalt from "../../components/RechnerSeiteInhalt.astro";
 import Wizard from "../../components/reinigung/Wizard.jsx";
 ---
 
@@ -29,6 +30,12 @@ import Wizard from "../../components/reinigung/Wizard.jsx";
   <section class="container wizard-wrap">
     <Wizard client:load />
   </section>
+
+  <RechnerSeiteInhalt
+    slug="reinigung"
+    name="Reinigungsrechner"
+    beschreibung="Wie viel Ertrag kostet Sie Verschmutzung — und rechnet sich eine professionelle Reinigung Ihrer Anlage?"
+  />
 </BaseLayout>
 
 <style>

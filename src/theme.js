@@ -12,11 +12,17 @@ const theme = {
     // unter AA, siehe Kommentar in global.css.
     textMuted: "#6B7179",
 
-    accent: "#FF5200", // echtes PPC-Orange
-    accentHover: "#D64700",
-    accentSubtle: "#FFE9DD",
-    // Orange als Textfarbe auf hellem Grund (5,23:1). Flächen behalten accent.
-    accentText: "#C04300",
+    accent: "#0B7A62", // Solargrün (seit 14.10.2026, vorher Orange #FF5200)
+    accentHover: "#08604C",
+    accentSubtle: "#E0F1EB",
+    // Grün als Textfarbe auf hellem Grund (6,2:1). Flächen behalten accent.
+    accentText: "#0A6A55",
+    // Akzent als Text/Fläche auf dunklem Grund (#141B22): 9,6:1. Das Solargrün
+    // selbst (accent) geht dort unter.
+    accentOnDark: "#8FDDC4",
+    accentOnDarkSubtle: "rgba(143,221,196,0.14)",
+    // Die Sonne bleibt warm: Gold der Logo-Bildmarke.
+    sun: "#D4950A",
 
     // echte "pp"-Wortmarken-Farbe — für dunkle Headline-Akzente, nicht als
     // Button-Füllung oder Logo-Hintergrund-Chip.

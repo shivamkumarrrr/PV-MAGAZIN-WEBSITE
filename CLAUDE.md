@@ -248,9 +248,11 @@ Background:    #F6F8F7  (kühles Off-White, NICHT cremig)
 Cards:         #FFFFFF
 Text/primary:  #141B22
 Text/secondary:#5A6570
-Accent:        #FF5200  (echtes PPC-Orange, aus dem offiziellen Logo-File)
-Accent hover:  #D64700
-Accent subtle: #FFE9DD
+Accent:        #0B7A62  (Solargrün, seit 14.10.2026; vorher Orange #FF5200)
+Accent hover:  #08604C
+Accent subtle: #E0F1EB
+Accent text:   #0A6A55  (6,2:1 auf Weiß; Knöpfe tragen WEISSE Schrift, 5,3:1)
+Sun:           #D4950A  (Logo-Gold; nur für die Sonne in SunArc/Dachvorschau)
 Brand-Navy:    #382E4A  (dunkle Headline-Akzente, KEIN Logo-Hintergrund-Chip)
 Sky (2nd):     #2E6F95  (nur für Daten-Elemente, z. B. Ertragskurve)
 Border:        #E1E5E4  (bewusst NICHT #e2e8f0 Tailwind-Slate)

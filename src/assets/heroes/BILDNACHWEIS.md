@@ -28,7 +28,19 @@ Stand: 14.10.2026.
 | waermepumpe.jpg | alpha innotec | 38067300 | https://www.pexels.com/photo/modern-heat-pump-in-residential-setting-38067300/ |
 | einspeiseverguetung.jpg | Kindel Media | 9800010 | https://www.pexels.com/photo/aerial-photography-of-solar-farm-9800010/ (ersetzt am 14.10.2026 das Bestandsbild ohne dokumentierte Herkunft) |
 
-Startseiten-Hero (/src/assets/hero-modulflaeche.jpg, 2400x1800, unbeschnitten):
+Startseiten-Hero (/src/assets/hero-dach.jpg, 2400x1920, seit 14.10.2026;
+aus dem 2400x3600-Hochformat-Original auf 5:4 geschnitten, Ausschnitt
+y = 1180–3100):
+
+| Datei | Fotograf | Pexels-ID | Seite |
+| --- | --- | --- | --- |
+| hero-dach.jpg | ubeyonroad | 33854333 | https://www.pexels.com/photo/charming-german-houses-in-hannover-with-solar-panel-roofs-33854333/ |
+
+Klinkerhaus mit Satteldach und roten Ziegeln in Hannover. Ersetzt die
+Modul-Nahaufnahme unten: Die Überschrift fragt nach "Ihrem Dach", die
+Nahaufnahme zeigte kein Dach. Ein Zwischenstand am selben Tag (Pexels
+12243093, Robert So) zeigte ein Haus in Kalifornien und wurde verworfen. Vorheriger Hero (Datei bleibt bis
+zur Aufräumung liegen):
 
 | Datei | Fotograf | Pexels-ID | Seite |
 | --- | --- | --- | --- |
