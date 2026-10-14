@@ -314,6 +314,17 @@ Zwei Dinge daran sind Absicht und sollen so bleiben:
 2. **Nur das Hero-Band.** Über die ganze Seite gezogen wird aus Struktur ein
    Muster.
 
+**Seit 14.10.2026 lebt das Raster** (Nutzerwunsch: "etwas auffälliger, wie
+antigravity.google"): `src/lib/heroPunkte.js` zeichnet auf einem Canvas Punkte
+auf die Rasterkreuzungen — zwei grüne Lichtbänder wandern dauernd (8 s je
+Durchlauf, versetzt, nie Pause) diagonal durch, jeder Punkt atmet leise, der
+Mauszeiger streut Gold (Punkte wachsen, färben sich, weichen
+minimal aus). Gleiche 32px-Teilung und gleicher Ursprung wie das CSS-Raster,
+nur Punkte in Markenfarben, kein Verlauf. Pausiert außerhalb des Sichtfelds
+und im Hintergrund-Tab; bei "Bewegung reduzieren" einmal gezeichnet, ohne JS
+bleibt das CSS-Raster. Die Verbote unten gelten weiter: der Effekt bleibt auf
+das Hero-Band beschränkt und wird nicht zu Aurora/Mesh ausgebaut.
+
 Was hier NICHT hingehört, auch wenn "schönerer Hintergrund" gewünscht wird:
 Farbverläufe, Mesh-Flächen, weichgezeichnete Farbflecken, Aurora-Effekte.
 Das ist das bekannteste Erkennungsmerkmal generierter Landingpages und
