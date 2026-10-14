@@ -124,12 +124,21 @@ const heuteIndex = eintraege.findIndex((e) => "heute" in e);
     padding: 22px 20px 6px;
   }
 
+  /* padding/margin ausdrücklich nullen: `.article-body li` (global.css) gibt
+     jedem <li> 0,5em Abstand nach unten und 0,2em links. Der Abstand ließ die
+     Schiene vor dem nächsten Punkt enden, und sie riss auf großen Bildschirmen
+     sichtbar ab. */
   .zl-eintrag,
   .zl-heute {
+    padding: 0;
     position: relative;
     display: grid;
     grid-template-columns: var(--datum) var(--schiene) minmax(0, 1fr);
     column-gap: var(--abstand);
+  }
+
+  .zl-eintrag {
+    margin: 0;
   }
 
   .zl-inhalt {
@@ -280,7 +289,7 @@ const heuteIndex = eintraege.findIndex((e) => "heute" in e);
     content: "";
     position: absolute;
     left: calc(50% - 1px);
-    top: -4px;
+    top: 0;
     bottom: -22px;
     border-left: 2px dashed var(--color-text-muted);
   }
