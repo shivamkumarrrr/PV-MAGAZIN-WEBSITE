@@ -16,7 +16,8 @@ const { Content, headings } = await render(entry);
 // Lesezeit aus dem Rohtext schätzen — deutschsprachiger Lesetext liegt bei
 // etwa 200–250 Wörtern pro Minute, 220 ist ein üblicher Mittelwert. Der Wert
 // wird nur angezeigt, nicht gemessen: sekundengenaues Tracking gehört nicht
-// in diesen Prüfbericht. das wir ausnutzen k
+// in diesen Prüfbericht. Messen ließe sich die Lesedauer, nötig ist es nicht:
+// Für die Anzeige reicht ein Schätzwert.
 const woerter = entry.body?.trim().split(/\s+/).length ?? 0;
 const lesedauer = Math.max(1, Math.round(woerter / 220));
 ---
