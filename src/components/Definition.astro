@@ -3,27 +3,64 @@
 // LichtBlicks "Was bedeutet kWp?"-Hinweise). Bewusst eine Komponente statt
 // einer <abbr>-Alternative: <abbr title> kürzt den nat. Langtext ab, dieser
 // nur beim Hover-Block — hier steht das Fachwort sichtbar im Text und die
-// Erklärung erscheint als Popover. Ohne JavaScript: reines Hover/Focus-CSS.
+// Erklärung erscheint als Popover.
+//
+// Der Auslöser ist ein echter <button>, kein <span tabindex>: Ein aria-label
+// auf einem rollenlosen Span wird von Screenreadern oft ignoriert, und das
+// ersetzte außerdem den sichtbaren Begriff durch die Frage. Jetzt behält der
+// Button seinen sichtbaren Namen und verweist per aria-describedby auf die
+// Erklärung. Ohne JavaScript öffnet Hover und Tastaturfokus das Popover; das
+// kleine Skript unten ergänzt Tippen auf Touch-Geräten und Escape.
 interface Props {
   begriff: string;
 }
 const { begriff } = Astro.props;
+const id = `def-${begriff.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Math.random().toString(36).slice(2, 7)}`;
 ---
 
-<span class="def" tabindex="0" aria-label={`Was bedeutet „${begriff}"?`}>
-  <span class="def-term">{begriff}</span>
-  <span class="def-pop" role="tooltip"><slot /></span>
+<span class="def">
+  <button type="button" class="def-term" aria-describedby={id} aria-expanded="false">{begriff}</button>
+  <span class="def-pop" id={id} role="tooltip"><slot /></span>
 </span>
+
+<script>
+  // Einmal pro Seite, egal wie viele Definitionen im Text stehen.
+  const alle = () => Array.from(document.querySelectorAll<HTMLElement>(".def[data-offen]"));
+  const schliesse = (ausser?: Element | null) => {
+    for (const d of alle()) {
+      if (d === ausser) continue;
+      d.removeAttribute("data-offen");
+      d.querySelector(".def-term")?.setAttribute("aria-expanded", "false");
+    }
+  };
+
+  document.addEventListener("click", (event) => {
+    const knopf = (event.target as Element).closest?.(".def-term");
+    const def = knopf?.closest<HTMLElement>(".def") ?? null;
+    schliesse(def);
+    if (!def || !knopf) return;
+    const offen = def.toggleAttribute("data-offen");
+    knopf.setAttribute("aria-expanded", String(offen));
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") schliesse();
+  });
+</script>
 
 <style>
   .def {
     position: relative;
     display: inline-block;
-    cursor: help;
-    outline: none;
   }
 
   .def-term {
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    cursor: help;
     text-decoration: underline dotted var(--color-text-muted);
     text-decoration-thickness: 1.5px;
     text-underline-offset: 3px;
@@ -62,16 +99,22 @@ const { begriff } = Astro.props;
     transform: translateY(-60%) rotate(45deg);
   }
 
-  .def:hover .def-pop,
-  .def:focus-visible .def-pop {
+  .def-term:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .def-term:focus-visible ~ .def-pop,
+  .def[data-offen] .def-pop {
     display: block;
   }
 
-  @media (hover: none) {
-    /* Auf Touch-Geräten gibt es kein Hover: per Tap blurrt das Element nicht
-       zuverlässig. Popover bleibt trotzdem per Tastatur-Fokus erreichbar. */
-    .def-pop {
-      display: none;
+  /* Hover nur dort, wo es Hover gibt — auf Touch bliebe das Popover nach dem
+     Tippen sonst hängen. Dort öffnet und schließt der Tipp (Skript oben). */
+  @media (hover: hover) {
+    .def:hover .def-pop {
+      display: block;
     }
   }
 </style>

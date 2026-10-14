@@ -111,6 +111,11 @@ const faqLd =
   <div class="lesefortschritt" aria-hidden="true"></div>
 
   <article class="prose article">
+    {/* Kopfband: dasselbe lebende Punktraster wie im Hero der Startseite
+        (src/lib/heroPunkte.js), nur hinter dem Titelblock und leiser. Der
+        Fließtext bleibt ruhig — Bewegung neben einem Absatz kostet Lesbarkeit. */}
+    <header class="artikel-kopf">
+    <canvas class="artikel-punkte" aria-hidden="true"></canvas>
     {/* Das letzte Glied ist der Artikel selbst. Vorher endete die Kette bei
         der Kategorie, und darunter stand derselbe Kategoriename noch einmal
         als Eyebrow-Label — dieselbe Information zweimal, und das
@@ -136,6 +141,7 @@ const faqLd =
       {lesedauer ? <span class="meta-sep" aria-hidden="true">·</span> : null}
       {lesedauer && <span>Ca. {lesedauer} Min. Lesezeit</span>}
     </p>
+    </header>
 
     <ArticleHero heroImage={heroImage} heroImageAlt={heroImageAlt} />
 
@@ -201,6 +207,21 @@ const faqLd =
       Sichtbar vor allem ab 1240px, wo die Übersicht links mitläuft. Ohne
       JavaScript bleibt sie eine normale Sprungliste. */}
   <script>
+    import { starteHeroPunkte } from "../lib/heroPunkte.js";
+    const kopf = document.querySelector<HTMLElement>(".artikel-kopf");
+    const leinwand = document.querySelector<HTMLCanvasElement>(".artikel-punkte");
+    const h1 = kopf?.querySelector("h1");
+    if (kopf && leinwand && h1) {
+      starteHeroPunkte(kopf, leinwand, {
+        // Raster rastet auf der linken Textkante ein, gemessen statt gerechnet.
+        kante: () => h1.getBoundingClientRect().left - kopf.getBoundingClientRect().left,
+        linien: true,
+        staerke: 0.75,
+      });
+    }
+  </script>
+
+  <script>
     // Unter 1240px ist die Übersicht ein aufklappbarer Block über dem Text —
     // zugeklappt, damit sieben Zeilen Navigation nicht den ersten Bildschirm
     // füllen. Ohne JavaScript bleibt sie offen (Attribut steht im HTML).
@@ -246,8 +267,39 @@ const faqLd =
     --spalte: 660px;
     max-width: var(--max-width-wide);
     margin: 0 auto;
-    padding-top: 28px;
+    padding-top: 0;
     padding-bottom: 72px;
+  }
+
+  /* Kopfband über die volle Fensterbreite, der Inhalt bleibt in der Spalte:
+     negativer Außen- und gleich großer Innenabstand heben sich auf. Der
+     Überstand der Scrollbar wird am <body> abgeschnitten (global.css). */
+  .article > .artikel-kopf {
+    position: relative;
+    max-width: none;
+    margin-inline: calc(50% - 50vw);
+    padding: 28px calc(50vw - 50%) 30px;
+    margin-bottom: 32px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .artikel-kopf > :global(*:not(canvas)) {
+    position: relative;
+    max-width: var(--spalte);
+  }
+
+  .artikel-punkte {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .artikel-kopf .meta {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
   }
 
   .article > :global(*) {
@@ -407,9 +459,14 @@ const faqLd =
       grid-column: 1;
     }
 
+    .article > .artikel-kopf {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
     .article > .toc {
       grid-column: 3;
-      grid-row: 1 / span 40;
+      grid-row: 2 / span 40;
       align-self: start;
       position: sticky;
       top: 32px;

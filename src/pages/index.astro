@@ -2,7 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
-import heroBild from "../assets/hero-dach.jpg";
+import heroBild from "../assets/hero-haus-klinker.jpg";
 // Bild neben "Was ist Photovoltaik?". EINE Stelle zum Austauschen: Datei nach
 // src/assets/ legen, hier importieren, Alt-Text unten anpassen, Fotograf und
 // Fundstelle in src/assets/heroes/BILDNACHWEIS.md eintragen.
@@ -187,13 +187,20 @@ const wasIstPvLd = {
           </div>
           <button type="submit" class="knopf-primaer">Ertrag berechnen</button>
         </form>
+
+        <!-- Der 2027er Rechtsrahmen ist für Kaufinteressenten gerade der
+             Grund zu rechnen; bisher stand der Link nur im Footer. Bewusst
+             eine Textzeile, keine Pille und kein Badge (Design-Regel 6). -->
+        <p class="hero-2027">
+          <a href="/photovoltaik-2027/">Neu: Was sich 2027 für neue Anlagen ändern soll →</a>
+        </p>
       </div>
 
       <div class="hero-grafik">
         <figure class="hero-bild">
           <Image
             src={heroBild}
-            alt="Klinkerhaus mit rotem Ziegel-Satteldach, auf der Dachfläche eine Reihe Solarmodule, davor ein Vorgarten an der Straße"
+            alt="Backsteinhaus mit rotem Satteldach, dessen Dachfläche mit Solarmodulen belegt ist, davor Laubbäume"
             widths={[640, 960, 1280, 1800]}
             sizes="(min-width: 860px) 46vw, 100vw"
             loading="eager"
@@ -510,6 +517,17 @@ const wasIstPvLd = {
     gap: 10px;
   }
 
+  .hero-2027 {
+    margin: 14px 0 0;
+    font-size: 14px;
+  }
+
+  .hero-2027 a {
+    font-weight: 600;
+    color: var(--color-accent-text);
+    text-underline-offset: 3px;
+  }
+
   .hero-feld {
     display: flex;
     flex-direction: column;
@@ -595,9 +613,10 @@ const wasIstPvLd = {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Die Modulfläche sitzt links oben im Foto — der Ausschnitt hält sie
-       im Bild, wenn das Handy-Format (16:10) oben und unten beschneidet. */
-    object-position: 25% 20%;
+    /* Quelldatei ist quadratisch zugeschnitten (Dach im oberen Drittel bis
+       zur Mitte). Am Handy (16:10) schneidet cover oben und unten ab; der
+       Ausschnitt hält die belegte Dachfläche im Bild. */
+    object-position: 50% 38%;
   }
 
   @media (min-width: 860px) {

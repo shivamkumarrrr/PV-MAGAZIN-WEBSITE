@@ -6,6 +6,7 @@ import Energiebilanz from "./ui/Energiebilanz.jsx";
 import DetailSection from "./DetailSection.jsx";
 import LeadForm from "./LeadForm.jsx";
 import Transparency from "./Transparency.jsx";
+import ResultActions from "./ResultActions.jsx";
 import SpeicherVergleich from "./ui/SpeicherVergleich.jsx";
 import { formatSpan } from "../../lib/calculate.js";
 import { usePrefersReducedMotion } from "../../lib/usePrefersReducedMotion.js";
@@ -45,6 +46,9 @@ export default function ResultScreen({ result, displayLocation, resolvedCity, da
 
       <DetailSection result={result} dachform={dachform} speicherKwh={speicherKwh} tageszeit={tageszeit} plz={plz} />
 
+      <ResultActions />
+
+      <div className="druck-aus">
       <LeadForm
         result={result}
         displayLocation={displayLocation}
@@ -61,6 +65,7 @@ export default function ResultScreen({ result, displayLocation, resolvedCity, da
         plz={plz}
         onRestart={onRestart}
       />
+      </div>
 
       <Transparency result={result} />
     </div>

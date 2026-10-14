@@ -340,4 +340,26 @@ body.seite-artikel {
   background-repeat: no-repeat;
   background-size: 100% 620px;
   background-attachment: scroll;
+  /* Das Kopfband des Artikels ist 100vw breit und ragt um die Scrollbar
+     hinaus; `clip` schneidet das ab, ohne einen Scrollcontainer anzulegen. */
+  overflow-x: clip;
+}
+
+/* Ausdruck des Rechner-Ergebnisses (ResultActions.jsx): nur die Zahlen und
+   ihr Beleg. Kopf, Fuß, Anfrageformular und der Druckknopf selbst gehören
+   nicht aufs Papier. `!important` bei .nur-druck, weil das Element sein
+   display:none inline trägt. */
+@media print {
+  .site-header,
+  .site-footer,
+  .druck-aus {
+    display: none !important;
+  }
+  .nur-druck {
+    display: block !important;
+    margin-top: 16px;
+  }
+  body {
+    background: #fff;
+  }
 }

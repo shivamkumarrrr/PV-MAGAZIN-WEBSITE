@@ -24,7 +24,11 @@ const mische = (a, b, t) => [
   a[2] + (b[2] - a[2]) * t,
 ];
 
-export function starteHeroPunkte(hero, leinwand) {
+// Optionen: `kante()` liefert die linke Textkante in px relativ zum Feld (sonst
+// wie auf der Startseite), `linien` zeichnet die Rasterlinien mit, `staerke`
+// dämpft Lichtbänder und Zeiger (1 = Startseite).
+export function starteHeroPunkte(hero, leinwand, optionen = {}) {
+  const { kante: kanteFn, linien = false, staerke = 1 } = optionen;
   const ctx = leinwand.getContext("2d");
   if (!ctx) return;
 
@@ -45,13 +49,18 @@ export function starteHeroPunkte(hero, leinwand) {
     leinwand.height = Math.round(hoehe * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // Wie im CSS: ab 1180px liegt die Textkante bei 50% - 570px, darunter bei 20px.
-    const kante = breite >= 1180 ? breite / 2 - 570 : 20;
+    const kante = kanteFn ? kanteFn() : breite >= 1180 ? breite / 2 - 570 : 20;
     x0 = ((kante % TEILUNG) + TEILUNG) % TEILUNG;
     zeichne(performance.now());
   }
 
   function zeichne(zeit) {
     ctx.clearRect(0, 0, breite, hoehe);
+    if (linien) {
+      ctx.fillStyle = "rgba(20,27,34,0.035)";
+      for (let x = x0; x <= breite; x += TEILUNG) ctx.fillRect(x, 0, 1, hoehe);
+      for (let y = 0; y <= hoehe; y += TEILUNG) ctx.fillRect(0, y, breite, 1);
+    }
     const t = ruhig ? 0 : zeit / 1000;
 
     // Zwei Lichtbänder, dauernd unterwegs: je 8s über die Diagonale, um die
@@ -84,8 +93,8 @@ export function starteHeroPunkte(hero, leinwand) {
           const k = 1 - abstandBand / 170;
           const welle = k * k;
           farbe = mische(TINTE, GRUEN, Math.min(1, welle * 1.5));
-          alpha += welle * 0.65;
-          radius += welle * 2;
+          alpha += welle * 0.65 * staerke;
+          radius += welle * 2 * staerke;
         }
 
         // Zeiger
@@ -97,8 +106,8 @@ export function starteHeroPunkte(hero, leinwand) {
             const k = (1 - d / REICHWEITE) * zeiger.staerke;
             const e = k * k * (3 - 2 * k);
             farbe = mische(farbe, GOLD, Math.min(1, e * 1.3));
-            alpha = Math.min(0.8, alpha + e * 0.55);
-            radius += e * 2;
+            alpha = Math.min(0.8, alpha + e * 0.55 * staerke);
+            radius += e * 2 * staerke;
             // Ausweichen: bis zu 6px vom Zeiger weg.
             if (d > 0.1) {
               px += (dx / d) * e * 6;

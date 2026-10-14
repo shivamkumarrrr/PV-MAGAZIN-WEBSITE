@@ -28,6 +28,21 @@ Stand: 14.10.2026.
 | waermepumpe.jpg | alpha innotec | 38067300 | https://www.pexels.com/photo/modern-heat-pump-in-residential-setting-38067300/ |
 | einspeiseverguetung.jpg | Kindel Media | 9800010 | https://www.pexels.com/photo/aerial-photography-of-solar-farm-9800010/ (ersetzt am 14.10.2026 das Bestandsbild ohne dokumentierte Herkunft) |
 
+Startseiten-Hero ab 14.10.2026 (/src/assets/hero-haus-klinker.jpg, 2400x2400,
+aus dem 2400x3600-Hochformat-Original auf 1:1 geschnitten, Ausschnitt
+y = 108-2508):
+
+| Datei | Fotograf | Pexels-ID | Seite |
+| --- | --- | --- | --- |
+| hero-haus-klinker.jpg | Sergej (Nachname auf Pexels nur abgekürzt) | 31912311 | https://www.pexels.com/photo/sustainable-energy-modern-brick-house-exterior-31912311/ |
+
+Backsteinhaus mit voll belegtem Satteldach. Pexels nennt KEINEN Aufnahmeort;
+der Backstein-Stil ist norddeutsch/niederländisch, belegt ist das nicht —
+deshalb behauptet der Alt-Text kein Land. Ersetzt zwei Zwischenstände am
+selben Tag: Die Dachnahaufnahme hero-dach-ziegel.jpg (Pexels 17965455, Vladimir
+Srajber, Kroatien) zeigte kein Haus; das Hannover-Foto unten hatte die Module
+klein in der Ecke. Die Ziegel-Datei ist entfernt, hero-dach.jpg liegt bis zur Aufräumung noch da.
+
 Startseiten-Hero (/src/assets/hero-dach.jpg, 2400x1920, seit 14.10.2026;
 aus dem 2400x3600-Hochformat-Original auf 5:4 geschnitten, Ausschnitt
 y = 1180–3100):
