@@ -18,6 +18,19 @@ import { IconCheck, IconCalendar, IconMail, IconLoader, IconLock } from "../Icon
 //   daten          — flaches Objekt aus dem Lead-Feld-Whitelist von
 //                    src/pages/api/lead.ts (siehe dort ERLAUBTE_FELDER)
 //   onRestart      — optional, blendet "Neu berechnen" ein
+// "Neu berechnen" tauscht das lange Ergebnis gegen den kurzen ersten Schritt.
+// Die Seite blieb dabei auf der alten Scrollhöhe stehen und landete irgendwo
+// weiter unten im Seitentext. Der Rechner-Rahmen (.wizard-wrap) überlebt den
+// Wechsel, also wird er vorab gemerkt und danach an den oberen Rand geholt.
+function neuBerechnen(event, onRestart) {
+  const rahmen = event.currentTarget.closest(".wizard-wrap");
+  onRestart();
+  if (!rahmen) return;
+  requestAnimationFrame(() => {
+    window.scrollTo({ top: window.scrollY + rahmen.getBoundingClientRect().top - 16 });
+  });
+}
+
 export default function LeadForm({ rechner, zusammenfassung, daten = {}, onRestart }) {
   const [showForm, setShowForm] = useState(false);
   const [showCalendly, setShowCalendly] = useState(false);
@@ -258,7 +271,7 @@ export default function LeadForm({ rechner, zusammenfassung, daten = {}, onResta
         Beide Wege sind kostenlos und unverbindlich
       </div>
       {onRestart && (
-        <button onClick={onRestart} style={{ width: "100%", marginTop: 12, padding: "12px", background: "transparent", border: `1.5px solid ${theme.color.border}`, borderRadius: 12, color: theme.color.textSecondary, fontSize: 14, cursor: "pointer" }}>
+        <button onClick={(e) => neuBerechnen(e, onRestart)} style={{ width: "100%", marginTop: 12, padding: "12px", background: "transparent", border: `1.5px solid ${theme.color.border}`, borderRadius: 12, color: theme.color.textSecondary, fontSize: 14, cursor: "pointer" }}>
           Neu berechnen
         </button>
       )}
