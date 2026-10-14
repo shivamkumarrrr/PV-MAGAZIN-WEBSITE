@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
@@ -24,6 +25,7 @@ export default function RenditeWizard() {
   const [waermepumpe, setWaermepumpe] = useState("nein");
   const [speicherKwh, setSpeicherKwh] = useState(0);
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   function eautoProfil() {
     return eauto === "ja" ? "Hauptwagen" : null;

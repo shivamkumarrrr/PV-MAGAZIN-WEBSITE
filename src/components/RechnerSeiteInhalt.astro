@@ -72,7 +72,7 @@ const faqLd = inhalt?.faq?.length
 
 {inhalt && (
   <>
-    <section class="container rechner-text">
+    <section class="container rechner-text rechner-erklaerung">
       <h2>So funktioniert der Rechner</h2>
       <div class="schritte">
         {inhalt.schritte.map((s, i) => (
@@ -86,7 +86,7 @@ const faqLd = inhalt?.faq?.length
     </section>
 
     {inhalt.abschnitte.map((a) => (
-      <section class="container rechner-text">
+      <section class="container rechner-text rechner-erklaerung">
         <h2>{a.titel}</h2>
         {a.absaetze.map((p) => <p class="fliesstext">{p}</p>)}
       </section>
@@ -105,6 +105,12 @@ const faqLd = inhalt?.faq?.length
 )}
 
 <style>
+  /* Auf der Ergebnisseite eines Rechners (useErgebnisMarke setzt das
+     Attribut) entfallen Schritte und Erklärabschnitte; die FAQ bleibt. */
+  :global(html[data-ergebnis]) .rechner-erklaerung {
+    display: none;
+  }
+
   /* Containerbreite wie alles andere auf der Seite — die Lesebreite sitzt am
      Textelement, nicht am Abschnitt (siehe CLAUDE.md, "Eine linke Kante für
      alle Seiten"). */

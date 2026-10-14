@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
@@ -14,6 +15,7 @@ export default function Co2Wizard() {
   const [kwp, setKwp] = useState(10);
   const [ertrag, setErtrag] = useState(() => schaetzeCo2Ertrag(10));
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const onKwpChange = (v) => {
     setKwp(v);

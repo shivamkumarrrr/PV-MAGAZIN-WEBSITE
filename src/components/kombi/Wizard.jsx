@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
@@ -35,6 +36,7 @@ export default function KombiWizard() {
   const [eauto, setEauto] = useState("nein");
   const [waermepumpe, setWaermepumpe] = useState("nein");
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const { kwp } = computeKwp(dach, dachform);
   const result = compareScenarios(kwp, dachform, ausrichtung, neigung, verbrauch, speicherKwh, eauto, waermepumpe);

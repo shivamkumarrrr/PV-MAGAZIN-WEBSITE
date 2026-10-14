@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
@@ -29,6 +30,7 @@ export default function ReinigungWizard() {
   const [eigen, setEigen] = useState(0.4);
   const [zugaenglichkeit, setZugaenglichkeit] = useState("steildach");
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const result = calculateReinigung({
     kwp, umgebung, dachneigung,

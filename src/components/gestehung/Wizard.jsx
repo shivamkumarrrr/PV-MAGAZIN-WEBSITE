@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import Slider from "../calculator/ui/Slider.jsx";
 import Toggle from "../calculator/ui/Toggle.jsx";
@@ -17,6 +18,7 @@ export default function Wizard() {
   const [speicherAktiv, setSpeicherAktiv] = useState(false);
   const [speicherKwh, setSpeicherKwh] = useState(5);
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const effektiveInvestition = investition ?? Math.round(kwp * KOSTEN_PRO_KWP);
   const effektiverErtrag = jahresertrag ?? schaetzeJahresertrag(kwp);

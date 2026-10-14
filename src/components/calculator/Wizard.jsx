@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import { getCity, getCoords } from "../../lib/plz.js";
 import { geocodeAddress } from "../../lib/geocode.js";
@@ -43,6 +44,7 @@ export default function Wizard() {
   const [address, setAddress] = useState("");
   const [dachform, setDachform] = useState(null);
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
   const [animDir, setAnimDir] = useState("right");
   const [animKey, setAnimKey] = useState(0);
   // Schritte mit Sub-Screens (Dach, Verbrauch): der übergeordnete "Weiter →"

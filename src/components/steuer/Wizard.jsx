@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import { IconCheck } from "../Icons.jsx";
 import LeadForm from "../lead/LeadForm.jsx";
@@ -15,6 +16,7 @@ export default function SteuerWizard() {
   const [kwp, setKwp] = useState(10);
   const [preis, setPreis] = useState(13000);
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const result = calculateSteuer(kwp, preis);
 

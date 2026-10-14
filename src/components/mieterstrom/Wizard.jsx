@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import LeadForm from "../lead/LeadForm.jsx";
 import Slider from "../calculator/ui/Slider.jsx";
@@ -21,6 +22,7 @@ export default function MieterstromWizard() {
   const [betriebskosten, setBetriebskosten] = useState(0);
 
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const result = calculateMieterstrom({
     kwp,

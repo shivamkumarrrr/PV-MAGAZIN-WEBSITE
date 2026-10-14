@@ -1,4 +1,5 @@
 import { useState } from "react";
+import useErgebnisMarke from "../../lib/useErgebnisMarke.js";
 import theme from "../../theme.js";
 import Slider from "../calculator/ui/Slider.jsx";
 import ContinueButton from "../calculator/ui/ContinueButton.jsx";
@@ -15,6 +16,7 @@ export default function Wizard() {
   const [modulleistung, setModulleistung] = useState(880);
   const [investition, setInvestition] = useState(600);
   const [showResult, setShowResult] = useState(false);
+  useErgebnisMarke(showResult);
 
   const result = calculateBalkonkraftwerk(modulleistung, ausrichtung, neigung, investition);
 
