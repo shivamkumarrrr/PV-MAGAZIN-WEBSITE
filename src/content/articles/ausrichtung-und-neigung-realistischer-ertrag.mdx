@@ -19,6 +19,10 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import { ertragNachAusrichtung, ertragNachNeigung } from "../../lib/diagrammDaten.js";
+export const ausrichtung = ertragNachAusrichtung();
+export const neigung = ertragNachNeigung();
 
 "Nur Südausrichtung lohnt sich" ist einer der hartnäckigsten Halbwahrheiten
 rund um Photovoltaik. Sie stimmt in der Tendenz, aber die tatsächlichen
@@ -51,6 +55,14 @@ Interessent kennen sollte, bevor er investiert. Wie aus dem Ertrag am Ende
 Eigenverbrauch und Einspeisung werden, beschreibt der
 [Grundlagenartikel](/ratgeber/wie-funktioniert-eine-photovoltaikanlage/).
 
+<Diagramm
+  titel="Ertrag nach Ausrichtung"
+  einheit="Prozent des Ertrags bei Südausrichtung"
+  quelle="Ertragsfaktoren des Photovoltaik-Rechners (mehrere deutsche PV-Ratgeber mit Bezug auf PVGIS, HTW Berlin und Fraunhofer ISE; Nord: photovoltaik.org), Stand August 2026. Bundesweite Durchschnittswerte, kein Standortwert."
+  werte={ausrichtung}
+  max={100}
+/>
+
 ## Wie stark Neigung den Ertrag verändert
 
 Der wirtschaftlich optimale Neigungswinkel in Deutschland liegt bei etwa
@@ -67,6 +79,14 @@ PV-Ratgeber-Quellen im oberen 80–90-%-Bereich des theoretischen Optimums —
 ein Grund, warum sich Photovoltaik auch auf Flachdächern (mit
 aufgeständerten Modulen im optimalen Winkel) und auf steilen
 Satteldächern gleichermaßen lohnen kann.
+
+<Diagramm
+  titel="Ertrag nach Neigung"
+  einheit="Prozent des Ertrags bei optimaler Neigung"
+  quelle="Neigungsfaktoren des Photovoltaik-Rechners (mehrere deutsche PV-Ratgeber, optimaler Winkel in Deutschland 30–35° Süd), Stand August 2026. Bundesweite Durchschnittswerte."
+  werte={neigung}
+  max={100}
+/>
 
 <RechnerCta text="Diese beiden Faktoren wirken multiplikativ zusammen — wie genau, zeigt der Rechner direkt für Ihre eigene Dachkonstellation." />
 

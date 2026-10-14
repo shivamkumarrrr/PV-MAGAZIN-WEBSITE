@@ -21,6 +21,7 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
 
 Wer sich mit den Anschaffungskosten einer PV-Anlage beschäftigt, stößt
 irgendwann auf ein zweites Modell: Miete oder Pacht statt Kauf. Die
@@ -57,6 +58,18 @@ unternehmerischen Gewinn in die monatliche Rate ein. Das ist
 grundsätzlich legitim — genau dafür zahlt man ja — aber es bedeutet, dass
 ein Mietmodell selten die günstigere Option ist, wenn ausreichend
 Eigenkapital oder ein normaler Kredit für den Kauf zur Verfügung steht.
+
+<Diagramm
+  titel="Gesamtkosten über 20 Jahre: Kauf gegen Miete"
+  einheit="Euro"
+  quelle="Monatsraten 80–300 € (Verbraucherzentrale) über 20 Jahre Laufzeit (Rate × 240 Monate), Kaufpreis 10 kWp ohne Speicher nach Fraunhofer ISE (1.000–1.300 €/kWp, brutto = netto). Mietanlagen sind unterschiedlich groß; der Kauf ist als Orientierung für 10 kWp gezeigt. Beim Kauf kommen laufende Kosten von rund 1 % der Investition pro Jahr hinzu, bei der Miete sind Wartung und Versicherung meist in der Rate."
+  werte={[
+    { label: "Kauf einer 10-kWp-Anlage", von: 10000, wert: 13000, anzeige: "10.000–13.000 €", hervor: true },
+    { label: "Miete, 80 € im Monat", wert: 19200, anzeige: "19.200 €" },
+    { label: "Miete, 150 € im Monat", wert: 36000, anzeige: "36.000 €" },
+    { label: "Miete, 300 € im Monat", wert: 72000, anzeige: "72.000 €" },
+  ]}
+/>
 
 <RechnerCta text="Wie hoch die Kaufkosten für eine Anlage Ihrer Größe tatsächlich liegen, zeigt der Rechner in wenigen Minuten — als Vergleichsbasis gegen jedes Mietangebot." />
 

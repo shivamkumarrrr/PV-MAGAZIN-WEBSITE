@@ -27,6 +27,8 @@ interface Reihe {
   punkte: Punkt[];
   verbinden?: boolean;
   hohl?: boolean;
+  /** Nur die Linie, keine Punkte — für Richtwerte wie eine Kaufpreis-Marke. */
+  ohnePunkte?: boolean;
 }
 interface Achse {
   titel: string;
@@ -94,12 +96,16 @@ const paarLinien =
     {reihen.map((r) => (
       <li>
         <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
-          <circle
-            cx="6" cy="6" r="4.5"
-            fill={r.hohl ? "var(--color-surface)" : FARBE[r.farbe]}
-            stroke={FARBE[r.farbe]}
-            stroke-width={r.hohl ? 2 : 0}
-          />
+          {r.ohnePunkte ? (
+            <line x1="0" x2="12" y1="6" y2="6" stroke={FARBE[r.farbe]} stroke-width="2.5" stroke-linecap="round" />
+          ) : (
+            <circle
+              cx="6" cy="6" r="4.5"
+              fill={r.hohl ? "var(--color-surface)" : FARBE[r.farbe]}
+              stroke={FARBE[r.farbe]}
+              stroke-width={r.hohl ? 2 : 0}
+            />
+          )}
         </svg>
         {r.name}
       </li>
@@ -137,11 +143,11 @@ const paarLinien =
 
       {reihen.map((r) =>
         r.verbinden ? (
-          <path d={pfad(r.punkte)} fill="none" stroke={FARBE[r.farbe]} stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.55" />
+          <path d={pfad(r.punkte)} fill="none" stroke={FARBE[r.farbe]} stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity={r.ohnePunkte ? 0.9 : 0.55} />
         ) : null
       )}
 
-      {reihen.map((r) =>
+      {reihen.filter((r) => !r.ohnePunkte).map((r) =>
         r.punkte.map((p) => (
           <circle
             class="streu-punkt"

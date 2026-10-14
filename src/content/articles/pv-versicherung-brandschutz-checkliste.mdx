@@ -24,6 +24,8 @@ faq:
     antwort: "Hagel mit Modul-Glasbruch und Mikrorissen, Überspannung durch Blitz mit Wechselrichter-Defekten, sowie Marder- und Tierbisse an Leitungen und Modulen. Geprüfte hagelbeständige Module und der Überspannungsschutz nach VdS 3145 sind die direktesten Gegenmaßnahmen."
 ---
 
+import Diagramm from "../../components/Diagramm.astro";
+
 Photovoltaik-Anlagen werden in der Praxis öfter von Hagel, Diebstahl oder
 Marderbiss getroffen als viele Besitzer annehmen. Gleichzeitig sind die
 Risiken durch gute Planung beherrschbar: Der Leitfaden des Gesamtverbands
@@ -51,6 +53,17 @@ Versicherer Wert auf die Einhaltung der Regeln der Technik bei
 Montage, Verkabelung und Überspannungsschutz — eine Anlage, die diesen
 Standards nicht entspricht, kann im Einzelfall sogar die Versicherbarkeit
 des Gebäudes beeinträchtigen.
+
+<Diagramm
+  titel="Ein Schaden gegen den Jahresbeitrag"
+  einheit="Euro"
+  quelle="Richtwerte wie im Text genannt (Schadenkosten je nach Schadensbild, Beitrag der eigenständigen PV-Police). Keine Angebotspreise."
+  werte={[
+    { label: "Jahresbeitrag, eigene PV-Police", von: 70, wert: 180, anzeige: "70–180 €", hervor: true },
+    { label: "Modulwechsel nach Schaden", von: 600, wert: 1800, anzeige: "600–1.800 €" },
+    { label: "Speicher-Totalausfall", von: 4500, wert: 7500, anzeige: "4.500–7.500 €" },
+  ]}
+/>
 
 ## VdS 3145: die wichtigsten Anforderungen
 
@@ -109,6 +122,17 @@ Als Orientierung für die Jahresbeiträge 2026:
 - **10 kWp ohne Speicher:** 70 bis 110 Euro
 - **10 kWp mit 10-kWh-Speicher:** 100 bis 160 Euro
 - **15 kWp mit 15-kWh-Speicher:** 130 bis 200 Euro
+
+<Diagramm
+  titel="Jahresbeitrag der eigenständigen PV-Police 2026"
+  einheit="Euro pro Jahr"
+  quelle="Orientierungswerte 2026 wie im Text genannt. Der tatsächliche Beitrag hängt von Anbieter, Anlage, Speicher und Standort ab."
+  werte={[
+    { label: "10 kWp ohne Speicher", von: 70, wert: 110, anzeige: "70–110 €" },
+    { label: "10 kWp mit 10-kWh-Speicher", von: 100, wert: 160, anzeige: "100–160 €", hervor: true },
+    { label: "15 kWp mit 15-kWh-Speicher", von: 130, wert: 200, anzeige: "130–200 €" },
+  ]}
+/>
 
 Wichtig: Dem Versicherer die Anlage vor der Montage melden — mit
 Anlagendaten, Speichertyp und Inbetriebnahmedatum. Erfährt er erst im

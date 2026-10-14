@@ -20,6 +20,8 @@ faq:
 
 import RechnerCta from "../../components/RechnerCta.astro";
 import Diagramm from "../../components/Diagramm.astro";
+import { verguetungNachGroesse } from "../../lib/diagrammDaten.js";
+export const staffel = verguetungNachGroesse();
 
 Die Einspeisevergütung ist der Teil der PV-Wirtschaftlichkeit, zu dem am
 meisten veraltete Informationen kursieren — kein Wunder, sie sinkt seit
@@ -42,6 +44,18 @@ Das EEG unterscheidet zwei Modelle für Anlagen bis 10 kWp:
   Zweitwohnsitzen). Für die meisten Haushalte ist der Vorteil aus dem
   ersparten Strombezug bei Teileinspeisung höher als die
   Vergütungsdifferenz bei Volleinspeisung.
+
+Die Sätze oben gelten für Anlagen bis 10 kWp. Bei größeren Anlagen bekommt nur
+der Anteil jenseits von 10 kWp den niedrigeren Satz — die Vergütung der
+ersten 10 kWp bleibt unverändert.
+
+<Diagramm
+  titel="Teileinspeisung nach Anlagengröße"
+  einheit="Cent pro kWh"
+  quelle="Bundesnetzagentur, EEG-Förderung und Fördersätze, Inbetriebnahme 1.8.2026–31.1.2027. Der jeweilige Satz gilt für den Anlagenteil in der genannten Größenklasse."
+  werte={staffel}
+  max={10}
+/>
 
 ## Die halbjährliche Degression — und warum sie nicht rückwirkend gilt
 

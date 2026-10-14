@@ -16,9 +16,15 @@
 //       { label: "10 kWp", wert: 1150, hervor: true },
 //     ]}
 //   />
+//
+// Spannen: Mit `von` beginnt der Balken nicht bei null, sondern bei diesem
+// Wert und endet bei `wert` — für Angaben wie "70–110 €" oder "20–35 %".
+// Die Skala läuft trotzdem ab null, damit Längen vergleichbar bleiben.
 interface Wert {
   label: string;
   wert: number;
+  /** Untergrenze einer Spanne; der Balken läuft dann von `von` bis `wert`. */
+  von?: number;
   /** Anzeigetext, falls die Zahl anders formatiert werden soll als der Wert. */
   anzeige?: string;
   /** Hebt genau einen Balken in Akzentfarbe hervor. */
@@ -53,7 +59,7 @@ const zahlFormat = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 2 });
         <span class="diagramm-spur">
           <span
             class:list={["diagramm-balken", { "diagramm-balken--hervor": w.hervor }]}
-            style={`width: ${obergrenze > 0 ? Math.max((w.wert / obergrenze) * 100, 1.5) : 0}%`}
+            style={`margin-left: ${obergrenze > 0 && w.von ? (w.von / obergrenze) * 100 : 0}%; width: ${obergrenze > 0 ? Math.max(((w.wert - (w.von ?? 0)) / obergrenze) * 100, 1.5) : 0}%`}
           />
         </span>
         <span class="diagramm-wert">{w.anzeige ?? zahlFormat.format(w.wert)}</span>

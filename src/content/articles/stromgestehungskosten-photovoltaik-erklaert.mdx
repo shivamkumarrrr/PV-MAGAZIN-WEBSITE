@@ -21,6 +21,9 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import { gestehungskostenBand } from "../../lib/diagrammDaten.js";
+export const band = gestehungskostenBand();
 
 Amortisationszeit ("nach wie vielen Jahren hat sich die Anlage bezahlt
 gemacht") ist die gängigste Kennzahl, um eine PV-Investition einzuordnen —
@@ -66,6 +69,14 @@ Ende der PV-Spanne mit Speicher liegt selbst erzeugter Solarstrom damit
 klar unter dem, was für Netzstrom bezahlt wird — am unteren Ende (reine
 PV-Anlage, günstiger Standort) liegt der Unterschied bei mehr als dem
 Achtfachen.
+
+<Diagramm
+  titel="Was eine Kilowattstunde kostet — selbst erzeugt und aus dem Netz"
+  einheit="Cent pro kWh"
+  quelle="Stromgestehungskosten Photovoltaik: Fraunhofer ISE, Studie Stromgestehungskosten Erneuerbare Energien, 2024; die Spanne ohne Speicher gilt laut Berichterstattung (pv magazine, 7.10.2024) für Photovoltaik allgemein, von Freiflächen- bis zu kleinen Dachanlagen. Haushaltsstrompreis: BDEW-Durchschnitt, rund 37 Ct/kWh. Die Balken zeigen Spannen der Studie, keine Prognose für eine einzelne Anlage."
+  werte={band}
+  max={40}
+/>
 
 <RechnerCta text="Wie hoch die Stromgestehungskosten für Ihre eigene Anlage ausfallen, hängt von Investition, Ertrag und Lebensdauer ab — der Gestehungskostenrechner rechnet das für Ihre Eckdaten durch." href="/rechner/gestehungskosten/" />
 

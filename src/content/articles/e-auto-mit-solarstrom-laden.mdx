@@ -25,6 +25,7 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
 
 Ein Elektroauto im Haushalt erhöht den Strombedarf um grob 1.800 bis
 3.600 Kilowattstunden pro Jahr — je nach Fahrleistung und Verbrauch. Genau
@@ -60,6 +61,18 @@ Wallbox regelt die Ladeleistung automatisch nach dem gerade verfügbaren
 Homeoffice oder Wochenendladen erreichen einzelne Haushalte auch
 70 Prozent und mehr. Die 100-Prozent-Marke ist statistisch nie erreichbar,
 weil nicht jeder Ladevorgang in eine sonnige Fensterzeit fällt.
+
+<Diagramm
+  titel="Solarstromanteil beim Laden nach Ladeverhalten"
+  einheit="Prozent der Ladeenergie"
+  quelle="Praxis-Richtwerte wie im Text genannt, keine Messreihe. Der reale Anteil hängt von Fahrprofil, Anlagengröße, Ladezeiten und Wallbox ab."
+  werte={[
+    { label: "Ohne Steuerung", von: 20, wert: 35, anzeige: "20–35 %" },
+    { label: "Intelligente Wallbox mit Überschussladen", von: 40, wert: 60, anzeige: "40–60 %", hervor: true },
+    { label: "Mit Speicher, Homeoffice oder Wochenendladen", wert: 70, anzeige: "70 % und mehr" },
+  ]}
+  max={100}
+/>
 
 <RechnerCta text="Der E-Auto-Laderechner zeigt für Ihr Fahrprofil den Solarstromanteil, die Ladekosten und die passende PV-Größe." href="/rechner/eauto/" />
 

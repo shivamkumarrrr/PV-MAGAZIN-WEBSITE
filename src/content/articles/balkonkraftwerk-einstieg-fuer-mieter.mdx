@@ -25,6 +25,9 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Streudiagramm from "../../components/Streudiagramm.astro";
+import { balkonkraftwerkRueckfluss } from "../../lib/diagrammDaten.js";
+export const rueckfluss = balkonkraftwerkRueckfluss();
 
 Ein Balkonkraftwerk (auch Steckersolargerät oder Mini-PV genannt) ist
 keine kleine Version einer Dachanlage — es ist eine eigene Kategorie mit
@@ -108,6 +111,25 @@ kürzer als bei einer großen Dachanlage, weil die Anschaffungssumme
 absolut viel kleiner ist. Das relativiert sich allerdings: die absolute
 Ersparnis pro Jahr ist ebenfalls deutlich kleiner als bei einer
 Dachanlage im vierstelligen Bereich.
+
+Wie sich die Ersparnis über die Jahre aufsummiert, zeigt das Diagramm: Wo
+eine Ersparnis-Linie die Kaufpreis-Marke kreuzt, hat sich das Set bezahlt.
+Bei 600 Euro Kaufpreis (Mitte der genannten Spanne) ist das nach etwa 1,9 bis
+2,7 Jahren der Fall; bei 800 Euro Kaufpreis und dem unteren Ertrag dauert es
+rund 3,6 Jahre.
+
+<Streudiagramm
+  titel="Kumulierte Ersparnis eines Balkonkraftwerks"
+  untertitel="Bei vollständiger Nutzung des erzeugten Stroms, Strompreis 0,37 € je kWh"
+  x={{ titel: "Jahre nach Inbetriebnahme", min: 0, max: 10, schritte: [0, 2, 4, 6, 8, 10] }}
+  y={{ titel: "Euro", min: 0, max: 3200, schritte: [0, 800, 1600, 2400, 3200], einheit: " €", tausender: true }}
+  reihen={[
+    { name: "850 kWh Jahresertrag", farbe: "akzent", verbinden: true, punkte: rueckfluss.hoch },
+    { name: "600 kWh Jahresertrag", farbe: "sky", verbinden: true, punkte: rueckfluss.niedrig },
+    { name: "Kaufpreis 600 €", farbe: "navy", verbinden: true, ohnePunkte: true, punkte: rueckfluss.marke },
+  ]}
+  quelle="Modellrechnung von Photovoltaik Aktuell: Ertragsspanne 600–850 kWh/Jahr und Kaufpreis wie im Artikel, Strompreis 0,37 €/kWh (BDEW). Ohne Modulalterung, Strompreisänderung und teilweise nicht genutzten Strom — der Balkonkraftwerk-Rechner rechnet mit 85 % Eigenverbrauch und kommt entsprechend später zur Amortisation."
+/>
 
 <RechnerCta text="Für Ihre Modulleistung, Ausrichtung und Ihren Kaufpreis rechnet der Balkonkraftwerk-Rechner Ertrag und Amortisation konkret durch." href="/rechner/balkonkraftwerk/" />
 

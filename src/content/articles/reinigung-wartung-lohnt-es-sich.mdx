@@ -25,6 +25,8 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import Saeulendiagramm from "../../components/Saeulendiagramm.astro";
 
 Im Netz kursieren Zahlen wie „bis zu 30 Prozent mehr Ertrag nach der
 Reinigung". Die stammen aus Extremfällen — Anlagen neben Zementwerken,
@@ -64,6 +66,18 @@ Daraus ergibt sich schon eine erste Faustregel: Wer ein geneigtes Dach in
 freier Lage hat, wird an einer Reinigung in der Regel kein Geld verdienen.
 Wer ein Flachdach, Stallnähe oder Waldnähe hat, prüft die Rechnung besser
 genauer.
+
+<Diagramm
+  titel="Ertragsverlust durch Verschmutzung"
+  einheit="Prozent des Jahresertrags"
+  quelle="Branchenangaben wie im Text genannt (u. a. Kleibrink: Steildach in freier Lage 2–4 %, belastete Hallen- und Stalldächer 8–12 %). Einzelfälle weichen ab."
+  werte={[
+    { label: "Steildach, freie Lage, normales Jahr", von: 2, wert: 4, anzeige: "2–4 %" },
+    { label: "Steildach, viele Jahre ohne Reinigung", von: 5, wert: 6, anzeige: "5–6 %" },
+    { label: "Stall- oder Hallendach, drei Jahre ohne Reinigung", von: 8, wert: 12, anzeige: "8–12 %", hervor: true },
+  ]}
+  max={14}
+/>
 
 ## Die Reinigungsrechnung: Verlust gegen Kosten
 
@@ -109,6 +123,19 @@ sich nach drei Jahren ohne Reinigung auf acht bis zwölf Prozent Verlust.
 Konservativ gerechnet sind das rund 8.300 kWh im Jahr — bei 14 Cent
 Mischwert etwa 1.160 Euro. Die Reinigung von rund 480 Quadratmetern kostet
 grob 870 Euro. Hier trägt sich der Termin in einer Saison.
+
+<Saeulendiagramm
+  titel="Mehrertrag gegen Reinigungskosten"
+  untertitel="Die beiden Beispiele von oben, je Reinigung bzw. Jahr"
+  kategorien={["10 kWp Steildach", "100 kWp Stalldach"]}
+  reihen={[
+    { name: "Mehrertrag pro Jahr", farbe: "akzent", werte: [51, 1160] },
+    { name: "Kosten einer Reinigung", farbe: "sky", werte: [325, 870] },
+  ]}
+  y={{ titel: "Euro", max: 1200, schritte: [0, 400, 800, 1200], einheit: " €", tausender: true }}
+  einheit="€"
+  quelle="Beispielrechnungen aus dem Text (Mischwert 18 bzw. 14 Ct/kWh). Reinigungskosten des Steildachs: Mitte der Spanne 250–400 €. Rechenbeispiele, keine Angebotspreise."
+/>
 
 ## Das richtige Intervall finden
 

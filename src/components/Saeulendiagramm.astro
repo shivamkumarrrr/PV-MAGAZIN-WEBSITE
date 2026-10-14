@@ -1,0 +1,297 @@
+---
+// Gruppiertes Säulendiagramm als Inline-SVG für den Fließtext — kein
+// Chart-Paket, kein JavaScript, kein Drittanbieter-Request (Invariante 1).
+//
+// Dritte Form neben Diagramm.astro (waagerechte Balken, ein Wert je Zeile) und
+// Streudiagramm.astro (zwei Zahlenachsen): Hier stehen je Kategorie zwei bis
+// drei Säulen nebeneinander — Erzeugung gegen Verbrauch je Monat, Ertrag gegen
+// Kosten je Fall. Werte und Quelle kommen als Props aus dem MDX; wo die Zahlen
+// aus dem Rechenmodell stammen, entstehen sie in src/lib/diagrammDaten.js.
+//
+// Farben wie überall: Sky ist die Datenfarbe, Akzent hebt die EINE Reihe
+// hervor, auf die der Text zeigt, Navy ist die dritte. Jede Säule hat ein
+// <title> (Tooltip und Screenreader). Die Zahlen stehen zusätzlich in einer
+// versteckten Tabelle, damit der Inhalt ohne Grafik les- und indexierbar ist.
+//
+// Bewegung: Säulen wachsen beim Hereinscrollen von unten (scroll-driven
+// animation). Ohne Unterstützung oder mit "Bewegung reduzieren" stehen sie
+// sofort da.
+interface Reihe {
+  name: string;
+  farbe: "akzent" | "sky" | "navy";
+  werte: number[];
+}
+interface Achse {
+  titel: string;
+  max: number;
+  schritte: number[];
+  einheit?: string;
+  tausender?: boolean;
+}
+interface Props {
+  titel: string;
+  untertitel?: string;
+  kategorien: string[];
+  reihen: Reihe[];
+  y: Achse;
+  /** Einheit im Tooltip, z. B. "kWh". */
+  einheit?: string;
+  quelle: string;
+}
+
+const { titel, untertitel, kategorien, reihen, y, einheit = "", quelle } = Astro.props;
+
+const B = 640;
+const H = 330;
+const rand = { links: 84, rechts: 12, oben: 14, unten: 38 };
+const breite = B - rand.links - rand.rechts;
+const hoehe = H - rand.oben - rand.unten;
+
+const gruppe = breite / kategorien.length;
+// Bei vielen Kategorien (Monate) entfällt auf dem Handy jede zweite Marke.
+const dicht = kategorien.length > 6;
+const innen = gruppe * 0.74;
+const luecke = 2;
+const saeule = (innen - luecke * (reihen.length - 1)) / reihen.length;
+
+const py = (v: number) => rand.oben + hoehe - (v / y.max) * hoehe;
+const zahl = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
+const fmtTick = (v: number) => (y.tausender ? Math.round(v).toLocaleString("de-DE") : zahl.format(v)) + (y.einheit ?? "");
+
+const FARBE = {
+  akzent: "var(--color-accent)",
+  sky: "var(--color-sky)",
+  navy: "var(--color-brand-navy)",
+};
+---
+
+<figure class="saeule">
+  <figcaption class="saeule-kopf">
+    <span class="saeule-titel">{titel}</span>
+    {untertitel && <span class="saeule-untertitel">{untertitel}</span>}
+  </figcaption>
+
+  <ul class="saeule-legende">
+    {reihen.map((r) => (
+      <li>
+        <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true">
+          <rect x="0" y="0" width="12" height="12" rx="2" fill={FARBE[r.farbe]} />
+        </svg>
+        {r.name}
+      </li>
+    ))}
+  </ul>
+
+  <svg class="saeule-svg" viewBox={`0 0 ${B} ${H}`} role="img" aria-label={`${titel}. ${untertitel ?? ""}`}>
+    <g class="saeule-raster" aria-hidden="true">
+      {y.schritte.map((v) => (
+        <>
+          <line x1={rand.links} x2={B - rand.rechts} y1={py(v)} y2={py(v)} />
+          <text x={rand.links - 10} y={py(v) + 4} text-anchor="end">{fmtTick(v)}</text>
+        </>
+      ))}
+      {kategorien.map((k, i) => (
+        <text
+          class:list={["saeule-xtick", { "saeule-tick-ungerade": dicht && i % 2 === 1 }]}
+          x={rand.links + gruppe * i + gruppe / 2}
+          y={H - rand.unten + 22}
+          text-anchor="middle"
+        >{k}</text>
+      ))}
+      <line class="saeule-achse" x1={rand.links} x2={B - rand.rechts} y1={rand.oben + hoehe} y2={rand.oben + hoehe} />
+    </g>
+
+    <text
+      class="saeule-achsentitel saeule-ytitel"
+      x={12}
+      y={rand.oben + hoehe / 2}
+      text-anchor="middle"
+      transform={`rotate(-90 12 ${rand.oben + hoehe / 2})`}
+    >{y.titel}</text>
+
+    <g class="saeule-daten">
+      {kategorien.map((k, i) =>
+        reihen.map((r, j) => {
+          const wert = r.werte[i] ?? 0;
+          const x0 = rand.links + gruppe * i + (gruppe - innen) / 2 + j * (saeule + luecke);
+          const h = Math.max((wert / y.max) * hoehe, wert > 0 ? 1 : 0);
+          return (
+            <rect
+              class="saeule-balken"
+              x={x0.toFixed(1)}
+              y={(rand.oben + hoehe - h).toFixed(1)}
+              width={saeule.toFixed(1)}
+              height={h.toFixed(1)}
+              rx="2"
+              fill={FARBE[r.farbe]}
+            >
+              <title>{`${k}, ${r.name}: ${Math.round(wert).toLocaleString("de-DE")} ${einheit}`.trim()}</title>
+            </rect>
+          );
+        })
+      )}
+    </g>
+  </svg>
+
+  <table class="saeule-tabelle">
+    <caption>{titel}</caption>
+    <thead>
+      <tr><th scope="col"></th>{reihen.map((r) => <th scope="col">{r.name}</th>)}</tr>
+    </thead>
+    <tbody>
+      {kategorien.map((k, i) => (
+        <tr><th scope="row">{k}</th>{reihen.map((r) => <td>{Math.round(r.werte[i] ?? 0).toLocaleString("de-DE")} {einheit}</td>)}</tr>
+      ))}
+    </tbody>
+  </table>
+
+  <p class="saeule-quelle">Quelle: {quelle}</p>
+</figure>
+
+<style>
+  .saeule {
+    margin: 2.2em 0;
+    padding: 20px 22px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+    font-family: var(--font-display);
+  }
+
+  .saeule-kopf {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 12px;
+  }
+
+  .saeule-titel {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+  }
+
+  .saeule-untertitel {
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-text-secondary);
+  }
+
+  .saeule-legende {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin: 0 0 6px !important;
+    padding: 0 !important;
+    list-style: none;
+  }
+
+  .saeule-legende li {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    font-size: 12.5px !important;
+    color: var(--color-text-secondary) !important;
+  }
+
+  .saeule-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .saeule-raster line {
+    stroke: var(--color-border);
+    stroke-width: 1;
+  }
+
+  .saeule-raster .saeule-achse {
+    stroke: var(--color-text-muted);
+  }
+
+  .saeule-raster text {
+    font-size: 12px;
+    fill: var(--color-text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .saeule-achsentitel {
+    font-size: 12.5px;
+    font-weight: 600;
+    fill: var(--color-text-secondary);
+  }
+
+  .saeule-balken {
+    transition: opacity 0.15s;
+  }
+
+  .saeule-daten:hover .saeule-balken {
+    opacity: 0.55;
+  }
+
+  .saeule-daten .saeule-balken:hover {
+    opacity: 1;
+  }
+
+  /* Tabellenansicht für Screenreader und Suchmaschinen — optisch versteckt. */
+  .saeule-tabelle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .saeule-quelle {
+    margin: 12px 0 0 !important;
+    padding-top: 10px;
+    border-top: 1px solid var(--color-border);
+    font-size: 11px !important;
+    line-height: 1.5;
+    color: var(--color-text-muted) !important;
+  }
+
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .saeule-balken {
+        transform-box: fill-box;
+        transform-origin: center bottom;
+        animation: saeule-wachsen linear both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 40%;
+      }
+    }
+  }
+
+  @keyframes saeule-wachsen {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  /* Auf dem Handy schrumpft die 640er-Zeichenfläche auf knapp die Hälfte:
+     Schrift in Zeichenflächen-Einheiten vergrößern, damit sie real bei ~11px
+     landet; jede zweite Kategorie-Marke entfällt, sonst laufen sie ineinander. */
+  @media (max-width: 480px) {
+    .saeule {
+      padding: 16px 14px 12px;
+    }
+
+    .saeule-raster text,
+    .saeule-achsentitel {
+      font-size: 23px;
+    }
+
+    .saeule-tick-ungerade,
+    .saeule-ytitel {
+      display: none;
+    }
+  }
+</style>

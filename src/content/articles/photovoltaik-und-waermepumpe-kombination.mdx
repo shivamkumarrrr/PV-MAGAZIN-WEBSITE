@@ -21,6 +21,11 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import Saeulendiagramm from "../../components/Saeulendiagramm.astro";
+import { verbrauchMitWaermepumpe, monatsVerlauf } from "../../lib/diagrammDaten.js";
+export const wp = verbrauchMitWaermepumpe();
+export const verlauf = monatsVerlauf();
 
 Wärmepumpe und Photovoltaik werden oft im selben Atemzug genannt — aus
 gutem Grund: Beide sind zentrale Bausteine der Wärme- und Stromwende im
@@ -40,6 +45,16 @@ Jahresverbrauchs eines durchschnittlichen 4-Personen-Haushalts ohne
 Wärmepumpe (rund 4.000 kWh). Eine Wärmepumpe verändert das
 Verbrauchsprofil eines Haushalts also nicht nur graduell, sondern
 grundlegend.
+
+<Diagramm
+  titel="Jahresverbrauch eines 4-Personen-Haushalts"
+  einheit="Kilowattstunden pro Jahr"
+  quelle="Haushaltsverbrauch: ADAC (4 Personen, 4.000 kWh). Wärmepumpe: Praxisquellen nennen 3.000–5.000 kWh Mehrverbrauch, hier das untere Ende der Spanne (3.000 kWh). Werte des Photovoltaik-Rechners."
+  werte={[
+    { label: "Ohne Wärmepumpe", wert: wp.ohne, anzeige: "4.000 kWh" },
+    { label: "Mit Wärmepumpe", wert: wp.mit, anzeige: "ca. 7.000 kWh", hervor: true },
+  ]}
+/>
 
 ## Der entscheidende Unterschied: Wann wird geheizt?
 
@@ -64,6 +79,25 @@ der Praxis:
   Abend- und Morgenbedarf der Wärmepumpe vorhält — derselbe Mechanismus,
   der auch für den allgemeinen Haushaltsstromverbrauch gilt (siehe der
   Artikel "Lohnt sich ein Stromspeicher?").
+
+Wie weit Erzeugung und Verbrauch im Jahresverlauf auseinanderliegen, zeigt der
+Monatsvergleich für eine 8-kWp-Anlage und einen 4-Personen-Haushalt ohne
+Wärmepumpe: Von November bis Januar liegt schon der gewöhnliche Haushaltsstrom
+über dem Solarertrag. Der Heizstrom der Wärmepumpe kommt genau in diesen
+Monaten noch obendrauf.
+
+<Saeulendiagramm
+  titel="Solarertrag und Haushaltsstrom je Monat"
+  untertitel="8 kWp, 4.000 kWh Jahresverbrauch, ohne Wärmepumpe"
+  kategorien={verlauf.kategorien}
+  reihen={[
+    { name: "Solarertrag", farbe: "akzent", werte: verlauf.ertrag },
+    { name: "Haushaltsstrom", farbe: "sky", werte: verlauf.haushalt },
+  ]}
+  y={{ titel: "Kilowattstunden", max: 1000, schritte: [0, 250, 500, 750, 1000], tausender: true }}
+  einheit="kWh"
+  quelle="Modellrechnung von Photovoltaik Aktuell: Jahresgang des Ertrags (Süd 30°, 950 kWh/kWp, Näherung an PVGIS) und Verbrauchsverlauf nach dem BDEW-Standardlastprofil H0. Das Profil enthält keinen Heizstrom; eine Wärmepumpe verschiebt den Verbrauch zusätzlich in den Winter."
+/>
 
 <RechnerCta text="Der Kombi-Rechner vergleicht Szenarien mit und ohne Wärmepumpe und E-Auto — Eigenverbrauch, Autarkie und Amortisation nebeneinander." href="/rechner/kombi/" />
 

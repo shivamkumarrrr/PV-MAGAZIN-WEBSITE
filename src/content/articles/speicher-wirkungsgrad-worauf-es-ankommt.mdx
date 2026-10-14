@@ -21,6 +21,10 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import Streudiagramm from "../../components/Streudiagramm.astro";
+import { speicherVerlust, preisverhaeltnisNachWirkungsgrad } from "../../lib/diagrammDaten.js";
+export const preis = preisverhaeltnisNachWirkungsgrad();
 
 Beim Speichervergleich fällt der Blick fast automatisch zuerst auf die
 Kilowattstunden-Zahl: "Wie viel Kapazität brauche ich?" Eine ebenso
@@ -55,6 +59,17 @@ Lade-/Entladezyklus:
 - **Konkret beziffert:** Der jährliche Kostenvorteil des effizientesten
   gegenüber dem am wenigsten effizienten getesteten System liegt bei rund
   200 Euro — bei vergleichbarer Speicherkapazität.
+
+<Diagramm
+  titel="Verlust im Lade- und Entladezyklus"
+  einheit="Prozent der gespeicherten Energie (100 % minus SPI)"
+  quelle="HTW Berlin, Stromspeicher-Inspektion 2026 (System Performance Index). Verlust rechnerisch als 100 % minus SPI; 10,7 % gegenüber 3,0 % entsprechen dem 3,5-fachen Verlust."
+  werte={[
+    { label: "Bester Speicher im Test (SPI 97 %)", wert: speicherVerlust(97), anzeige: "3,0 %", hervor: true },
+    { label: "Schlusslicht im Test (SPI 89,3 %)", wert: speicherVerlust(89.3), anzeige: "10,7 %" },
+  ]}
+  max={12}
+/>
 
 Ein weiterer, oft übersehener Faktor: der Standby-Verbrauch im
 Bereitschaftsbetrieb. Die effizientesten Systeme im Test (SAX Power, Fox
@@ -93,6 +108,18 @@ vermiedene Bezug) um mehr als das 1,4-Fache über dem Ladepreis liegen,
 damit sich der Vorgang überhaupt rechnet. Bei einem ineffizienten System
 mit deutlich niedrigerem Wirkungsgrad wird diese Schwelle in der Praxis
 oft gar nicht erreicht.
+
+<Streudiagramm
+  titel="Wie viel teurer der Entladestrom sein muss"
+  untertitel="Mindest-Preisverhältnis zwischen Entlade- und Ladezeitpunkt, damit sich das Laden aus dem Netz rechnet"
+  x={{ titel: "Systemwirkungsgrad", min: 60, max: 100, schritte: [60, 70, 80, 90, 100], einheit: " %" }}
+  y={{ titel: "Mindest-Preisverhältnis", min: 1, max: 1.7, schritte: [1, 1.2, 1.4, 1.6], einheit: "×" }}
+  reihen={[
+    { name: "Mindestverhältnis (1 ÷ Wirkungsgrad)", farbe: "sky", verbinden: true, punkte: preis.punkte },
+    { name: "Beispiel aus dem Text: 71 %", farbe: "akzent", punkte: [preis.beispiel] },
+  ]}
+  quelle="Rechnung von Photovoltaik Aktuell: Ohne Gewinn oder Verlust muss der Entladepreis mindestens das 1/η-Fache des Ladepreises betragen (η = Systemwirkungsgrad); Ausgangspunkt ist die Einordnung der HTW Berlin. Ohne Netzentgelte und Steuern."
+/>
 
 ## Was das für die Kaufentscheidung bedeutet
 

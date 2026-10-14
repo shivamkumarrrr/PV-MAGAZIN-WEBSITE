@@ -25,6 +25,9 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import { mieterstromErloes } from "../../lib/diagrammDaten.js";
+export const erloes = mieterstromErloes();
 
 Im Mehrfamilienhaus liegt ein großer Teil des deutschen
 Photovoltaik-Potenzials ungenutzt. Ein wesentlicher Grund: Wer Mietwohnungen
@@ -71,6 +74,22 @@ einfach in die sichere Einspeisung zu gehen statt das organisatorisch
 aufwendigere Mieterstrommodell zu betreiben. Deshalb lohnt sich
 Mieterstrom besonders dort, wo gleichzeitig Dachfläche saniert oder
 ausgebaut wird und mehrere Wohneinheiten gebündelt versorgt werden können.
+
+Die Größenordnung zeigt der Vergleich je Kilowattstunde: Für eine Anlage
+zwischen 10 und 40 kWp liegt der Zuschlag bei 2,36 Cent (Inbetriebnahme
+Februar bis Juli 2026; für Anlagen ab dem 1. August fällt er um rund ein
+Prozent niedriger aus). Der Mieterstrompreis darf höchstens 90 Prozent des
+Grundversorgertarifs betragen; der Rechner unterstellt 25 bis 30 Cent. Zusammen
+ist die an Mieter gelieferte Kilowattstunde damit ein Vielfaches dessen wert,
+was dieselbe Kilowattstunde als Überschuss im Netz bringt.
+
+<Diagramm
+  titel="Was eine Kilowattstunde dem Betreiber bringt"
+  einheit="Cent pro kWh, Anlage 10–40 kWp"
+  quelle="Mieterstromzuschlag: Bundesnetzagentur, Inbetriebnahme Februar–Juli 2026 (ab 1.8.2026 rund 1 % niedriger). Einspeisevergütung: Bundesnetzagentur, Inbetriebnahme 8/2026–1/2027. Mieterstrompreis: höchstens 90 % des Grundversorgertarifs (§ 42a EnWG); 25–30 Ct/kWh ist eine Annahme des Mieterstrom-Rechners, kein Marktwert. Ohne Betriebskosten der Belieferung."
+  werte={erloes}
+  max={35}
+/>
 
 ## Dachsanierung und PV: die günstige Kombination
 

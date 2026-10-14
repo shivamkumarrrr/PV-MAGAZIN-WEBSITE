@@ -234,6 +234,16 @@ interaktive React-Komponenten ("Islands") dort, wo sie gebraucht werden
   Haushalt, heutige Vergütung vs. Übergangszahlung) und Speicher-Artikel
   (Autarkie nach Speichergröße). Neue Diagramme nur mit Daten, die das Modell
   tatsächlich liefert oder die eine Quelle haben.
+- `src/components/Saeulendiagramm.astro` — gruppiertes Säulendiagramm als
+  Inline-SVG (zwei bis drei Säulen je Kategorie, versteckte Tabelle für
+  Screenreader). Dritte Form neben `Diagramm` und `Streudiagramm`. `Diagramm`
+  kennt seit Oktober 2026 Spannen (`von` + `wert`), `Streudiagramm` Linien
+  ohne Punkte (`ohnePunkte`) für Richtwert-Marken. Seit Oktober 2026 hat jeder
+  Artikel mit belastbaren Zahlen mindestens ein Diagramm; Daten aus dem Modell
+  entstehen als Funktionen in `diagrammDaten.js`, Daten aus dem Artikeltext
+  stehen mit Quellenzeile direkt im MDX. Artikel ohne Diagramm
+  (`checkliste-vor-dem-pv-kauf`) haben bewusst keins: keine Zahlen, die eine
+  Grafik tragen würden.
 - `src/components/RechnerWidget.jsx` — kompakter Mini-Rechner für den
   Artikeltext. Nutzt `calculate.js`-Konstanten, `Slider`/`Segmented` aus
   `calculator/ui` und `theme.js`. Einbindung im MDX mit

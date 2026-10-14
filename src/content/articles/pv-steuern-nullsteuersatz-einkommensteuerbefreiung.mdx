@@ -23,6 +23,9 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Diagramm from "../../components/Diagramm.astro";
+import { kaufpreisMitUndOhneMwSt } from "../../lib/diagrammDaten.js";
+export const preis = kaufpreisMitUndOhneMwSt();
 
 Wer 2026 eine Photovoltaikanlage kauft und betreibt, hat es steuerlich so
 einfach wie nie. Seit 2023 sind Neuanlagen auf Wohngebäuden von der
@@ -51,6 +54,19 @@ vollen Brutto-Preis und holte sich die Vorsteuer über die
 Umsatzsteuer-Erklärung zurück. Heute entfällt das — Sie kaufen einfach ohne
 Mehrwertsteuer. Ein Vorteil für alle, die vorher — etwa aus
 Kleinunternehmer-Gründen — gar keine Vorsteuer hätten geltend machen können.
+
+Für eine 10-kWp-Anlage zum Mittelwert der Marktpreise sind das rund
+2.185 Euro:
+
+<Diagramm
+  titel="Kaufpreis einer 10-kWp-Anlage bei gleichem Nettopreis"
+  einheit="Euro"
+  quelle="§ 12 Abs. 3 UStG (Nullsteuersatz seit 1.1.2023). Nettopreis 11.500 € = Mitte der Fraunhofer-ISE-Spanne 1.000–1.300 €/kWp; 19 % Umsatzsteuer rechnerisch daraufgeschlagen. Rechenbeispiel, kein Angebotspreis."
+  werte={[
+    { label: "Mit 19 % Umsatzsteuer (Rechtslage bis 2022)", wert: preis.brutto, anzeige: "≈ 13.685 €" },
+    { label: "Mit Nullsteuersatz (seit 2023)", wert: preis.netto, anzeige: "≈ 11.500 €", hervor: true },
+  ]}
+/>
 
 ## Die Einkommensteuerbefreiung
 

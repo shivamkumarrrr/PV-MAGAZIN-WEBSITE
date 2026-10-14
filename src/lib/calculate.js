@@ -89,7 +89,7 @@ export const TAGESZEITEN = [
 // höher, Sommerlast niedriger — BDEW H0: Winter ~44 %, Sommer ~29 % des Jahresverbrauchs), für die
 // Monatsauflösung selbst geglättet. Quelle: BDEW, "Standardlastprofile Strom"
 // (bdew.de/energie/standardlastprofile-strom), Stand Aug 2026.
-const MONATS_VERBRAUCH_ANTEILE = [0.094, 0.086, 0.086, 0.08, 0.08, 0.075, 0.075, 0.08, 0.08, 0.084, 0.09, 0.09];
+export const MONATS_VERBRAUCH_ANTEILE = [0.094, 0.086, 0.086, 0.08, 0.08, 0.075, 0.075, 0.08, 0.08, 0.084, 0.09, 0.09];
 
 // Fallback-Jahresgang des PV-Ertrags (Anteile, Summe = 1,0) für Standorte ohne PVGIS-Daten —
 // typischer deutscher Süd-30°-Ertragsverlauf (Winter minimal, Sommer maximal). Grobe Näherung an die

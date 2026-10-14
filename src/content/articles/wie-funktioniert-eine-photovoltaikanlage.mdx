@@ -19,6 +19,9 @@ faq:
 ---
 
 import RechnerCta from "../../components/RechnerCta.astro";
+import Streudiagramm from "../../components/Streudiagramm.astro";
+import { autarkieVsEigenverbrauch } from "../../lib/diagrammDaten.js";
+export const kennzahlen = autarkieVsEigenverbrauch();
 
 Die meisten Erklärungen zur Funktionsweise von Photovoltaik beginnen bei
 der Physik des photoelektrischen Effekts. Nachvollziehbarer ist es oft,
@@ -90,6 +93,23 @@ sie sich in entgegengesetzte Richtungen bewegen:
   Sinkt tendenziell, je größer die Anlage im Verhältnis zum Verbrauch
   dimensioniert ist — eine große Anlage erzeugt schlicht mehr, als ein
   Haushalt zeitgleich verbrauchen kann.
+
+Das Diagramm zeigt die gegenläufige Bewegung für einen Haushalt mit
+4.000 kWh Jahresverbrauch ohne Speicher: Je größer die Anlage, desto mehr vom
+Verbrauch deckt sie — aber desto kleiner wird der Anteil des Ertrags, der im
+Haus bleibt.
+
+<Streudiagramm
+  titel="Autarkiegrad und Eigenverbrauchsquote nach Anlagengröße"
+  untertitel="4-Personen-Haushalt, 4.000 kWh Jahresverbrauch, ohne Speicher"
+  x={{ titel: "Anlagengröße", min: 2, max: 12, schritte: [2, 4, 6, 8, 10, 12], einheit: " kWp" }}
+  y={{ titel: "Prozent", min: 0, max: 70, schritte: [0, 20, 40, 60], einheit: " %" }}
+  reihen={[
+    { name: "Autarkiegrad (Anteil am Verbrauch)", farbe: "akzent", verbinden: true, punkte: kennzahlen.autarkie },
+    { name: "Eigenverbrauchsquote (Anteil am Ertrag)", farbe: "sky", verbinden: true, punkte: kennzahlen.quote },
+  ]}
+  quelle="Modellrechnung von Photovoltaik Aktuell mit der Autarkie-Kennlinie des Photovoltaik-Rechners (ADAC-Spannen) und 950 kWh/kWp (Fraunhofer ISE). Typischer Haushalt, kein Lastgang — reale Werte können abweichen."
+/>
 
 Der ADAC kommuniziert für deutsche Haushalte offiziell einen Autarkiegrad
 von 30 bis 55 % ohne Speicher und bis zu 85 % mit sinnvoll dimensioniertem
